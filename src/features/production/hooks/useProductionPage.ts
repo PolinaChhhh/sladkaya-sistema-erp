@@ -16,7 +16,9 @@ export const useProductionPage = () => {
     productions, 
     recipes,
     ingredients,
-    receipts
+    receipts,
+    isLoading,
+    error
   } = useStore();
   
   const {
@@ -103,6 +105,10 @@ export const useProductionPage = () => {
   };
   
   return {
+    // Loading and error states
+    isLoading,
+    error,
+    
     // Search and filtering
     searchQuery,
     setSearchQuery,

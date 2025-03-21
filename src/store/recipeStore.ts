@@ -34,14 +34,30 @@ interface StoreState extends
   ReceiptSlice, 
   ProductionSlice, 
   ShippingSlice, 
-  BuyerSlice {}
+  BuyerSlice {
+  // Add loading and error states to the store
+  isLoading: boolean;
+  error: Error | null;
+}
 
-export const useStore = create<StoreState>()((...args) => ({
-  ...createIngredientSlice(...args),
-  ...createRecipeSlice(...args),
-  ...createSupplierSlice(...args),
-  ...createReceiptSlice(...args),
-  ...createProductionSlice(...args),
-  ...createShippingSlice(...args),
-  ...createBuyerSlice(...args),
-}));
+export const useStore = create<StoreState>()(
+  devtools(
+    persist(
+      (...args) => ({
+        ...createIngredientSlice(...args),
+        ...createRecipeSlice(...args),
+        ...createSupplierSlice(...args),
+        ...createReceiptSlice(...args),
+        ...createProductionSlice(...args),
+        ...createShippingSlice(...args),
+        ...createBuyerSlice(...args),
+        // Initialize loading and error states
+        isLoading: false,
+        error: null
+      }),
+      {
+        name: 'recipe-store'
+      }
+    )
+  )
+);

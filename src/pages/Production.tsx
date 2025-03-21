@@ -4,10 +4,15 @@ import { useProductionPage } from '@/features/production/hooks/useProductionPage
 import ProductionList from '@/features/production/components/ProductionList';
 import ProductionHeader from '@/features/production/components/ProductionHeader';
 import ProductionDialogs from '@/features/production/components/ProductionDialogs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle } from 'lucide-react';
 
 const Production = () => {
-  // The hook is now much cleaner with all the functionality divided into submodules
   const {
+    // Loading and error states
+    isLoading,
+    error,
+    
     // Search and filtering
     searchQuery,
     setSearchQuery,
@@ -50,6 +55,46 @@ const Production = () => {
     openDetailDialog
   } = useProductionPage();
   
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
+          <Skeleton className="h-10 w-full max-w-sm mb-4" />
+          <div className="flex justify-between">
+            <Skeleton className="h-9 w-52" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </div>
+        
+        <div className="glass rounded-xl overflow-hidden p-4">
+          <Skeleton className="h-10 w-full mb-4" />
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-16 w-full mb-2" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  // Render error state
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-6 rounded-lg flex items-center">
+          <AlertCircle className="h-6 w-6 mr-3" />
+          <div>
+            <h3 className="font-medium text-lg">Ошибка загрузки данных</h3>
+            <p className="text-red-600">
+              {error instanceof Error ? error.message : 'Произошла ошибка при загрузке данных о производстве'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Render main content when data is available
   return (
     <div className="max-w-5xl mx-auto">
       <ProductionHeader 
