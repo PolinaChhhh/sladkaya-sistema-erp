@@ -38,6 +38,9 @@ const ProductionPage = () => {
     checkSemiFinalAvailability
   } = useProductionState();
 
+  console.log("Create dialog open:", isCreateDialogOpen);
+  console.log("Form data:", formData);
+
   return (
     <div className="max-w-5xl mx-auto">
       <ProductionHeader onAddNew={() => setIsCreateDialogOpen(true)} />

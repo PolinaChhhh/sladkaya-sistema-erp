@@ -42,6 +42,10 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
     recipe.category === 'semi-finished' || recipe.category === 'finished'
   );
 
+  // Get semi-finished and finished recipes
+  const semiFinishedRecipes = filteredRecipes.filter(recipe => recipe.category === 'semi-finished');
+  const finishedRecipes = filteredRecipes.filter(recipe => recipe.category === 'finished');
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -59,25 +63,33 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
                 <SelectValue placeholder="Выберите рецепт" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="" disabled>Выберите рецепт</SelectItem>
-                <SelectItem value="" disabled className="font-semibold text-sm text-gray-500">-- Полуфабрикаты --</SelectItem>
-                {filteredRecipes
-                  .filter(recipe => recipe.category === 'semi-finished')
-                  .map((recipe) => (
-                    <SelectItem key={recipe.id} value={recipe.id}>
-                      {recipe.name}
-                    </SelectItem>
-                  ))
-                }
-                <SelectItem value="" disabled className="font-semibold text-sm text-gray-500">-- Готовые изделия --</SelectItem>
-                {filteredRecipes
-                  .filter(recipe => recipe.category === 'finished')
-                  .map((recipe) => (
-                    <SelectItem key={recipe.id} value={recipe.id}>
-                      {recipe.name}
-                    </SelectItem>
-                  ))
-                }
+                {/* Use a placeholder with a non-empty value */}
+                <SelectItem value="_placeholder" disabled>Выберите рецепт</SelectItem>
+                
+                {/* Only show category headers if there are recipes in that category */}
+                {semiFinishedRecipes.length > 0 && (
+                  <SelectItem value="_semi_header" disabled className="font-semibold text-sm text-gray-500">
+                    -- Полуфабрикаты --
+                  </SelectItem>
+                )}
+                
+                {semiFinishedRecipes.map((recipe) => (
+                  <SelectItem key={recipe.id} value={recipe.id}>
+                    {recipe.name}
+                  </SelectItem>
+                ))}
+                
+                {finishedRecipes.length > 0 && (
+                  <SelectItem value="_finished_header" disabled className="font-semibold text-sm text-gray-500">
+                    -- Готовые изделия --
+                  </SelectItem>
+                )}
+                
+                {finishedRecipes.map((recipe) => (
+                  <SelectItem key={recipe.id} value={recipe.id}>
+                    {recipe.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -92,7 +104,7 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
               value={formData.quantity}
               onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0 })}
             />
-            {formData.recipeId && (
+            {formData.recipeId && formData.recipeId !== '_placeholder' && formData.recipeId !== '_semi_header' && formData.recipeId !== '_finished_header' && (
               <p className="text-xs text-gray-500">
                 Единица измерения: {getRecipeOutput(formData.recipeId)}
               </p>
@@ -109,7 +121,7 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
             />
           </div>
           
-          {formData.recipeId && (
+          {formData.recipeId && formData.recipeId !== '_placeholder' && formData.recipeId !== '_semi_header' && formData.recipeId !== '_finished_header' && (
             <div className="mt-2 p-3 bg-mint-50 rounded-md border border-mint-200">
               <div className="flex items-center text-sm font-medium text-mint-800 mb-1">
                 <Info className="h-4 w-4 mr-1.5" />
