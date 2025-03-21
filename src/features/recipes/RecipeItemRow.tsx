@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RecipeItem, Recipe, Ingredient } from '@/store/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface RecipeItemRowProps {
   item: RecipeItem;
@@ -92,8 +93,11 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
     return '';
   };
 
+  // Check if this ingredient comes from a semi-finished product
+  const isFromSemiFinished = !!item.fromSemiFinished;
+
   return (
-    <div className="bg-gray-50 p-3 rounded-md">
+    <div className={`p-3 rounded-md ${isFromSemiFinished ? 'bg-blue-50' : 'bg-gray-50'}`}>
       <div className="space-y-2">
         {/* Only show type selector if recipe items are allowed and not forced */}
         {allowRecipeItems && !forcedType && (
@@ -116,21 +120,38 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
         <div className="flex items-center gap-2">
           <div className="flex-grow">
             {effectiveType === 'ingredient' ? (
-              <Select
-                value={item.ingredientId || ''}
-                onValueChange={handleIngredientChange}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Выберите ингредиент" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ingredients.map((ingredient) => (
-                    <SelectItem key={ingredient.id} value={ingredient.id}>
-                      {ingredient.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={item.ingredientId || ''}
+                  onValueChange={handleIngredientChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Выберите ингредиент" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ingredients.map((ingredient) => (
+                      <SelectItem key={ingredient.id} value={ingredient.id}>
+                        {ingredient.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {isFromSemiFinished && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-blue-500">
+                          <Info size={16} />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Из полуфабриката: {item.fromSemiFinished.recipeName}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             ) : (
               allowRecipeItems && (
                 <Select

@@ -26,12 +26,7 @@ export const createRecipeSlice: StateCreator<
       tags: recipe.tags || [], // Ensure tags is defined
       // Keep category as provided, defaulting to 'finished' if not specified
       category: recipe.category || 'finished',
-      items: recipe.items.filter(item => 
-        // For finished products, only allow ingredients
-        recipe.category === 'finished' 
-          ? item.type === 'ingredient' && !item.isPackaging
-          : !item.isPackaging // For semi-finished, allow both ingredients and recipes
-      ) 
+      items: recipe.items || [] // Ensure items is defined
     }]
   })),
   
@@ -44,12 +39,8 @@ export const createRecipeSlice: StateCreator<
         tags: data.tags !== undefined ? data.tags : recipe.tags || [],
         // Keep category as specified in the data or use the existing one
         category: data.category || recipe.category,
-        // Filter items appropriately based on category
-        items: data.items ? data.items.filter(item => 
-          (recipe.category === 'finished' || data.category === 'finished')
-            ? item.type === 'ingredient' && !item.isPackaging
-            : !item.isPackaging // For semi-finished, allow both ingredients and recipes
-        ) : recipe.items
+        // Keep items as provided
+        items: data.items !== undefined ? data.items : recipe.items
       } : recipe
     )
   })),

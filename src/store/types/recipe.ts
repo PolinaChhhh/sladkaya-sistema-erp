@@ -5,6 +5,11 @@ export type RecipeItem = {
   recipeId?: string;
   amount: number;
   isPackaging?: boolean;
+  // Track if this ingredient came from a semi-finished product for display purposes
+  fromSemiFinished?: {
+    recipeId: string;
+    recipeName: string;
+  };
 };
 
 // Changed from single string to union type to support semi-finished products

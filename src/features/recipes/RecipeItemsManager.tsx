@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
+import SemiFinishedPortionDialog from './SemiFinishedPortionDialog';
+import { expandSemiFinishedToIngredients } from './utils/expandSemiFinished';
 
 interface RecipeItemsManagerProps {
   items: RecipeItem[];
@@ -32,6 +34,9 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   onUpdateItems,
   category,
 }) => {
+  const [isPortionDialogOpen, setIsPortionDialogOpen] = useState(false);
+  const [selectedSemiFinished, setSelectedSemiFinished] = useState<Recipe | null>(null);
+
   const addRecipeItem = () => {
     if (ingredients.length === 0) {
       toast.error('Сначала добавьте ингредиенты');
@@ -70,15 +75,69 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   // For finished products, only ingredients are allowed
   const allowRecipeItems = category === 'semi-finished';
 
+  // Open semi-finished portion dialog
+  const openSemiFinishedDialog = (recipe: Recipe) => {
+    setSelectedSemiFinished(recipe);
+    setIsPortionDialogOpen(true);
+  };
+
+  // Handle confirmation from portion dialog
+  const handleAddSemiFinishedIngredients = (portionSize: number) => {
+    if (!selectedSemiFinished) return;
+
+    // Expand the semi-finished recipe into its ingredient components
+    const expandedIngredients = expandSemiFinishedToIngredients(
+      selectedSemiFinished,
+      portionSize,
+      recipes
+    );
+
+    // Add all expanded ingredients to the current recipe
+    onUpdateItems([...items, ...expandedIngredients]);
+    
+    toast.success(
+      `Добавлены ингредиенты из "${selectedSemiFinished.name}" (${portionSize} ${selectedSemiFinished.outputUnit})`
+    );
+  };
+
+  // Get all semi-finished recipes (excluding the current one if editing)
+  const semiFinishedRecipes = recipes.filter(
+    recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
+  );
+
   return (
     <div className="space-y-3 mt-2">
       <div className="flex justify-between items-center">
         <Label>
           {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
         </Label>
-        <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
-          <Plus className="h-3 w-3 mr-1" /> Добавить
-        </Button>
+        <div className="flex gap-2">
+          {category === 'finished' && semiFinishedRecipes.length > 0 && (
+            <div className="dropdown dropdown-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="dropdown-toggle" 
+                onClick={() => {}}
+              >
+                Добавить из полуфабриката
+              </Button>
+              <ul className="dropdown-menu z-10 bg-white border rounded-md shadow-lg p-2 mt-1 max-h-60 overflow-auto">
+                {semiFinishedRecipes.map((recipe) => (
+                  <li key={recipe.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => openSemiFinishedDialog(recipe)}
+                  >
+                    {recipe.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
+            <Plus className="h-3 w-3 mr-1" /> Добавить
+          </Button>
+        </div>
       </div>
       
       {items.length > 0 ? (
@@ -108,6 +167,16 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
             ? 'Нет добавленных ингредиентов' 
             : 'Нет добавленных компонентов'}
         </p>
+      )}
+
+      {/* Dialog for selecting semi-finished portion size */}
+      {selectedSemiFinished && (
+        <SemiFinishedPortionDialog
+          isOpen={isPortionDialogOpen}
+          onClose={() => setIsPortionDialogOpen(false)}
+          semiFinishedRecipe={selectedSemiFinished}
+          onConfirm={handleAddSemiFinishedIngredients}
+        />
       )}
     </div>
   );

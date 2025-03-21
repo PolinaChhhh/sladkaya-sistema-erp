@@ -54,18 +54,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       description: recipe.description,
       output: recipe.output,
       outputUnit: recipe.outputUnit,
-      // Ensure correct type for items
-      items: recipe.items.map(item => {
-        if (item.type === 'recipe') {
-          return { 
-            type: 'ingredient' as const,
-            ingredientId: '', 
-            amount: 0,
-            isPackaging: false
-          };
-        }
-        return { ...item, type: 'ingredient' as const };
-      }).filter(item => !item.isPackaging), // Only keep non-packaging items
+      items: recipe.items || [],
       category: recipe.category || 'finished', 
       lossPercentage: recipe.lossPercentage || 0,
       tags: recipe.tags || [], 
