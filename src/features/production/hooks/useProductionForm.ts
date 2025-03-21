@@ -8,7 +8,7 @@ interface UseProductionFormProps {
   recipes: Recipe[];
   ingredients: any[];
   productions: ProductionBatch[];
-  addProduction: (production: Omit<ProductionBatch, 'id'>) => void;
+  addProduction: (production: Omit<ProductionBatch, 'id'>) => { error?: boolean; insufficientItems?: Array<{name: string, required: number, available: number, unit: string}> };
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void;
   calculateCost: (recipeId: string, quantity: number) => number;
   checkSemiFinalAvailability: (recipeId: string, quantity: number) => { 
@@ -130,13 +130,23 @@ export const useProductionForm = ({
     // The cost will be calculated in the store
     const estimatedCost = calculateCost(formData.recipeId, formData.quantity);
     
-    addProduction({
+    const result = addProduction({
       recipeId: formData.recipeId,
       quantity: formData.quantity,
       date: formData.date,
       cost: estimatedCost,
       autoProduceSemiFinals: formData.autoProduceSemiFinals
     });
+    
+    // Check if there was an error during production
+    if (result.error && result.insufficientItems) {
+      const warningMessage = result.insufficientItems.map(res => 
+        `${res.name}: требуется ${res.required.toFixed(2)} ${res.unit}, доступно ${res.available.toFixed(2)} ${res.unit}`
+      ).join('\n');
+      
+      toast.error(`Недостаточно ресурсов:\n${warningMessage}`);
+      return false;
+    }
     
     toast.success('Запись о производстве добавлена');
     return true;

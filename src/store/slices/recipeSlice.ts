@@ -15,7 +15,7 @@ export interface RecipeSlice {
   addRecipe: (recipe: Omit<Recipe, 'id'>) => void;
   updateRecipe: (id: string, data: Partial<Recipe>) => void;
   deleteRecipe: (id: string) => void;
-  addProduction: (production: Omit<ProductionBatch, 'id'>) => void;
+  addProduction: (production: Omit<ProductionBatch, 'id'>) => { error?: boolean; insufficientItems?: Array<{name: string, required: number, available: number, unit: string}> };
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void;
   deleteProduction: (id: string) => void;
 }
@@ -55,26 +55,28 @@ export const createRecipeSlice: StateCreator<
     recipes: state.recipes.filter((recipe) => recipe.id !== id)
   })),
   
-  addProduction: (production) => set((state) => {
+  addProduction: (production) => {
     // Use the extracted module to create a production
-    const newProduction = createProduction(
+    const result = createProduction(
       production,
-      state.recipes,
-      state.ingredients,
-      state.receipts,
+      get().recipes,
+      get().ingredients,
+      get().receipts,
       get().updateIngredient,
       get().updateReceiptItem,
       get().updateRecipe
     );
     
-    if (!newProduction) {
-      return { productions: state.productions };
+    if ('error' in result) {
+      return result;
     }
     
-    return {
-      productions: [...state.productions, newProduction]
-    };
-  }),
+    set((state) => ({
+      productions: [...state.productions, result]
+    }));
+    
+    return {};
+  },
 
   updateProduction: (id, data) => set((state) => {
     // Use the extracted module to update a production

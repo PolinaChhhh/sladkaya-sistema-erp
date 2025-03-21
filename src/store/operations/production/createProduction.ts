@@ -11,7 +11,7 @@ export const createProduction = (
   updateIngredient: (id: string, data: Partial<Ingredient>) => void,
   updateReceiptItem: (receiptId: string, itemId: string, data: Partial<ReceiptItem>) => void,
   updateRecipe: (id: string, data: Partial<Recipe>) => void
-): ProductionBatch | null => {
+): ProductionBatch | { error: boolean; insufficientItems: Array<{name: string, required: number, available: number, unit: string}> } => {
   const recipe = recipes.find(r => r.id === production.recipeId);
   
   if (recipe) {
@@ -34,7 +34,32 @@ export const createProduction = (
       
       if (!canProduce) {
         console.error(`Cannot produce: Insufficient ingredients: ${insufficientIngredients.join(', ')}`);
-        return null; // Don't add production if insufficient ingredients
+        
+        // Collect detailed information about insufficient ingredients
+        const productionRatio = production.quantity / recipe.output;
+        const insufficientItems: Array<{name: string, required: number, available: number, unit: string}> = [];
+        
+        recipe.items.forEach(item => {
+          if (item.type === 'ingredient' && item.ingredientId) {
+            const ingredient = ingredients.find(i => i.id === item.ingredientId);
+            if (ingredient) {
+              const requiredAmount = item.amount * productionRatio;
+              if (ingredient.quantity < requiredAmount) {
+                insufficientItems.push({
+                  name: ingredient.name,
+                  required: requiredAmount,
+                  available: ingredient.quantity,
+                  unit: ingredient.unit
+                });
+              }
+            }
+          }
+        });
+        
+        return { 
+          error: true,
+          insufficientItems 
+        };
       }
       
       // Calculate total cost using FIFO method for ingredients
@@ -74,7 +99,7 @@ export const createProduction = (
               };
               
               // Recursively call createProduction to produce the semi-final
-              const semiFinalBatch = createProduction(
+              const semiFinalResult = createProduction(
                 semiFinalProduction,
                 recipes,
                 ingredients,
@@ -84,14 +109,13 @@ export const createProduction = (
                 updateRecipe
               );
               
-              if (semiFinalBatch) {
-                // If successfully produced, add its cost to the total
-                totalCost += semiFinalBatch.cost;
-              } else {
-                console.error(`Failed to auto-produce semi-final: ${semiFinalRecipe.name}`);
-                // If auto-production fails, we should also fail the main production
-                return null;
+              if ('error' in semiFinalResult) {
+                // If there was an error producing the semi-final, return the error
+                return semiFinalResult;
               }
+              
+              // If successfully produced, add its cost to the total
+              totalCost += semiFinalResult.cost;
             } else {
               // If auto-production is disabled, calculate cost from existing semi-finals
               const semiFinishedCost = calculateSemiFinalCost(
@@ -112,7 +136,15 @@ export const createProduction = (
             // Check if we have enough of the ingredient
             if (ingredient.quantity < requiredAmount) {
               console.error(`Insufficient ingredient: ${ingredient.name}`);
-              return null; // Don't add production if insufficient ingredients
+              return { 
+                error: true,
+                insufficientItems: [{
+                  name: ingredient.name,
+                  required: requiredAmount,
+                  available: ingredient.quantity,
+                  unit: ingredient.unit
+                }]
+              };
             }
             
             // Reduce the ingredient quantity
