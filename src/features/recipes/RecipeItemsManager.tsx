@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
 import SemiFinishedPortionDialog from './SemiFinishedPortionDialog';
 import { expandSemiFinishedToIngredients } from './utils/expandSemiFinished';
+import RecipeItemsHeader from './components/recipeItem/RecipeItemsHeader';
+import EmptyItemsMessage from './components/recipeItem/EmptyItemsMessage';
 
 interface RecipeItemsManagerProps {
   items: RecipeItem[];
@@ -108,69 +107,45 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
   );
 
+  const renderItems = () => {
+    if (items.length === 0) {
+      return <EmptyItemsMessage category={category} />;
+    }
+
+    return (
+      <div className="space-y-3 mt-3">
+        {items.map((item, index) => (
+          <RecipeItemRow
+            key={index}
+            item={item}
+            index={index}
+            ingredients={ingredients}
+            recipes={[]} // Empty array since we don't allow recipe items anymore for semi-finished
+            getIngredientName={getIngredientName}
+            getIngredientUnit={getIngredientUnit}
+            getRecipeName={getRecipeName}
+            getRecipeUnit={getRecipeUnit}
+            onUpdate={updateRecipeItem}
+            onRemove={removeRecipeItem}
+            allowRecipeItems={allowRecipeItems}
+            forceRecipeItems={false}
+            forcedType="ingredient" // Force all items to be ingredients
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3 mt-2">
-      <div className="flex justify-between items-center">
-        <Label>
-          {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
-        </Label>
-        <div className="flex gap-2">
-          {category === 'finished' && semiFinishedRecipes.length > 0 && (
-            <div className="dropdown dropdown-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                className="dropdown-toggle" 
-                onClick={() => {}}
-              >
-                Добавить из полуфабриката
-              </Button>
-              <ul className="dropdown-menu z-10 bg-white border rounded-md shadow-lg p-2 mt-1 max-h-60 overflow-auto">
-                {semiFinishedRecipes.map((recipe) => (
-                  <li key={recipe.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => openSemiFinishedDialog(recipe)}
-                  >
-                    {recipe.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
-            <Plus className="h-3 w-3 mr-1" /> Добавить
-          </Button>
-        </div>
-      </div>
+      <RecipeItemsHeader 
+        category={category}
+        semiFinishedRecipes={semiFinishedRecipes}
+        onAddItem={addRecipeItem}
+        onSelectSemiFinished={openSemiFinishedDialog}
+      />
       
-      {items.length > 0 ? (
-        <div className="space-y-3 mt-3">
-          {items.map((item, index) => (
-            <RecipeItemRow
-              key={index}
-              item={item}
-              index={index}
-              ingredients={ingredients}
-              recipes={[]} // Empty array since we don't allow recipe items anymore for semi-finished
-              getIngredientName={getIngredientName}
-              getIngredientUnit={getIngredientUnit}
-              getRecipeName={getRecipeName}
-              getRecipeUnit={getRecipeUnit}
-              onUpdate={updateRecipeItem}
-              onRemove={removeRecipeItem}
-              allowRecipeItems={allowRecipeItems}
-              forceRecipeItems={false}
-              forcedType="ingredient" // Force all items to be ingredients
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-gray-500 py-2">
-          {category === 'finished' 
-            ? 'Нет добавленных ингредиентов' 
-            : 'Нет добавленных компонентов'}
-        </p>
-      )}
+      {renderItems()}
 
       {/* Dialog for selecting semi-finished portion size */}
       {selectedSemiFinished && (
