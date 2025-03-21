@@ -20,6 +20,7 @@ interface RecipeFormProps {
     description: string;
     output: number;
     outputUnit: string;
+    lossPercentage: number;
     items: RecipeItem[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -27,6 +28,7 @@ interface RecipeFormProps {
     description: string;
     output: number;
     outputUnit: string;
+    lossPercentage: number;
     items: RecipeItem[];
   }>>;
   onSubmit: () => void;
@@ -55,7 +57,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     const firstIngredient = ingredients[0];
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { ingredientId: firstIngredient.id, amount: 0, lossPercentage: 0 }],
+      items: [...prev.items, { ingredientId: firstIngredient.id, amount: 0 }],
     }));
   };
   
@@ -99,8 +101,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         <RecipeOutputFields 
           output={formData.output}
           outputUnit={formData.outputUnit}
+          lossPercentage={formData.lossPercentage}
           onOutputChange={(value) => setFormData({ ...formData, output: value })}
           onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
+          onLossPercentageChange={(value) => setFormData({ ...formData, lossPercentage: value })}
         />
         
         <div className="space-y-3 mt-2">

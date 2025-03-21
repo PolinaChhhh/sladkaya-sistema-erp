@@ -2,7 +2,7 @@
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Recipe, RecipeItem } from '@/store/recipeStore';
+import { Recipe } from '@/store/recipeStore';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -24,7 +24,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-semibold text-lg">{recipe.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">Выход: {recipe.output} {recipe.outputUnit}</p>
+          <div className="flex gap-3 text-sm text-gray-500 mt-1">
+            <p>Выход: {recipe.output} {recipe.outputUnit}</p>
+            {recipe.lossPercentage > 0 && (
+              <p>Потери: {recipe.lossPercentage}%</p>
+            )}
+          </div>
           {recipe.description && (
             <p className="text-gray-700 mt-2 text-sm">{recipe.description}</p>
           )}
@@ -46,12 +51,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             {recipe.items.map((item, idx) => (
               <div key={idx} className="text-sm flex justify-between">
                 <span>{getIngredientName(item.ingredientId)}</span>
-                <div className="flex items-center gap-2">
-                  <span>{item.amount} {getIngredientUnit(item.ingredientId)}</span>
-                  {item.lossPercentage > 0 && (
-                    <span className="text-gray-500 text-xs">(потери: {item.lossPercentage}%)</span>
-                  )}
-                </div>
+                <span>{item.amount} {getIngredientUnit(item.ingredientId)}</span>
               </div>
             ))}
           </div>

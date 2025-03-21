@@ -24,6 +24,7 @@ const Recipes = () => {
     description: string;
     output: number;
     outputUnit: string;
+    lossPercentage: number;
     items: {
       ingredientId: string;
       amount: number;
@@ -33,6 +34,7 @@ const Recipes = () => {
     description: '',
     output: 1,
     outputUnit: 'кг',
+    lossPercentage: 0,
     items: [],
   });
   
@@ -46,6 +48,7 @@ const Recipes = () => {
       description: '',
       output: 1,
       outputUnit: 'кг',
+      lossPercentage: 0,
       items: [],
     });
     setIsCreateDialogOpen(true);
@@ -58,6 +61,7 @@ const Recipes = () => {
       description: recipe.description,
       output: recipe.output,
       outputUnit: recipe.outputUnit,
+      lossPercentage: recipe.lossPercentage || 0,
       items: [...recipe.items],
     });
     setIsEditDialogOpen(true);
@@ -80,6 +84,7 @@ const Recipes = () => {
       items: formData.items,
       output: formData.output,
       outputUnit: formData.outputUnit,
+      lossPercentage: formData.lossPercentage,
       lastProduced: null,
     });
     
@@ -101,6 +106,7 @@ const Recipes = () => {
       items: formData.items,
       output: formData.output,
       outputUnit: formData.outputUnit,
+      lossPercentage: formData.lossPercentage,
     });
     
     toast.success('Рецепт успешно обновлен');

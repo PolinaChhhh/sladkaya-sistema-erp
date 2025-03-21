@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -15,7 +14,6 @@ export type Ingredient = {
 export type RecipeItem = {
   ingredientId: string;
   amount: number;
-  lossPercentage?: number;
 };
 
 export type Recipe = {
@@ -26,6 +24,7 @@ export type Recipe = {
   output: number;
   outputUnit: string;
   lastProduced: string | null;
+  lossPercentage?: number;
 };
 
 export type ProductionBatch = {
