@@ -7,17 +7,20 @@ import { RecipeTag } from '@/store/types';
 import RecipeTagManager from './RecipeTagManager';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Upload, ImageIcon } from 'lucide-react';
+import { Upload, ImageIcon, Clock } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface RecipeBasicFieldsProps {
   name: string;
   description: string;
   tags: RecipeTag[];
   imageUrl?: string;
+  preparationTime?: number;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onTagsChange: (tags: RecipeTag[]) => void;
   onImageChange: (imageUrl: string) => void;
+  onPreparationTimeChange?: (time: number) => void;
 }
 
 const RecipeBasicFields: React.FC<RecipeBasicFieldsProps> = ({
@@ -25,10 +28,12 @@ const RecipeBasicFields: React.FC<RecipeBasicFieldsProps> = ({
   description,
   tags,
   imageUrl,
+  preparationTime,
   onNameChange,
   onDescriptionChange,
   onTagsChange,
   onImageChange,
+  onPreparationTimeChange,
 }) => {
   const [isImageLoading, setIsImageLoading] = useState(false);
 
@@ -109,6 +114,31 @@ const RecipeBasicFields: React.FC<RecipeBasicFieldsProps> = ({
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           placeholder="Описание рецепта (опционально)"
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="preparationTime" className="flex items-center gap-1">
+          <div className="p-1 rounded-full bg-mint-100">
+            <Clock className="h-4 w-4 text-mint-600" />
+          </div>
+          Время приготовления (мин.)
+        </Label>
+        <Input 
+          id="preparationTime" 
+          type="number"
+          min="0"
+          step="1"
+          value={preparationTime || ''}
+          onChange={(e) => {
+            const value = parseInt(e.target.value);
+            if (onPreparationTimeChange && !isNaN(value) && value >= 0) {
+              onPreparationTimeChange(value);
+            } else if (onPreparationTimeChange && e.target.value === '') {
+              onPreparationTimeChange(0);
+            }
+          }}
+          placeholder="Введите время в минутах"
         />
       </div>
 

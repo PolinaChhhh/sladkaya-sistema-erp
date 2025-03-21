@@ -1,3 +1,4 @@
+
 import { StateCreator } from 'zustand';
 import { Recipe } from '../types';
 
@@ -27,7 +28,8 @@ export const createRecipeSlice: StateCreator<
       // Keep category as provided, defaulting to 'finished' if not specified
       category: recipe.category || 'finished',
       items: recipe.items || [], // Ensure items is defined
-      imageUrl: recipe.imageUrl || undefined // Handle imageUrl
+      imageUrl: recipe.imageUrl || undefined, // Handle imageUrl
+      preparationTime: recipe.preparationTime || undefined // Handle preparationTime
     }]
   })),
   
@@ -43,7 +45,9 @@ export const createRecipeSlice: StateCreator<
         // Keep items as provided
         items: data.items !== undefined ? data.items : recipe.items,
         // Handle imageUrl updating
-        imageUrl: data.imageUrl !== undefined ? data.imageUrl : recipe.imageUrl
+        imageUrl: data.imageUrl !== undefined ? data.imageUrl : recipe.imageUrl,
+        // Handle preparationTime updating
+        preparationTime: data.preparationTime !== undefined ? data.preparationTime : recipe.preparationTime
       } : recipe
     )
   })),

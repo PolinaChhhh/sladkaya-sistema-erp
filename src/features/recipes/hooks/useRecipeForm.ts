@@ -23,6 +23,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     lossPercentage: number;
     tags: RecipeTag[];
     imageUrl?: string;
+    preparationTime?: number;
   }>({
     name: '',
     description: '',
@@ -33,6 +34,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     lossPercentage: 0,
     tags: [],
     imageUrl: undefined,
+    preparationTime: 0,
   });
   
   const initCreateForm = () => {
@@ -46,6 +48,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: 0,
       tags: [],
       imageUrl: undefined,
+      preparationTime: 0,
     });
     setIsCreateDialogOpen(true);
   };
@@ -62,6 +65,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: recipe.lossPercentage || 0,
       tags: recipe.tags || [],
       imageUrl: recipe.imageUrl,
+      preparationTime: recipe.preparationTime || 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -83,6 +87,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: formData.lossPercentage,
       tags: formData.tags,
       imageUrl: formData.imageUrl,
+      preparationTime: formData.preparationTime,
     });
     
     toast.success(formData.category === 'finished' 
@@ -109,6 +114,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: formData.lossPercentage,
       tags: formData.tags,
       imageUrl: formData.imageUrl,
+      preparationTime: formData.preparationTime,
     });
     
     toast.success(formData.category === 'finished' 
