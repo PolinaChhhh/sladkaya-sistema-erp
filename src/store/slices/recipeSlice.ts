@@ -7,7 +7,7 @@ import {
   createProduction, 
   updateProductionBatch, 
   deleteProductionBatch 
-} from '../operations/productionOperations';
+} from '../operations/production';
 
 export interface RecipeSlice {
   recipes: Recipe[];
