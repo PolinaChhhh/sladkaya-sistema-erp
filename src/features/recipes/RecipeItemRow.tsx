@@ -42,45 +42,35 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
     } else if (selectedType === 'recipe' && !item.recipeId && recipes.length > 0) {
       onUpdate(index, 'recipeId', recipes[0].id);
     }
-  }, [selectedType, item.ingredientId, item.recipeId, ingredients, recipes]);
+  }, [selectedType, item.ingredientId, item.recipeId, ingredients, recipes, index, onUpdate]);
   
   const handleTypeChange = (type: string) => {
     console.log('Changing type to:', type);
     
     if (type === 'ingredient') {
-      const newItem = { 
-        ...item,
-        type: 'ingredient' as const,
-        recipeId: undefined 
-      };
+      // First clear recipe related fields
+      onUpdate(index, 'recipeId', undefined);
+      // Then set type and default ingredient
+      onUpdate(index, 'type', 'ingredient');
       
       // Set default ingredient if available
       if (ingredients.length > 0) {
-        newItem.ingredientId = ingredients[0].id;
+        onUpdate(index, 'ingredientId', ingredients[0].id);
       } else {
-        newItem.ingredientId = '';
+        onUpdate(index, 'ingredientId', '');
       }
-      
-      onUpdate(index, 'type', 'ingredient');
-      onUpdate(index, 'ingredientId', newItem.ingredientId);
-      onUpdate(index, 'recipeId', undefined);
-    } else {
-      const newItem = { 
-        ...item,
-        type: 'recipe' as const,
-        ingredientId: undefined 
-      };
+    } else if (type === 'recipe') {
+      // First clear ingredient related fields
+      onUpdate(index, 'ingredientId', undefined);
+      // Then set type and default recipe
+      onUpdate(index, 'type', 'recipe');
       
       // Set default recipe if available
       if (recipes.length > 0) {
-        newItem.recipeId = recipes[0].id;
+        onUpdate(index, 'recipeId', recipes[0].id);
       } else {
-        newItem.recipeId = '';
+        onUpdate(index, 'recipeId', '');
       }
-      
-      onUpdate(index, 'type', 'recipe');
-      onUpdate(index, 'recipeId', newItem.recipeId);
-      onUpdate(index, 'ingredientId', undefined);
     }
   };
   

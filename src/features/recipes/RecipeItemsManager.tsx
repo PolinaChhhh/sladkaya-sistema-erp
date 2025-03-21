@@ -51,13 +51,24 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     }
     
     // Create a properly typed new item
-    const newItem: RecipeItem = defaultType === 'ingredient' 
-      ? { type: 'ingredient', ingredientId: defaultId, amount: 0 }
-      : { type: 'recipe', recipeId: defaultId, amount: 0 };
+    let newItem: RecipeItem;
     
-    onUpdateItems([...items, newItem]);
+    if (defaultType === 'ingredient') {
+      newItem = { 
+        type: 'ingredient', 
+        ingredientId: defaultId, 
+        amount: 0 
+      };
+    } else {
+      newItem = { 
+        type: 'recipe', 
+        recipeId: defaultId, 
+        amount: 0 
+      };
+    }
     
     console.log('Added new recipe item:', newItem);
+    onUpdateItems([...items, newItem]);
   };
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
