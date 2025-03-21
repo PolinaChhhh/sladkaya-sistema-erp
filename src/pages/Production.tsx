@@ -91,7 +91,7 @@ const Production = () => {
         if (ingredient) {
           // Calculate based on average cost 
           const amountNeeded = (item.amount * quantity) / recipe.output;
-          totalCost += amountNeeded * (ingredient.price || 0);
+          totalCost += amountNeeded * (ingredient.cost || 0);
         }
       } else if (item.type === 'recipe' && item.recipeId) {
         // For semi-finished products, calculate recursively
@@ -206,7 +206,7 @@ const Production = () => {
           name: ingredient.name,
           amount: amountUsed,
           unit: ingredient.unit,
-          cost: amountUsed * (ingredient.price || 0),
+          cost: amountUsed * (ingredient.cost || 0),
           fifoDetails: []
         };
       })
