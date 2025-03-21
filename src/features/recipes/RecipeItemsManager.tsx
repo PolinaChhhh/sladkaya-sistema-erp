@@ -83,7 +83,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     newItems[index] = { ...newItems[index], [field]: value };
     
     // Log the update for debugging
-    console.log(`Updated recipe item: ${index} ${field} ${value}`, newItems[index]);
+    console.log(`Updated recipe item: ${index} ${String(field)} ${value}`, newItems[index]);
     
     onUpdateItems(newItems);
   };

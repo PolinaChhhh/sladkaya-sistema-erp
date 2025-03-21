@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument, Buyer } from './types';
@@ -9,9 +10,22 @@ import { createProductionSlice, ProductionSlice } from './slices/productionSlice
 import { createShippingSlice, ShippingSlice } from './slices/shippingSlice';
 import { createBuyerSlice, BuyerSlice } from './slices/buyerSlice';
 
-export type { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument } from './types';
-export type { Buyer } from './types';
+// Export all types from the types directory
+export type { 
+  Ingredient, 
+  Recipe, 
+  Supplier, 
+  Receipt, 
+  ReceiptItem,  // Add ReceiptItem export
+  ShippingDocument, 
+  Buyer,
+  ProductionBatch, 
+  RecipeItem,    // Add RecipeItem export
+  RecipeCategory, // Add RecipeCategory export
+  RecipeTag      // Add RecipeTag export
+} from './types';
 
+// Create the store combining all slices
 interface StoreState extends IngredientSlice, RecipeSlice, SupplierSlice, ReceiptSlice, ProductionSlice, ShippingSlice, BuyerSlice {}
 
 export const useStore = create<StoreState>()((...args) => ({
