@@ -49,7 +49,7 @@ export const createProductionSlice: StateCreator<
       production.quantity,
       recipes,
       get().productions,
-      updateProduction
+      get().updateProduction
     );
     
     // Add semi-final cost to total cost
