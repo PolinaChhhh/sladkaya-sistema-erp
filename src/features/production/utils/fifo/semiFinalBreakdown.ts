@@ -82,8 +82,8 @@ export const getSemiFinalBreakdown = (
         
         // If we have consumption details for this production and semi-final, use them
         let fifoDetails;
-        if (production?.semiFinalConsumptionDetails && production.semiFinalConsumptionDetails[semiRecipeId]) {
-          const consumedItems = production.semiFinalConsumptionDetails[semiRecipeId] as ConsumedSemiFinalItem[];
+        if (production?.consumptionDetails && production.consumptionDetails[semiRecipeId]) {
+          const consumedItems = production.consumptionDetails[semiRecipeId] as ConsumedSemiFinalItem[];
           
           fifoDetails = consumedItems.map(consumed => {
             return {

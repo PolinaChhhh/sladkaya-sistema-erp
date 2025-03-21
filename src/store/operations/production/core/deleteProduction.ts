@@ -44,7 +44,7 @@ export const handleDeleteProduction = (
       recipe,
       production.quantity,
       productions,
-      production.semiFinalConsumptionDetails,
+      production.consumptionDetails,
       updateProduction,
       recipes,
       ingredients,

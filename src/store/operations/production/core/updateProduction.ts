@@ -49,7 +49,7 @@ export const handleUpdateProduction = (
         recipe,
         originalProduction.quantity,
         productions,
-        originalProduction.semiFinalConsumptionDetails,
+        originalProduction.consumptionDetails,
         updateProduction,
         recipes,
         ingredients,
@@ -83,7 +83,7 @@ export const handleUpdateProduction = (
       const totalCost = ingredientCost + semiFinalCost;
       data.cost = totalCost;
       data.consumptionDetails = consumptionDetails;
-      data.semiFinalConsumptionDetails = semiFinalConsumptionDetails;
+      data.consumptionDetails = semiFinalConsumptionDetails;
       
       console.log(`Production ${id} updated with new cost: ${totalCost}`);
     }
