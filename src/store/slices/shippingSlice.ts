@@ -6,6 +6,7 @@ export interface ShippingSlice {
   shippings: ShippingDocument[];
   addShipping: (shipping: Omit<ShippingDocument, 'id'>) => void;
   updateShippingStatus: (id: string, status: ShippingDocument['status']) => void;
+  deleteShipping: (id: string) => void;
 }
 
 export const createShippingSlice: StateCreator<ShippingSlice> = (set) => ({
@@ -19,5 +20,9 @@ export const createShippingSlice: StateCreator<ShippingSlice> = (set) => ({
     shippings: state.shippings.map((shipping) => 
       shipping.id === id ? { ...shipping, status } : shipping
     )
+  })),
+  
+  deleteShipping: (id) => set((state) => ({
+    shippings: state.shippings.filter((shipping) => shipping.id !== id)
   })),
 });

@@ -4,3 +4,4 @@ export * from './recipe';
 export * from './supplier';
 export * from './receipt';
 export * from './shipping';
+export * from './buyer';

@@ -1,30 +1,25 @@
-
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
+import { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument, Buyer } from './types';
 import { createIngredientSlice, IngredientSlice } from './slices/ingredientSlice';
 import { createRecipeSlice, RecipeSlice } from './slices/recipeSlice';
-import { createShippingSlice, ShippingSlice } from './slices/shippingSlice';
 import { createSupplierSlice, SupplierSlice } from './slices/supplierSlice';
 import { createReceiptSlice, ReceiptSlice } from './slices/receiptSlice';
+import { createProductionSlice, ProductionSlice } from './slices/productionSlice';
+import { createShippingSlice, ShippingSlice } from './slices/shippingSlice';
+import { createBuyerSlice, BuyerSlice } from './slices/buyerSlice';
 
-// Re-export all types from the central location
-export * from './types';
+export type { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument } from './types';
+export type { Buyer } from './types';
 
-// Combined store state type
-type StoreState = IngredientSlice & RecipeSlice & ShippingSlice & SupplierSlice & ReceiptSlice;
+interface StoreState extends IngredientSlice, RecipeSlice, SupplierSlice, ReceiptSlice, ProductionSlice, ShippingSlice, BuyerSlice {}
 
-// Create the store with all slices
-export const useStore = create<StoreState>()(
-  persist(
-    (...a) => ({
-      ...createIngredientSlice(...a),
-      ...createRecipeSlice(...a),
-      ...createShippingSlice(...a),
-      ...createSupplierSlice(...a),
-      ...createReceiptSlice(...a),
-    }),
-    {
-      name: 'sladkaya-sistema-storage',
-    }
-  )
-);
+export const useStore = create<StoreState>()((...args) => ({
+  ...createIngredientSlice(...args),
+  ...createRecipeSlice(...args),
+  ...createSupplierSlice(...args),
+  ...createReceiptSlice(...args),
+  ...createProductionSlice(...args),
+  ...createShippingSlice(...args),
+  ...createBuyerSlice(...args),
+}));
