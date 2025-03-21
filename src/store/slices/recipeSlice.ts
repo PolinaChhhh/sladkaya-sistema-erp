@@ -26,7 +26,8 @@ export const createRecipeSlice: StateCreator<
       tags: recipe.tags || [], // Ensure tags is defined
       // Keep category as provided, defaulting to 'finished' if not specified
       category: recipe.category || 'finished',
-      items: recipe.items || [] // Ensure items is defined
+      items: recipe.items || [], // Ensure items is defined
+      imageUrl: recipe.imageUrl || undefined // Handle imageUrl
     }]
   })),
   
@@ -40,7 +41,9 @@ export const createRecipeSlice: StateCreator<
         // Keep category as specified in the data or use the existing one
         category: data.category || recipe.category,
         // Keep items as provided
-        items: data.items !== undefined ? data.items : recipe.items
+        items: data.items !== undefined ? data.items : recipe.items,
+        // Handle imageUrl updating
+        imageUrl: data.imageUrl !== undefined ? data.imageUrl : recipe.imageUrl
       } : recipe
     )
   })),

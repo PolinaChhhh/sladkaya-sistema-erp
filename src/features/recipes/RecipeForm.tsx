@@ -21,6 +21,7 @@ interface RecipeFormProps {
     category: RecipeCategory;
     lossPercentage: number;
     tags: RecipeTag[];
+    imageUrl?: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     name: string;
@@ -31,6 +32,7 @@ interface RecipeFormProps {
     category: RecipeCategory;
     lossPercentage: number;
     tags: RecipeTag[];
+    imageUrl?: string;
   }>>;
   onSubmit: () => void;
   ingredients: Ingredient[];
@@ -81,6 +83,14 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   };
 
+  // Handle image change
+  const handleImageChange = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      imageUrl
+    }));
+  };
+
   // Get only the main items (no packaging)
   const mainItems = formData.items.filter(item => !item.isPackaging);
 
@@ -94,9 +104,11 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           name={formData.name}
           description={formData.description}
           tags={formData.tags}
+          imageUrl={formData.imageUrl}
           onNameChange={(value) => setFormData({ ...formData, name: value })}
           onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
           onTagsChange={handleTagsChange}
+          onImageChange={handleImageChange}
         />
         
         <RecipeOutputFields 

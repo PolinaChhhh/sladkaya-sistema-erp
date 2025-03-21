@@ -22,6 +22,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     category: RecipeCategory;
     lossPercentage: number;
     tags: RecipeTag[];
+    imageUrl?: string;
   }>({
     name: '',
     description: '',
@@ -31,6 +32,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     category: 'finished',
     lossPercentage: 0,
     tags: [],
+    imageUrl: undefined,
   });
   
   const initCreateForm = () => {
@@ -43,6 +45,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       category: 'finished',
       lossPercentage: 0,
       tags: [],
+      imageUrl: undefined,
     });
     setIsCreateDialogOpen(true);
   };
@@ -57,7 +60,8 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       items: recipe.items || [],
       category: recipe.category || 'finished', 
       lossPercentage: recipe.lossPercentage || 0,
-      tags: recipe.tags || [], 
+      tags: recipe.tags || [],
+      imageUrl: recipe.imageUrl,
     });
     setIsEditDialogOpen(true);
   };
@@ -78,6 +82,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       category: formData.category,
       lossPercentage: formData.lossPercentage,
       tags: formData.tags,
+      imageUrl: formData.imageUrl,
     });
     
     toast.success(formData.category === 'finished' 
@@ -103,6 +108,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       category: formData.category,
       lossPercentage: formData.lossPercentage,
       tags: formData.tags,
+      imageUrl: formData.imageUrl,
     });
     
     toast.success(formData.category === 'finished' 

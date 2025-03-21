@@ -32,6 +32,7 @@ export type Recipe = {
   lossPercentage?: number; // Calculate automatically for semi-finished products
   category: RecipeCategory;
   tags: RecipeTag[];
+  imageUrl?: string; // Add image URL field
 };
 
 export type ProductionBatch = {

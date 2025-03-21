@@ -6,6 +6,7 @@ import { ChefHat, Edit, Clock, Scale, PercentCircle, ArrowRight, UtensilsCrossed
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Recipe, RecipeItem } from '@/store/types';
 
 interface ChefCardProps {
@@ -53,7 +54,7 @@ const ChefCard: React.FC<ChefCardProps> = ({
       {/* Cover image and header */}
       <div className="relative rounded-t-xl overflow-hidden h-64 bg-gradient-to-r from-cream-50 to-confection-50">
         <img 
-          src={placeholderImage} 
+          src={recipe.imageUrl || placeholderImage} 
           alt={recipe.name}
           className="w-full h-full object-cover opacity-60"
         />
@@ -87,8 +88,22 @@ const ChefCard: React.FC<ChefCardProps> = ({
       </div>
       
       <div className="grid md:grid-cols-3 gap-6 p-6 bg-white rounded-b-xl shadow-md">
-        {/* Left column: Ingredients */}
+        {/* Left column: Ingredients and Recipe Image */}
         <div className="md:col-span-1">
+          {/* Recipe Image - Circular Format */}
+          <div className="flex justify-center mb-6">
+            <Avatar className="h-32 w-32 border-4 border-cream-100">
+              <AvatarImage 
+                src={recipe.imageUrl || placeholderImage} 
+                alt={recipe.name} 
+                className="object-cover"
+              />
+              <AvatarFallback className="text-xl font-playfair text-confection-500">
+                {recipe.name.substring(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          
           <div className="mb-6">
             <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
               <Scale className="h-5 w-5 text-confection-500" />
