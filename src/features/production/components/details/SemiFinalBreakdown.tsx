@@ -36,23 +36,28 @@ const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakd
         
         return (
           <div key={index} className="glass rounded-md overflow-hidden">
+            <div className="p-4 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  {hasFifoDetails && (
+                    <button 
+                      onClick={() => toggleItem(index)} 
+                      className="mr-2 p-1 rounded-full hover:bg-gray-100"
+                    >
+                      {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                    </button>
+                  )}
+                  <h3 className="text-lg font-medium">{semi.name} ({semi.quantity.toFixed(2)} {semi.unit})</h3>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm text-gray-500">Общая стоимость:</span>
+                  <p className="font-medium">{semi.cost.toFixed(2)} ₽</p>
+                </div>
+              </div>
+            </div>
+            
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead colSpan={hasFifoDetails ? 3 : 4}>
-                    <div className="flex items-center">
-                      {hasFifoDetails && (
-                        <button 
-                          onClick={() => toggleItem(index)} 
-                          className="mr-2 p-1 rounded-full hover:bg-gray-100"
-                        >
-                          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </button>
-                      )}
-                      {semi.name} ({semi.quantity.toFixed(2)} {semi.unit})
-                    </div>
-                  </TableHead>
-                </TableRow>
                 <TableRow>
                   <TableHead>Ингредиент</TableHead>
                   <TableHead>Количество</TableHead>
