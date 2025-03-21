@@ -53,11 +53,14 @@ export const useProductionOperations = () => {
         toast.error(result.errorMessage || 'Ошибка при создании производства');
       }
       
-      return false;
+      return { 
+        error: true, 
+        insufficientItems: result.insufficientItems || [] 
+      };
     }
     
     toast.success('Запись о производстве добавлена');
-    return true;
+    return { error: false };
   }, [
     recipes, 
     ingredients, 
