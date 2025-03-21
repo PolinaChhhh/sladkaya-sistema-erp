@@ -35,4 +35,6 @@ export type ProductionBatch = {
   date: string;
   cost: number;
   autoProduceSemiFinals?: boolean;
+  consumptionDetails?: Record<string, any[]>; // Ingredient consumption details
+  semiFinalConsumptionDetails?: Record<string, any[]>; // Semi-final consumption details
 };

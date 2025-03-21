@@ -1,7 +1,7 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
 import { consumeIngredientsWithFifo } from '../../../utils/fifo/consumeIngredients';
-import { consumeSemiFinalProducts } from '../../../utils/semiFinalProductUtils';
+import { consumeSemiFinalProductsWithFifo } from '../../../utils/fifo/consumeSemiFinals';
 import { autoProduceSemiFinals } from './autoProduceSemiFinals';
 
 /**
@@ -52,25 +52,27 @@ export const handleAddProduction = (
     updateReceiptItem
   );
   
-  // Handle semi-finished products in recipe
-  const semiFinalCost = consumeSemiFinalProducts(
-    recipe,
-    production.quantity,
-    recipes,
-    productions,
-    updateProduction
-  );
+  // Handle semi-finished products in recipe using FIFO
+  const { totalCost: semiFinalCost, consumptionDetails: semiFinalConsumptionDetails } = 
+    consumeSemiFinalProductsWithFifo(
+      recipe,
+      production.quantity,
+      recipes,
+      productions,
+      updateProduction
+    );
   
   // Add semi-final cost to total cost
   const totalCost = ingredientCost + semiFinalCost;
   
-  // Create new production with calculated cost
+  // Create new production with calculated cost and consumption details
   const newProduction = {
     ...production,
     id: crypto.randomUUID(),
     cost: totalCost,
     date: new Date().toISOString(),
-    consumptionDetails // Store the consumption details with the production
+    consumptionDetails, // Store the ingredient consumption details
+    semiFinalConsumptionDetails // Store the semi-final consumption details
   };
   
   // Update the lastProduced date for the recipe

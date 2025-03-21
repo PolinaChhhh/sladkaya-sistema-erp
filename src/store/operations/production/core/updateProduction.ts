@@ -2,7 +2,8 @@
 import { ProductionBatch, Recipe } from '../../../types';
 import { consumeIngredientsWithFifo } from '../../../utils/fifo/consumeIngredients';
 import { restoreIngredientsToReceipts } from '../../../utils/fifo/restoreIngredients';
-import { consumeSemiFinalProducts, restoreSemiFinalProducts } from '../../../utils/semiFinalProductUtils';
+import { consumeSemiFinalProductsWithFifo } from '../../../utils/fifo/consumeSemiFinals';
+import { restoreSemiFinalProductsWithFifo } from '../../../utils/fifo/restoreSemiFinals';
 
 /**
  * Handles updating an existing production batch
@@ -40,12 +41,12 @@ export const handleUpdateProduction = (
         updateReceiptItem
       );
       
-      // Also restore semi-finished products
-      restoreSemiFinalProducts(
+      // Also restore semi-finished products using FIFO details if available
+      restoreSemiFinalProductsWithFifo(
         recipe,
         originalProduction.quantity,
-        recipes,
         productions,
+        originalProduction.semiFinalConsumptionDetails,
         updateProduction
       );
       
@@ -59,19 +60,21 @@ export const handleUpdateProduction = (
         updateReceiptItem
       );
       
-      // And consume new amount of semi-finished products
-      const semiFinalCost = consumeSemiFinalProducts(
-        recipe,
-        data.quantity,
-        recipes,
-        productions,
-        updateProduction
-      );
+      // And consume new amount of semi-finished products using FIFO
+      const { totalCost: semiFinalCost, consumptionDetails: semiFinalConsumptionDetails } = 
+        consumeSemiFinalProductsWithFifo(
+          recipe,
+          data.quantity,
+          recipes,
+          productions,
+          updateProduction
+        );
       
       // Update the cost along with other changes
       const totalCost = ingredientCost + semiFinalCost;
       data.cost = totalCost;
       data.consumptionDetails = consumptionDetails;
+      data.semiFinalConsumptionDetails = semiFinalConsumptionDetails;
     }
   }
   
