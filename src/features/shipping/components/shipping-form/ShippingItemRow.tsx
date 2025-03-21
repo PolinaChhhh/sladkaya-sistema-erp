@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShippingDocument } from '@/store/recipeStore';
 import { vatRateOptions } from '../../hooks/useShippingForm';
 import { calculatePriceWithVat } from '../../hooks/useShipmentsList';
+import { getProductsInStock } from '../../utils/shippingUtils';
 
 interface ShippingItemRowProps {
   item: {
@@ -40,6 +41,9 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
 }) => {
   const priceWithVat = calculatePriceWithVat(item.price, item.vatRate);
   const amount = item.quantity * priceWithVat;
+  
+  // Get products that are actually in stock
+  const productsInStock = getProductsInStock(productions, shippings, recipes);
 
   return (
     <div className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center">
@@ -52,29 +56,14 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
             <SelectValue placeholder="Выберите товар" />
           </SelectTrigger>
           <SelectContent>
-            {productions.map((prod) => {
-              const recipe = recipes.find(r => r.id === prod.recipeId);
-              
-              // Calculate already shipped quantity
-              const shippedQuantity = shippings.reduce((total, shipping) => {
-                return total + shipping.items
-                  .filter(item => item.productionBatchId === prod.id)
-                  .reduce((sum, item) => sum + item.quantity, 0);
-              }, 0);
-              
-              const available = prod.quantity - shippedQuantity;
-              const productName = recipe?.name || 'Неизвестно';
-              
-              return (
-                <SelectItem 
-                  key={prod.id} 
-                  value={prod.id}
-                  disabled={available <= 0}
-                >
-                  {productName}
-                </SelectItem>
-              );
-            })}
+            {productsInStock.map((product) => (
+              <SelectItem 
+                key={product.productionBatchId} 
+                value={product.productionBatchId}
+              >
+                {product.recipeName}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

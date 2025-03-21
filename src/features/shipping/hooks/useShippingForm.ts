@@ -1,6 +1,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
+import { getProductsInStock } from '../utils/shippingUtils';
 
 export const useShippingForm = (
   formData: {
@@ -24,44 +25,26 @@ export const useShippingForm = (
     }[];
   }>>,
   productions: any[],
-  shippings: ShippingDocument[]
+  shippings: ShippingDocument[],
+  recipes: any[]
 ) => {
   const addShippingItem = () => {
-    if (productions.length === 0) {
-      return { error: 'Нет доступных партий продукции' };
+    // Get products that are actually in stock using the utility function
+    const productsInStock = getProductsInStock(productions, shippings, recipes);
+    
+    if (productsInStock.length === 0) {
+      return { error: 'Нет доступных товаров на складе' };
     }
     
-    // Filter out productions that have already been fully shipped
-    const availableProductions = productions.filter(p => {
-      // Calculate already shipped quantity
-      const alreadyShippedQuantity = shippings.reduce((total, shipping) => {
-        return total + shipping.items
-          .filter(item => item.productionBatchId === p.id)
-          .reduce((sum, item) => sum + item.quantity, 0);
-      }, 0);
-      
-      console.log('Checking production availability:', { 
-        productionId: p.id, 
-        totalQuantity: p.quantity,
-        shippedQuantity: alreadyShippedQuantity,
-        available: p.quantity - alreadyShippedQuantity
-      });
-      
-      return p.quantity > alreadyShippedQuantity;
-    });
-    
-    if (availableProductions.length === 0) {
-      return { error: 'Нет доступных партий продукции для отгрузки' };
-    }
-    
-    const firstBatch = availableProductions[0];
+    // Select the first product in stock for the new item
+    const firstProduct = productsInStock[0];
     
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
-        productionBatchId: firstBatch.id, 
+        productionBatchId: firstProduct.productionBatchId, 
         quantity: 1, 
-        price: firstBatch.cost * 1.3, // Default 30% markup
+        price: firstProduct.cost * 1.3, // Default 30% markup
         vatRate: 20, // Default VAT rate 20%
       }],
     }));
@@ -73,13 +56,15 @@ export const useShippingForm = (
     const newItems = [...formData.items];
     
     if (field === 'productionBatchId' && value !== newItems[index].productionBatchId) {
-      // When changing batch, update the price based on the new batch's cost
-      const batch = productions.find(p => p.id === value);
-      if (batch) {
+      // When changing product, update the price based on the new product's cost
+      const productsInStock = getProductsInStock(productions, shippings, recipes);
+      const selectedProduct = productsInStock.find(p => p.productionBatchId === value);
+      
+      if (selectedProduct) {
         newItems[index] = { 
           ...newItems[index], 
           [field]: value,
-          price: batch.cost * 1.3 // Default 30% markup when changing batch
+          price: selectedProduct.cost * 1.3 // Default 30% markup when changing product
         };
       } else {
         newItems[index] = { ...newItems[index], [field]: value };
