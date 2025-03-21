@@ -3,7 +3,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import ChefCard from './ChefCard';
+import ChefCard from './chef-card/ChefCard';
 import { Recipe } from '@/store/types';
 
 interface ChefCardDialogProps {
