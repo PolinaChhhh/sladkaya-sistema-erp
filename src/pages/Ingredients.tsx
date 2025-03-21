@@ -3,6 +3,16 @@ import React, { useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { useStore, Ingredient } from '@/store/recipeStore';
 import { toast } from 'sonner';
+import { Trash2, Edit } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 
 // Import our new components
 import IngredientHeader from '@/features/ingredients/IngredientHeader';
