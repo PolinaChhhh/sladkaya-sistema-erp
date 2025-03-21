@@ -38,7 +38,9 @@ export const handleAddProduction = (
       updateIngredient,
       updateReceiptItem,
       updateProduction,
-      updateRecipe
+      updateRecipe,
+      // Pass the semiFinalsToProduce if it exists in the production object
+      (production as any).semiFinalsToProduce
     );
   }
   

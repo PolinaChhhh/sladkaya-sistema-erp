@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe } from '@/store/types';
@@ -59,9 +58,13 @@ export const useProductionPage = () => {
   // Update createFormData when recipes change (for initial load)
   useEffect(() => {
     if (recipes.length > 0 && createFormData.recipeId === '') {
+      // Find the first finished product to use as default
+      const finishedRecipe = recipes.find(r => r.category === 'finished');
+      
       setCreateFormData(prevState => ({
         ...prevState,
-        recipeId: recipes[0].id
+        recipeId: finishedRecipe ? finishedRecipe.id : (recipes[0].id || ''),
+        semiFinalsToProduce: [] // Initialize as empty array
       }));
     }
   }, [recipes, createFormData.recipeId, setCreateFormData]);
