@@ -14,7 +14,7 @@ const RecipeSearch: React.FC<RecipeSearchProps> = ({ searchQuery, onSearchChange
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
       <Input 
         placeholder="Поиск рецептов..." 
-        className="pl-10" 
+        className="pl-10"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
       />

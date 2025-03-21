@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Ingredient, RecipeItem } from '@/store/recipeStore';
 import { toast } from 'sonner';
+import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface RecipeFormProps {
   isOpen: boolean;
@@ -45,6 +47,9 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   getIngredientName,
   getIngredientUnit,
 }) => {
+  const [searchValue, setSearchValue] = useState("");
+  const [open, setOpen] = useState<number | null>(null);
+  
   const addRecipeItem = () => {
     if (ingredients.length === 0) {
       toast.error('Сначала добавьте ингредиенты');
@@ -67,6 +72,12 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   const removeRecipeItem = (index: number) => {
     const newItems = formData.items.filter((_, i) => i !== index);
     setFormData({ ...formData, items: newItems });
+  };
+
+  const filterIngredients = (value: string) => {
+    return ingredients.filter((ingredient) => 
+      ingredient.name.toLowerCase().includes(value.toLowerCase())
+    );
   };
 
   return (
@@ -135,21 +146,45 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             <div className="space-y-3 mt-3">
               {formData.items.map((item, index) => (
                 <div key={index} className="flex items-center gap-2 bg-gray-50 p-3 rounded-md">
-                  <Select 
-                    value={item.ingredientId}
-                    onValueChange={(value) => updateRecipeItem(index, 'ingredientId', value)}
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Выберите ингредиент" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ingredients.map((ingredient) => (
-                        <SelectItem key={ingredient.id} value={ingredient.id}>
-                          {ingredient.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open === index} onOpenChange={(isOpen) => setOpen(isOpen ? index : null)}>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        role="combobox" 
+                        aria-expanded={open === index} 
+                        className="flex-1 justify-between">
+                        {item.ingredientId ? getIngredientName(item.ingredientId) : "Выберите ингредиент"}
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Поиск ингредиента..." 
+                          className="h-9" 
+                          value={searchValue}
+                          onValueChange={setSearchValue}
+                        />
+                        <CommandEmpty>Ингредиенты не найдены.</CommandEmpty>
+                        <CommandGroup className="max-h-[200px] overflow-y-auto">
+                          {filterIngredients(searchValue).map((ingredient) => (
+                            <CommandItem
+                              key={ingredient.id}
+                              value={ingredient.name}
+                              onSelect={() => {
+                                updateRecipeItem(index, 'ingredientId', ingredient.id);
+                                setSearchValue("");
+                                setOpen(null);
+                              }}
+                            >
+                              {ingredient.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  
                   <div className="flex items-center gap-2">
                     <Input 
                       type="number"
