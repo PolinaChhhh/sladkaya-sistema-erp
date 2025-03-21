@@ -26,7 +26,15 @@ export type {
 } from './types';
 
 // Create the store combining all slices
-interface StoreState extends IngredientSlice, RecipeSlice, SupplierSlice, ReceiptSlice, ProductionSlice, ShippingSlice, BuyerSlice {}
+// Use separate interfaces to avoid conflicts
+interface StoreState extends 
+  IngredientSlice, 
+  RecipeSlice, 
+  SupplierSlice, 
+  ReceiptSlice, 
+  ProductionSlice, 
+  ShippingSlice, 
+  BuyerSlice {}
 
 export const useStore = create<StoreState>()((...args) => ({
   ...createIngredientSlice(...args),
