@@ -39,7 +39,8 @@ export const handleDeleteProduction = (
     );
     
     // Restore semi-finished products using FIFO details if available
-    // and decompose them into their original ingredients
+    // IMPORTANT: We do NOT decompose semi-finals into ingredients here
+    // We just return them to stock so they can be used in other productions
     restoreSemiFinalProductsWithFifo(
       recipe,
       production.quantity,
@@ -52,9 +53,9 @@ export const handleDeleteProduction = (
       receipts,
       updateIngredient,
       updateReceiptItem,
-      true // Set to true to decompose semi-finals into ingredients
+      false // Set to false to NOT decompose semi-finals into ingredients
     );
     
-    console.log(`Production ${id} has been deleted and all ingredients have been restored`);
+    console.log(`Production ${id} has been deleted and all ingredients/semi-finals have been restored`);
   }
 };
