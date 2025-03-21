@@ -27,7 +27,7 @@ export const getIngredientUsageDetails = (
   quantity: number,
   recipes: Recipe[],
   ingredients: Ingredient[],
-  receipts: Receipt[],
+  receipts: Receipt[] = [], // Make receipts optional with default empty array
   production?: ProductionBatch
 ): IngredientUsageDetail[] => {
   const recipe = recipes.find(r => r.id === recipeId);
@@ -76,8 +76,9 @@ export const getIngredientUsageDetails = (
           });
         } else {
           // Fallback to the old method if consumption details aren't available
-          const fifoDetails = receipts
-            .filter(receipt => receipt.items.some(i => i.ingredientId === ingredientId))
+          // Added null check for receipts and items
+          const fifoDetails = (receipts || [])
+            .filter(receipt => receipt.items && receipt.items.some(i => i.ingredientId === ingredientId))
             .flatMap(receipt => {
               return receipt.items
                 .filter(i => i.ingredientId === ingredientId)

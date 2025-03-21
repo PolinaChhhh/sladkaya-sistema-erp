@@ -42,7 +42,7 @@ export const getSemiFinalBreakdown = (
   recipes: Recipe[],
   ingredients: Ingredient[],
   receipts: Receipt[] = [],
-  productions: ProductionBatch[] = [],
+  productions: ProductionBatch[] = [], // Explicitly specify ProductionBatch[] type
   production?: ProductionBatch
 ): SemiFinalBreakdown[] => {
   const recipe = recipes.find(r => r.id === recipeId);

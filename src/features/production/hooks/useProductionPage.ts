@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe } from '@/store/types';
@@ -111,14 +112,16 @@ export const useProductionPage = () => {
   };
   
   const getSemiFinalBreakdownWrapped = (recipeId: string, quantity: number) => {
-    // Pass the selected production to get FIFO details for semi-finals
+    // Fix the type error by passing receipts instead of productions
+    // The function expects Recipe[], Ingredient[], Receipt[], ProductionBatch[] in that order
     return getSemiFinalBreakdown(
       recipeId, 
       quantity, 
       recipes, 
       ingredients,
-      productions,  // Pass the productions array
-      selectedProduction  // Pass the selected production for consumption details
+      receipts,
+      productions,  
+      selectedProduction  
     );
   };
   
