@@ -46,7 +46,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             {recipe.items.map((item, idx) => (
               <div key={idx} className="text-sm flex justify-between">
                 <span>{getIngredientName(item.ingredientId)}</span>
-                <span>{item.amount} {getIngredientUnit(item.ingredientId)}</span>
+                <div className="flex items-center gap-2">
+                  <span>{item.amount} {getIngredientUnit(item.ingredientId)}</span>
+                  {item.lossPercentage > 0 && (
+                    <span className="text-gray-500 text-xs">(потери: {item.lossPercentage}%)</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

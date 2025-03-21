@@ -59,7 +59,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     const firstIngredient = ingredients[0];
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { ingredientId: firstIngredient.id, amount: 0 }],
+      items: [...prev.items, { ingredientId: firstIngredient.id, amount: 0, lossPercentage: 0 }],
     }));
   };
   
@@ -145,67 +145,92 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           {formData.items.length > 0 ? (
             <div className="space-y-3 mt-3">
               {formData.items.map((item, index) => (
-                <div key={index} className="flex items-center gap-2 bg-gray-50 p-3 rounded-md">
-                  <Popover open={open === index} onOpenChange={(isOpen) => setOpen(isOpen ? index : null)}>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        role="combobox" 
-                        aria-expanded={open === index} 
-                        className="flex-1 justify-between">
-                        {item.ingredientId ? getIngredientName(item.ingredientId) : "Выберите ингредиент"}
-                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0" align="start">
-                      <Command>
-                        <CommandInput 
-                          placeholder="Поиск ингредиента..." 
-                          className="h-9" 
-                          value={searchValue}
-                          onValueChange={setSearchValue}
-                        />
-                        <CommandEmpty>Ингредиенты не найдены.</CommandEmpty>
-                        <CommandGroup className="max-h-[200px] overflow-y-auto">
-                          {filterIngredients(searchValue).map((ingredient) => (
-                            <CommandItem
-                              key={ingredient.id}
-                              value={ingredient.name}
-                              onSelect={() => {
-                                updateRecipeItem(index, 'ingredientId', ingredient.id);
-                                setSearchValue("");
-                                setOpen(null);
-                              }}
-                            >
-                              {ingredient.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      className="w-24"
-                      value={item.amount}
-                      onChange={(e) => updateRecipeItem(index, 'amount', parseFloat(e.target.value) || 0)}
-                    />
-                    <span className="text-sm text-gray-500">
-                      {getIngredientUnit(item.ingredientId)}
-                    </span>
+                <div key={index} className="bg-gray-50 p-3 rounded-md">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Popover open={open === index} onOpenChange={(isOpen) => setOpen(isOpen ? index : null)}>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          role="combobox" 
+                          aria-expanded={open === index} 
+                          className="flex-1 justify-between">
+                          {item.ingredientId ? getIngredientName(item.ingredientId) : "Выберите ингредиент"}
+                          <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[300px] p-0" align="start">
+                        <Command>
+                          <CommandInput 
+                            placeholder="Поиск ингредиента..." 
+                            className="h-9" 
+                            value={searchValue}
+                            onValueChange={setSearchValue}
+                          />
+                          <CommandEmpty>Ингредиенты не найдены.</CommandEmpty>
+                          <CommandGroup className="max-h-[200px] overflow-y-auto">
+                            {filterIngredients(searchValue).map((ingredient) => (
+                              <CommandItem
+                                key={ingredient.id}
+                                value={ingredient.name}
+                                onSelect={() => {
+                                  updateRecipeItem(index, 'ingredientId', ingredient.id);
+                                  setSearchValue("");
+                                  setOpen(null);
+                                }}
+                              >
+                                {ingredient.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeRecipeItem(index)}
+                    >
+                      <X className="h-4 w-4 text-gray-500" />
+                    </Button>
                   </div>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => removeRecipeItem(index)}
-                  >
-                    <X className="h-4 w-4 text-gray-500" />
-                  </Button>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        className="w-full"
+                        value={item.amount}
+                        onChange={(e) => updateRecipeItem(index, 'amount', parseFloat(e.target.value) || 0)}
+                        placeholder="Количество"
+                      />
+                      <span className="text-sm text-gray-500 w-8">
+                        {getIngredientUnit(item.ingredientId)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <div className="w-full relative">
+                        <Input 
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          className="w-full pr-8"
+                          value={item.lossPercentage || 0}
+                          onChange={(e) => updateRecipeItem(index, 'lossPercentage', parseFloat(e.target.value) || 0)}
+                          placeholder="Потери"
+                        />
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">%</span>
+                      </div>
+                      <Label className="text-xs text-gray-500 whitespace-nowrap" htmlFor={`loss-${index}`}>
+                        Потери
+                      </Label>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

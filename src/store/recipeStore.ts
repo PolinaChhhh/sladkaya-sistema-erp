@@ -15,6 +15,7 @@ export type Ingredient = {
 export type RecipeItem = {
   ingredientId: string;
   amount: number;
+  lossPercentage?: number;
 };
 
 export type Recipe = {
