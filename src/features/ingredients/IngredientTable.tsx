@@ -62,7 +62,13 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
               </TableCell>
               <TableCell>{ingredient.cost.toFixed(2)} ₽/{ingredient.unit}</TableCell>
               <TableCell>
-                <span className={ingredient.quantity <= 0 ? "text-red-500 font-medium" : ""}>
+                <span className={
+                  ingredient.quantity <= 0 
+                    ? "text-red-500 font-medium" 
+                    : ingredient.quantity < 5 
+                      ? "text-orange-500 font-medium"
+                      : ""
+                }>
                   {ingredient.quantity} {ingredient.unit}
                 </span>
               </TableCell>

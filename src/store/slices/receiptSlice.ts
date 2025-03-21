@@ -61,27 +61,30 @@ export const createReceiptSlice: StateCreator<
   
   updateReceipt: (id, data) => set((state) => {
     const originalReceipt = state.receipts.find(receipt => receipt.id === id);
-    const updatedReceipt = { ...originalReceipt, ...data };
+    
+    if (!originalReceipt) {
+      return { receipts: state.receipts };
+    }
     
     // If items have changed, update ingredient quantities
     if (data.items && originalReceipt) {
-      // Revert original receipt quantities
-      originalReceipt.items.forEach(item => {
-        const existingIngredient = state.ingredients.find(ing => ing.id === item.ingredientId);
+      // First, revert the original quantities from all items in the original receipt
+      originalReceipt.items.forEach(originalItem => {
+        const existingIngredient = state.ingredients.find(ing => ing.id === originalItem.ingredientId);
         if (existingIngredient) {
-          get().updateIngredient(item.ingredientId, {
-            quantity: Math.max(0, existingIngredient.quantity - item.quantity)
+          get().updateIngredient(originalItem.ingredientId, {
+            quantity: Math.max(0, existingIngredient.quantity - originalItem.quantity)
           });
         }
       });
       
-      // Apply new receipt quantities
-      data.items.forEach(item => {
-        const existingIngredient = state.ingredients.find(ing => ing.id === item.ingredientId);
+      // Then, add the new quantities from the updated receipt items
+      data.items.forEach(newItem => {
+        const existingIngredient = state.ingredients.find(ing => ing.id === newItem.ingredientId);
         if (existingIngredient) {
-          get().updateIngredient(item.ingredientId, {
-            quantity: existingIngredient.quantity + item.quantity,
-            cost: item.unitPrice, // Update to the latest price
+          get().updateIngredient(newItem.ingredientId, {
+            quantity: existingIngredient.quantity + newItem.quantity,
+            cost: newItem.unitPrice, // Update to the latest price
             lastPurchaseDate: new Date().toISOString()
           });
         }

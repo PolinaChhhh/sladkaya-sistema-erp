@@ -44,6 +44,29 @@ export const createRecipeSlice: StateCreator<
       // Calculate how much of each ingredient is used for this production
       const productionRatio = production.quantity / recipe.output;
       
+      // Check if we have enough of each ingredient
+      let canProduce = true;
+      const insufficientIngredients: string[] = [];
+      
+      recipe.items.forEach(item => {
+        if (item.type === 'ingredient' && item.ingredientId) {
+          const ingredient = state.ingredients.find(i => i.id === item.ingredientId);
+          
+          if (ingredient) {
+            const amountNeeded = item.amount * productionRatio;
+            if (ingredient.quantity < amountNeeded) {
+              canProduce = false;
+              insufficientIngredients.push(ingredient.name);
+            }
+          }
+        }
+      });
+      
+      if (!canProduce) {
+        console.error(`Cannot produce: Insufficient ingredients: ${insufficientIngredients.join(', ')}`);
+        return { productions: state.productions }; // Don't add production if insufficient ingredients
+      }
+      
       // Reduce ingredient quantities based on recipe items
       recipe.items.forEach(item => {
         if (item.type === 'ingredient' && item.ingredientId) {
@@ -58,6 +81,11 @@ export const createRecipeSlice: StateCreator<
             });
           }
         }
+      });
+      
+      // Update the last produced date for the recipe
+      get().updateRecipe(recipe.id, {
+        lastProduced: new Date().toISOString()
       });
     }
     
