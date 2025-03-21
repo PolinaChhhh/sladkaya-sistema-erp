@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, BarChart3 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +14,7 @@ const Navbar: React.FC = () => {
     { name: 'Производство', path: '/production' },
     { name: 'Отгрузки', path: '/shipping' },
     { name: 'Поступления', path: '/receipts' },
+    { name: 'Отчёты', path: '/reports', icon: <BarChart3 className="h-4 w-4 mr-1.5" /> },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -32,12 +33,13 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center ${
                   isActive(item.path)
                     ? 'bg-confection-100 text-confection-800'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
+                {item.icon}
                 {item.name}
               </Link>
             ))}
@@ -62,13 +64,14 @@ const Navbar: React.FC = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block px-3 py-2 rounded-md text-base font-medium flex items-center ${
                     isActive(item.path)
                       ? 'bg-confection-100 text-confection-800'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
+                  {item.icon}
                   {item.name}
                 </Link>
               ))}
