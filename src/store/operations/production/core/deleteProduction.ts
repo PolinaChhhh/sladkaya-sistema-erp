@@ -44,7 +44,8 @@ export const handleDeleteProduction = (
       recipe,
       production.quantity,
       productions,
-      production.consumptionDetails,
+      // Safe casting the consumption details to the expected type
+      production.consumptionDetails as unknown as Record<string, any[]>,
       updateProduction,
       recipes,
       ingredients,

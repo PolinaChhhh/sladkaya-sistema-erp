@@ -49,7 +49,8 @@ export const handleUpdateProduction = (
         recipe,
         originalProduction.quantity,
         productions,
-        originalProduction.consumptionDetails,
+        // Safe casting the consumption details to the expected type
+        originalProduction.consumptionDetails as unknown as Record<string, any[]>,
         updateProduction,
         recipes,
         ingredients,
@@ -82,8 +83,17 @@ export const handleUpdateProduction = (
       // Update the cost along with other changes
       const totalCost = ingredientCost + semiFinalCost;
       data.cost = totalCost;
-      data.consumptionDetails = consumptionDetails;
-      data.consumptionDetails = semiFinalConsumptionDetails;
+      
+      // Merge both consumption details into one object
+      // We need to handle both ingredient and semi-final consumption in the same field
+      const mergedConsumptionDetails = { ...consumptionDetails };
+      
+      // Safely add semi-final consumption details
+      Object.entries(semiFinalConsumptionDetails).forEach(([key, value]) => {
+        mergedConsumptionDetails[key] = value as any[];
+      });
+      
+      data.consumptionDetails = mergedConsumptionDetails;
       
       console.log(`Production ${id} updated with new cost: ${totalCost}`);
     }

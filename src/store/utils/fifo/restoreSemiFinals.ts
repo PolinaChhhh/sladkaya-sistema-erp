@@ -1,4 +1,3 @@
-
 import { Recipe, ProductionBatch } from '../../types';
 import { ConsumedSemiFinalItem } from './consumeSemiFinals';
 import { restoreIngredientsToReceipts } from './restoreIngredients';
@@ -10,7 +9,7 @@ export const restoreSemiFinalProductsWithFifo = (
   recipe: Recipe,
   quantity: number,
   productions: ProductionBatch[],
-  consumptionDetails: Record<string, ConsumedSemiFinalItem[]> | undefined,
+  consumptionDetails: Record<string, any[]> | undefined,
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void,
   // Adding optional parameters for decomposing semi-finals into ingredients
   recipes?: Recipe[],
@@ -26,43 +25,51 @@ export const restoreSemiFinalProductsWithFifo = (
     Object.entries(consumptionDetails).forEach(([semiFinalRecipeId, items]) => {
       const semiFinalRecipe = recipes?.find(r => r.id === semiFinalRecipeId);
       
-      items.forEach(item => {
-        const production = productions.find(p => p.id === item.productionId);
-        if (production) {
-          console.log(`Restoring ${item.amount} of semi-final ${item.name} to production ${item.productionId}`);
-          
-          // If we should decompose the semi-final into ingredients
-          if (shouldDecompose && semiFinalRecipe && recipes && ingredients && receipts && updateIngredient && updateReceiptItem) {
-            console.log(`Decomposing semi-final ${item.name} into original ingredients`);
+      // Check if these are semi-final items (they have productionId property)
+      const hasSemiFinalFormat = items.length > 0 && 'productionId' in items[0];
+      
+      if (hasSemiFinalFormat) {
+        // Cast to ConsumedSemiFinalItem[] since we confirmed it has the right structure
+        const semiFinalItems = items as unknown as ConsumedSemiFinalItem[];
+        
+        semiFinalItems.forEach(item => {
+          const production = productions.find(p => p.id === item.productionId);
+          if (production) {
+            console.log(`Restoring ${item.amount} of semi-final ${item.name} to production ${item.productionId}`);
             
-            // Find the recipe for this semi-final
-            const semiFinalRecipeObj = recipes.find(r => r.id === semiFinalRecipeId);
-            if (semiFinalRecipeObj) {
-              // Restore the ingredients used to create this semi-final
-              restoreIngredientsToReceipts(
-                semiFinalRecipeObj,
-                item.amount,
-                ingredients,
-                receipts,
-                updateIngredient,
-                updateReceiptItem
-              );
+            // If we should decompose the semi-final into ingredients
+            if (shouldDecompose && semiFinalRecipe && recipes && ingredients && receipts && updateIngredient && updateReceiptItem) {
+              console.log(`Decomposing semi-final ${item.name} into original ingredients`);
               
-              console.log(`Ingredients from semi-final ${item.name} have been restored to inventory`);
+              // Find the recipe for this semi-final
+              const semiFinalRecipeObj = recipes.find(r => r.id === semiFinalRecipeId);
+              if (semiFinalRecipeObj) {
+                // Restore the ingredients used to create this semi-final
+                restoreIngredientsToReceipts(
+                  semiFinalRecipeObj,
+                  item.amount,
+                  ingredients,
+                  receipts,
+                  updateIngredient,
+                  updateReceiptItem
+                );
+                
+                console.log(`Ingredients from semi-final ${item.name} have been restored to inventory`);
+              } else {
+                console.error(`Could not find recipe for semi-final ${semiFinalRecipeId}`);
+              }
             } else {
-              console.error(`Could not find recipe for semi-final ${semiFinalRecipeId}`);
+              // Just restore the production quantity if not decomposing
+              console.log(`Not decomposing semi-final, just restoring production quantity ${item.amount} to ${production.id}`);
+              updateProduction(item.productionId, {
+                quantity: production.quantity + item.amount
+              });
             }
           } else {
-            // Just restore the production quantity if not decomposing
-            console.log(`Not decomposing semi-final, just restoring production quantity ${item.amount} to ${production.id}`);
-            updateProduction(item.productionId, {
-              quantity: production.quantity + item.amount
-            });
+            console.error(`Could not find production ${item.productionId} to restore semi-final`);
           }
-        } else {
-          console.error(`Could not find production ${item.productionId} to restore semi-final`);
-        }
-      });
+        });
+      }
     });
   } else {
     // Fallback to the old method if consumption details aren't available
