@@ -4,6 +4,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Recipe } from '@/store/recipeStore';
 import { Badge } from '@/components/ui/badge';
+import { Package2, Box } from 'lucide-react';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -39,8 +40,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           </div>
           <div className="flex gap-3 text-sm text-gray-500 mt-1">
             <p>Выход: {recipe.output} {recipe.outputUnit}</p>
-            {recipe.lossPercentage > 0 && (
-              <p>Потери: {recipe.lossPercentage}%</p>
+            {recipe.lossPercentage !== undefined && recipe.lossPercentage > 0 && (
+              <p>Потери: {recipe.lossPercentage.toFixed(2)}%</p>
             )}
           </div>
           {recipe.description && (
@@ -64,18 +65,21 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             {recipe.items.map((item, idx) => {
               let name = 'Неизвестный элемент';
               let unit = '';
+              let icon = null;
               
               if (item.type === 'ingredient' && item.ingredientId) {
                 name = getIngredientName(item.ingredientId);
                 unit = getIngredientUnit(item.ingredientId);
+                icon = <Package2 className="h-3 w-3 inline mr-1 text-gray-500" />;
               } else if (item.type === 'recipe' && item.recipeId) {
-                name = `🍳 ${getRecipeName(item.recipeId)}`;
+                name = getRecipeName(item.recipeId);
                 unit = getRecipeUnit(item.recipeId);
+                icon = <Box className="h-3 w-3 inline mr-1 text-gray-500" />;
               }
               
               return (
                 <div key={idx} className="text-sm flex justify-between">
-                  <span>{name}</span>
+                  <span>{icon} {name}</span>
                   <span>{item.amount} {unit}</span>
                 </div>
               );

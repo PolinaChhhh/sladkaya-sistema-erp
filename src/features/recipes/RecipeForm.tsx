@@ -95,6 +95,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       category,
       outputUnit: category === 'semi-finished' ? 'кг' : 'шт'
     });
+
+    // Since we changed category, we should clear the items
+    // to avoid mixing semi-finished and finished product items
+    setFormData(prev => ({
+      ...prev,
+      items: []
+    }));
   };
 
   // Debug logging for form data
@@ -135,6 +142,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           getRecipeName={getRecipeName}
           getRecipeUnit={getRecipeUnit}
           onUpdateItems={(items) => setFormData({ ...formData, items })}
+          category={formData.category}
         />
       </div>
       <DialogFooter>

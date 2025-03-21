@@ -1,10 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RecipeItem, Recipe, Ingredient } from '@/store/recipeStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Package2, Box } from 'lucide-react';
 
 interface RecipeItemRowProps {
   item: RecipeItem;
@@ -17,6 +19,7 @@ interface RecipeItemRowProps {
   getRecipeUnit: (id: string) => string;
   onUpdate: (index: number, field: keyof RecipeItem, value: any) => void;
   onRemove: (index: number) => void;
+  allowRecipeItems?: boolean;
 }
 
 const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
@@ -30,30 +33,38 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   getRecipeUnit,
   onUpdate,
   onRemove,
+  allowRecipeItems = false,
 }) => {
-  // Force all items to be ingredients for now
-  useEffect(() => {
-    if (item.type !== 'ingredient') {
-      onUpdate(index, 'type', 'ingredient');
-      
-      if (ingredients.length > 0 && !item.ingredientId) {
+  const handleTypeChange = (type: 'ingredient' | 'recipe') => {
+    onUpdate(index, 'type', type);
+    
+    // Clear the current selection
+    if (type === 'ingredient') {
+      onUpdate(index, 'recipeId', undefined);
+      if (ingredients.length > 0) {
         onUpdate(index, 'ingredientId', ingredients[0].id);
       }
-      
-      // Clear any recipe ID
-      if (item.recipeId) {
-        onUpdate(index, 'recipeId', undefined);
+    } else {
+      onUpdate(index, 'ingredientId', undefined);
+      if (recipes.length > 0) {
+        onUpdate(index, 'recipeId', recipes[0].id);
       }
     }
-  }, [item, ingredients, index, onUpdate]);
+  };
   
   const handleIngredientChange = (id: string) => {
     onUpdate(index, 'ingredientId', id);
   };
   
+  const handleRecipeChange = (id: string) => {
+    onUpdate(index, 'recipeId', id);
+  };
+  
   const getDisplayUnit = () => {
-    if (item.ingredientId) {
+    if (item.type === 'ingredient' && item.ingredientId) {
       return getIngredientUnit(item.ingredientId);
+    } else if (item.type === 'recipe' && item.recipeId) {
+      return getRecipeUnit(item.recipeId);
     }
     return '';
   };
@@ -61,21 +72,59 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   return (
     <div className="bg-gray-50 p-3 rounded-md">
       <div className="space-y-2">
-        <Select
-          value={item.ingredientId || ''}
-          onValueChange={handleIngredientChange}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Выберите ингредиент" />
-          </SelectTrigger>
-          <SelectContent>
-            {ingredients.map((ingredient) => (
-              <SelectItem key={ingredient.id} value={ingredient.id}>
-                {ingredient.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {allowRecipeItems && (
+          <ToggleGroup type="single" value={item.type} 
+            onValueChange={(value) => {
+              if (value) handleTypeChange(value as 'ingredient' | 'recipe');
+            }}
+            className="justify-start mb-2"
+          >
+            <ToggleGroupItem value="ingredient" aria-label="Ingredient">
+              <Package2 className="h-4 w-4 mr-1" />
+              <span className="text-xs">Ингредиент</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="recipe" aria-label="Recipe">
+              <Box className="h-4 w-4 mr-1" />
+              <span className="text-xs">Полуфабрикат</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
+        
+        {(item.type === 'ingredient' || !item.type) && (
+          <Select
+            value={item.ingredientId || ''}
+            onValueChange={handleIngredientChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите ингредиент" />
+            </SelectTrigger>
+            <SelectContent>
+              {ingredients.map((ingredient) => (
+                <SelectItem key={ingredient.id} value={ingredient.id}>
+                  {ingredient.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        
+        {item.type === 'recipe' && (
+          <Select
+            value={item.recipeId || ''}
+            onValueChange={handleRecipeChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите полуфабрикат" />
+            </SelectTrigger>
+            <SelectContent>
+              {recipes.map((recipe) => (
+                <SelectItem key={recipe.id} value={recipe.id}>
+                  {recipe.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         
         <div className="flex items-center gap-1 mt-2">
           <Input 
