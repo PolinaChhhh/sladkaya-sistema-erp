@@ -3,11 +3,15 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { useStore } from '@/store/recipeStore';
 import { toast } from 'sonner';
+import { ProductionBatch } from '@/store/types';
 
 export const useProductionState = () => {
-  const { recipes, ingredients, productions, addProduction, updateRecipe } = useStore();
+  const { recipes, ingredients, productions, addProduction, updateProduction, deleteProduction, updateRecipe } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedProduction, setSelectedProduction] = useState<ProductionBatch | null>(null);
   
   const [formData, setFormData] = useState<{
     recipeId: string;
@@ -15,6 +19,14 @@ export const useProductionState = () => {
     date: string;
   }>({
     recipeId: recipes.length > 0 ? recipes[0].id : '',
+    quantity: 1,
+    date: format(new Date(), 'yyyy-MM-dd'),
+  });
+  
+  const [editFormData, setEditFormData] = useState<{
+    quantity: number;
+    date: string;
+  }>({
     quantity: 1,
     date: format(new Date(), 'yyyy-MM-dd'),
   });
@@ -115,6 +127,49 @@ export const useProductionState = () => {
     setIsCreateDialogOpen(false);
   };
   
+  const handleEditProduction = () => {
+    if (!selectedProduction) return;
+    
+    if (editFormData.quantity <= 0) {
+      toast.error('Количество должно быть больше 0');
+      return;
+    }
+    
+    const cost = calculateCost(selectedProduction.recipeId, editFormData.quantity);
+    
+    updateProduction(selectedProduction.id, {
+      quantity: editFormData.quantity,
+      date: editFormData.date,
+      cost,
+    });
+    
+    toast.success('Запись о производстве обновлена');
+    setIsEditDialogOpen(false);
+  };
+  
+  const handleDeleteProduction = () => {
+    if (!selectedProduction) return;
+    
+    deleteProduction(selectedProduction.id);
+    
+    toast.success('Запись о производстве удалена');
+    setIsDeleteDialogOpen(false);
+  };
+  
+  const openEditDialog = (production: ProductionBatch) => {
+    setSelectedProduction(production);
+    setEditFormData({
+      quantity: production.quantity,
+      date: production.date,
+    });
+    setIsEditDialogOpen(true);
+  };
+  
+  const openDeleteDialog = (production: ProductionBatch) => {
+    setSelectedProduction(production);
+    setIsDeleteDialogOpen(true);
+  };
+  
   const getRecipeName = (recipeId: string): string => {
     const recipe = recipes.find(r => r.id === recipeId);
     return recipe ? recipe.name : 'Неизвестный рецепт';
@@ -130,10 +185,21 @@ export const useProductionState = () => {
     setSearchQuery,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
     formData,
     setFormData,
+    editFormData,
+    setEditFormData,
+    selectedProduction,
     sortedProductions,
     handleCreateProduction,
+    handleEditProduction,
+    handleDeleteProduction,
+    openEditDialog,
+    openDeleteDialog,
     calculateCost,
     getRecipeName,
     getRecipeOutput

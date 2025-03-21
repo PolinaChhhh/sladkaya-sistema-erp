@@ -1,20 +1,25 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Calendar, DollarSign, ChefHat, Info } from 'lucide-react';
+import { Calendar, DollarSign, ChefHat, Info, Edit, Trash2 } from 'lucide-react';
 import GlassMorphicCard from '@/components/ui/GlassMorphicCard';
+import { Button } from '@/components/ui/button';
 import { ProductionBatch } from '@/store/types';
 
 interface ProductionListProps {
   productions: ProductionBatch[];
   getRecipeName: (recipeId: string) => string;
   getRecipeOutput: (recipeId: string) => string;
+  onEdit: (production: ProductionBatch) => void;
+  onDelete: (production: ProductionBatch) => void;
 }
 
 const ProductionList: React.FC<ProductionListProps> = ({ 
   productions,
   getRecipeName,
-  getRecipeOutput
+  getRecipeOutput,
+  onEdit,
+  onDelete
 }) => {
   const formatDate = (dateString: string): string => {
     try {
@@ -69,6 +74,25 @@ const ProductionList: React.FC<ProductionListProps> = ({
                 <p className="font-medium mt-1">
                   {(production.cost / production.quantity).toFixed(2)} ₽/{getRecipeOutput(production.recipeId)}
                 </p>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onEdit(production)}
+                  title="Редактировать"
+                >
+                  <Edit className="h-4 w-4 text-gray-500" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onDelete(production)}
+                  title="Удалить"
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
               </div>
             </div>
           </div>
