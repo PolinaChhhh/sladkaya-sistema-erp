@@ -44,12 +44,19 @@ export const handleUpdateProduction = (
       );
       
       // Also restore semi-finished products using FIFO details if available
+      // Do not decompose for update - we need to reuse these semi-finals
       restoreSemiFinalProductsWithFifo(
         recipe,
         originalProduction.quantity,
         productions,
         originalProduction.semiFinalConsumptionDetails,
-        updateProduction
+        updateProduction,
+        recipes,
+        ingredients,
+        receipts,
+        updateIngredient,
+        updateReceiptItem,
+        false // Set to false for updates as we don't want to decompose
       );
       
       // Then consume the new amount of ingredients
@@ -82,3 +89,4 @@ export const handleUpdateProduction = (
   
   return data;
 };
+

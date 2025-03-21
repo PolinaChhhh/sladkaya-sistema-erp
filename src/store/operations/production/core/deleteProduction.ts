@@ -39,12 +39,20 @@ export const handleDeleteProduction = (
     );
     
     // Restore semi-finished products using FIFO details if available
+    // and decompose them into their original ingredients
     restoreSemiFinalProductsWithFifo(
       recipe,
       production.quantity,
       productions,
       production.semiFinalConsumptionDetails,
-      updateProduction
+      updateProduction,
+      recipes,
+      ingredients,
+      receipts,
+      updateIngredient,
+      updateReceiptItem,
+      true // Set to true to decompose semi-finals into ingredients
     );
   }
 };
+

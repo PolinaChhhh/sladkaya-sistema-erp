@@ -1,6 +1,7 @@
 
 import { Recipe, ProductionBatch } from '../../types';
 import { ConsumedSemiFinalItem } from './consumeSemiFinals';
+import { restoreIngredientsToReceipts } from './restoreIngredients';
 
 /**
  * Restore semi-final products when updating or deleting a production
@@ -10,19 +11,47 @@ export const restoreSemiFinalProductsWithFifo = (
   quantity: number,
   productions: ProductionBatch[],
   consumptionDetails: Record<string, ConsumedSemiFinalItem[]> | undefined,
-  updateProduction: (id: string, data: Partial<ProductionBatch>) => void
+  updateProduction: (id: string, data: Partial<ProductionBatch>) => void,
+  // Adding optional parameters for decomposing semi-finals into ingredients
+  recipes?: Recipe[],
+  ingredients?: any[],
+  receipts?: any[],
+  updateIngredient?: (id: string, data: Partial<any>) => void,
+  updateReceiptItem?: (receiptId: string, itemId: string, data: Partial<any>) => void,
+  shouldDecompose: boolean = false
 ): void => {
   // If we have consumption details, use them for precise restoration
   if (consumptionDetails) {
     // Restore each consumed semi-final item
-    Object.values(consumptionDetails).forEach(items => {
+    Object.entries(consumptionDetails).forEach(([semiFinalRecipeId, items]) => {
+      const semiFinalRecipe = recipes?.find(r => r.id === semiFinalRecipeId);
+      
       items.forEach(item => {
         const production = productions.find(p => p.id === item.productionId);
         if (production) {
           console.log(`Restoring ${item.amount} of semi-final ${item.name} to production ${item.productionId}`);
-          updateProduction(item.productionId, {
-            quantity: production.quantity + item.amount
-          });
+          
+          // If we should decompose the semi-final into ingredients
+          if (shouldDecompose && semiFinalRecipe && recipes && ingredients && receipts && updateIngredient && updateReceiptItem) {
+            console.log(`Decomposing semi-final ${item.name} into original ingredients`);
+            
+            // Restore the ingredients used to create this semi-final
+            restoreIngredientsToReceipts(
+              semiFinalRecipe,
+              item.amount,
+              ingredients,
+              receipts,
+              updateIngredient,
+              updateReceiptItem
+            );
+            
+            // We don't actually restore the semi-final production if we're decomposing it
+          } else {
+            // Just restore the production quantity if not decomposing
+            updateProduction(item.productionId, {
+              quantity: production.quantity + item.amount
+            });
+          }
         }
       });
     });
@@ -38,6 +67,26 @@ export const restoreSemiFinalProductsWithFifo = (
         const amountToRestore = item.amount * productionRatio;
         
         console.log(`Need to restore ${amountToRestore} of semi-final ${semiFinalId}`);
+        
+        const semiFinalRecipe = recipes?.find(r => r.id === semiFinalId);
+        
+        // If we should decompose and we have all the necessary dependencies
+        if (shouldDecompose && semiFinalRecipe && ingredients && receipts && updateIngredient && updateReceiptItem) {
+          console.log(`Decomposing semi-final ${semiFinalId} into original ingredients`);
+          
+          // Restore the ingredients used to create this semi-final
+          restoreIngredientsToReceipts(
+            semiFinalRecipe,
+            amountToRestore,
+            ingredients,
+            receipts,
+            updateIngredient,
+            updateReceiptItem
+          );
+          
+          // We don't actually restore the semi-final production if we're decomposing it
+          return;
+        }
         
         // Find productions of this semi-final with quantity 0
         // We'll restore to the most recent productions first (LIFO for restoration)
@@ -70,3 +119,4 @@ export const restoreSemiFinalProductsWithFifo = (
       });
   }
 };
+
