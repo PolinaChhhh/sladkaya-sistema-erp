@@ -60,7 +60,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 name = getIngredientName(item.ingredientId);
                 unit = getIngredientUnit(item.ingredientId);
               } else if (item.type === 'recipe' && item.recipeId) {
-                name = `🍲 ${getRecipeName(item.recipeId)}`;
+                name = `🍳 ${getRecipeName(item.recipeId)}`;
                 unit = getRecipeUnit(item.recipeId);
               }
               
