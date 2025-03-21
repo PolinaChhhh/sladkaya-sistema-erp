@@ -2,6 +2,7 @@
 import { StateCreator } from 'zustand';
 import { Recipe, ProductionBatch } from '../types';
 import { IngredientSlice } from './ingredientSlice';
+import { ReceiptSlice } from './receiptSlice';
 
 export interface RecipeSlice {
   recipes: Recipe[];
@@ -14,10 +15,11 @@ export interface RecipeSlice {
   deleteProduction: (id: string) => void;
 }
 
-type StoreWithIngredientSlice = IngredientSlice;
+// Update the type to include ReceiptSlice
+type StoreWithDependencies = IngredientSlice & ReceiptSlice;
 
 export const createRecipeSlice: StateCreator<
-  RecipeSlice & StoreWithIngredientSlice,
+  RecipeSlice & StoreWithDependencies,
   [],
   [],
   RecipeSlice

@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ProductionBatch } from '@/store/types';
 
 export const useProductionState = () => {
-  const { recipes, ingredients, productions, addProduction, updateProduction, deleteProduction, updateRecipe } = useStore();
+  const { recipes, ingredients, productions, addProduction, updateProduction, deleteProduction, updateRecipe, receipts } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -61,7 +61,7 @@ export const useProductionState = () => {
         const amountNeeded = item.amount * productionRatio;
         
         // For the estimate, we'll use a weighted average price from receipts with remaining quantities
-        const { receipts } = useStore.getState();
+        // const { receipts } = useStore.getState();
         
         const allReceiptItems = receipts
           .flatMap(receipt => receipt.items
