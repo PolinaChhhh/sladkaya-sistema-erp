@@ -1,17 +1,11 @@
 
-import React from 'react';
-import { TrendingUp } from 'lucide-react';
+import React, { useEffect } from 'react';
 import ProductionHeader from './components/ProductionHeader';
-import ProductionList from './components/ProductionList';
-import ProductionDialog from './components/ProductionDialog';
-import EditProductionDialog from './components/EditProductionDialog';
-import DeleteConfirmDialog from './components/DeleteConfirmDialog';
-import ProductionDetailDialog from './components/ProductionDetailDialog';
-import SearchBar from './components/SearchBar';
+import ProductionDialogs from './components/ProductionDialogs';
+import ProductionListSection from './components/ProductionListSection';
+import { useStore } from '@/store/recipeStore';
 import { useProductionState } from './hooks/useProductionState';
-import { useProductionDetails } from './hooks/useProductionDetails';
-import EmptyState from './components/EmptyState';
-import { Dialog } from '@/components/ui/dialog';
+import { useProductionDetailsDialog } from './hooks/useProductionDetailsDialog';
 
 const ProductionPage = () => {
   const {
@@ -48,7 +42,7 @@ const ProductionPage = () => {
     selectedRecipe,
     getIngredientDetails,
     getIngredientUsageDetails
-  } = useProductionDetails();
+  } = useProductionDetailsDialog();
 
   console.log("Create dialog open:", isCreateDialogOpen);
   console.log("Form data:", formData);
@@ -57,65 +51,49 @@ const ProductionPage = () => {
     <div className="max-w-5xl mx-auto">
       <ProductionHeader onAddNew={() => setIsCreateDialogOpen(true)} />
       
-      <div className="mb-6">
-        <SearchBar 
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Поиск по рецептам..."
-        />
-      </div>
-      
-      {sortedProductions.length > 0 ? (
-        <ProductionList 
-          productions={sortedProductions}
-          getRecipeName={getRecipeName}
-          getRecipeOutput={getRecipeOutput}
-          onEdit={openEditDialog}
-          onDelete={openDeleteDialog}
-          onViewDetails={openDetailDialog}
-        />
-      ) : (
-        <EmptyState icon={TrendingUp} />
-      )}
-      
-      <ProductionDialog 
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleCreateProduction}
-        calculateCost={calculateCost}
+      <ProductionListSection 
+        productions={sortedProductions}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        getRecipeName={getRecipeName}
         getRecipeOutput={getRecipeOutput}
+        onEdit={openEditDialog}
+        onDelete={openDeleteDialog}
+        onViewDetails={openDetailDialog}
       />
       
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <EditProductionDialog 
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          production={selectedProduction}
-          formData={editFormData}
-          setFormData={setEditFormData}
-          onSubmit={handleEditProduction}
-          recipeOutput={selectedProduction ? getRecipeOutput(selectedProduction.recipeId) : ''}
-          calculateCost={calculateCost}
-        />
-      </Dialog>
-      
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DeleteConfirmDialog 
-          recipeName={selectedProduction ? getRecipeName(selectedProduction.recipeId) : ''}
-          onCancel={() => setIsDeleteDialogOpen(false)}
-          onConfirm={handleDeleteProduction}
-        />
-      </Dialog>
-      
-      <ProductionDetailDialog 
-        isOpen={isDetailDialogOpen}
-        onClose={closeDetailDialog}
-        production={detailProduction}
-        recipe={selectedRecipe}
-        getIngredientDetails={getIngredientDetails}
+      <ProductionDialogs 
+        // Create dialog props
+        isCreateDialogOpen={isCreateDialogOpen}
+        setIsCreateDialogOpen={setIsCreateDialogOpen}
+        createFormData={formData}
+        setCreateFormData={setFormData}
+        handleCreateProduction={handleCreateProduction}
+        
+        // Edit dialog props
+        isEditDialogOpen={isEditDialogOpen}
+        setIsEditDialogOpen={setIsEditDialogOpen}
+        selectedProduction={selectedProduction}
+        editFormData={editFormData}
+        setEditFormData={setEditFormData}
+        handleEditProduction={handleEditProduction}
+        
+        // Delete dialog props
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        handleDeleteProduction={handleDeleteProduction}
+        
+        // Detail dialog props
+        isDetailDialogOpen={isDetailDialogOpen}
+        closeDetailDialog={closeDetailDialog}
+        detailProduction={detailProduction}
+        selectedRecipe={selectedRecipe}
+        
+        // Utility functions
+        calculateCost={calculateCost}
         getRecipeName={getRecipeName}
+        getRecipeOutput={getRecipeOutput}
+        getIngredientDetails={getIngredientDetails}
         getIngredientUsageDetails={getIngredientUsageDetails}
       />
     </div>
