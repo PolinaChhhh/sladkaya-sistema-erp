@@ -21,6 +21,7 @@ interface ProductionDetailsProps {
   getIngredientDetails: (recipeId: string, quantity: number) => any[];
   getIngredientUsageDetails: (recipeId: string, quantity: number) => any[];
   getSemiFinalBreakdown: (recipeId: string, quantity: number) => any[];
+  calculateTotalCost?: (recipeId: string, quantity: number) => number;
   onClose: () => void;
 }
 
@@ -32,6 +33,7 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
   getIngredientDetails,
   getIngredientUsageDetails,
   getSemiFinalBreakdown,
+  calculateTotalCost,
   onClose
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,6 +55,13 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
   const ingredientDetails = getIngredientDetails(recipe.id, production.quantity);
   const usageDetails = getIngredientUsageDetails(recipe.id, production.quantity);
   const semiFinalBreakdown = getSemiFinalBreakdown(recipe.id, production.quantity);
+  
+  // Calculate the ingredient cost and semi-finished cost separately for display
+  const ingredientCost = ingredientDetails.reduce((sum, item) => sum + item.cost, 0);
+  const semiFinalCost = semiFinalBreakdown.reduce((sum, item) => sum + item.cost, 0);
+  const totalCost = calculateTotalCost 
+    ? calculateTotalCost(recipe.id, production.quantity)
+    : production.cost;
   
   return (
     <DialogContent className="sm:max-w-4xl">
@@ -109,6 +118,16 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
                   <TableCell className="font-medium">Дата производства</TableCell>
                   <TableCell>{format(new Date(production.date), 'dd.MM.yyyy')}</TableCell>
                 </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Стоимость ингредиентов</TableCell>
+                  <TableCell>{ingredientCost.toFixed(2)} ₽</TableCell>
+                </TableRow>
+                {semiFinalBreakdown.length > 0 && (
+                  <TableRow>
+                    <TableCell className="font-medium">Стоимость полуфабрикатов</TableCell>
+                    <TableCell>{semiFinalCost.toFixed(2)} ₽</TableCell>
+                  </TableRow>
+                )}
                 <TableRow>
                   <TableCell className="font-medium">Себестоимость единицы</TableCell>
                   <TableCell>{(production.cost / production.quantity).toFixed(2)} ₽/{recipe.outputUnit}</TableCell>

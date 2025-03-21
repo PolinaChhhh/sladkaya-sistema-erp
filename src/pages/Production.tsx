@@ -47,6 +47,7 @@ const Production = () => {
     getIngredientDetails,
     getIngredientUsageDetails,
     getSemiFinalBreakdown,
+    calculateTotalCost,
     getSelectedRecipe,
     
     // Dialog openers
@@ -145,6 +146,7 @@ const Production = () => {
         getIngredientDetails={getIngredientDetails}
         getIngredientUsageDetails={getIngredientUsageDetails}
         getSemiFinalBreakdown={getSemiFinalBreakdown}
+        calculateTotalCost={calculateTotalCost}
       />
     </div>
   );

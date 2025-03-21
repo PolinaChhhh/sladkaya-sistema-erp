@@ -5,7 +5,7 @@ import { ProductionBatch, Recipe } from '@/store/types';
 import { useProductionForm, ProductionFormData } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionFilter } from './useProductionFilter';
-import { getIngredientDetails } from '../utils/productionCalculations';
+import { getIngredientDetails, calculateTotalCost } from '../utils/productionCalculations';
 import { getIngredientUsageDetails, getSemiFinalBreakdown } from '../utils/fifoUtils';
 import { getRecipeName, getRecipeOutput, getSelectedRecipe } from '../utils/recipeUtils';
 
@@ -104,6 +104,10 @@ export const useProductionPage = () => {
     return getSemiFinalBreakdown(recipeId, quantity, recipes, ingredients);
   };
   
+  const calculateTotalCostWrapped = (recipeId: string, quantity: number) => {
+    return calculateTotalCost(recipes, recipeId, quantity, ingredients);
+  };
+  
   return {
     // Loading and error states
     isLoading,
@@ -143,6 +147,7 @@ export const useProductionPage = () => {
     getIngredientDetails: getIngredientDetailsWrapped,
     getIngredientUsageDetails: getIngredientUsageDetailsWrapped,
     getSemiFinalBreakdown: getSemiFinalBreakdownWrapped,
+    calculateTotalCost: calculateTotalCostWrapped,
     getSelectedRecipe: getSelectedRecipeWrapped,
     
     // Dialog openers

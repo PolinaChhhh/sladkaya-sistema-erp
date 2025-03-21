@@ -41,6 +41,7 @@ interface ProductionDialogsProps {
   getIngredientDetails: (recipeId: string, quantity: number) => any[];
   getIngredientUsageDetails: (recipeId: string, quantity: number) => any[];
   getSemiFinalBreakdown: (recipeId: string, quantity: number) => any[];
+  calculateTotalCost?: (recipeId: string, quantity: number) => number;
 }
 
 const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
@@ -75,7 +76,8 @@ const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
   getRecipeOutput,
   getIngredientDetails,
   getIngredientUsageDetails,
-  getSemiFinalBreakdown
+  getSemiFinalBreakdown,
+  calculateTotalCost
 }) => {
   const { recipes } = useStore();
   
@@ -125,6 +127,7 @@ const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
             getIngredientDetails={getIngredientDetails}
             getIngredientUsageDetails={getIngredientUsageDetails}
             getSemiFinalBreakdown={getSemiFinalBreakdown}
+            calculateTotalCost={calculateTotalCost}
             onClose={closeDetailDialog}
           />
         )}
