@@ -24,19 +24,19 @@ interface IngredientTableProps {
 const getTypeBadgeProps = (type: string): { variant: "default" | "secondary" | "destructive" | "outline", className: string } => {
   // Base pastel color palette for different ingredient types
   const typeMap: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", className: string }> = {
-    'Ингредиент': { variant: 'outline', className: 'bg-[#D3E4FD] text-blue-700 hover:bg-[#D3E4FD]/80 border-[#D3E4FD]' },
-    'Молочные': { variant: 'outline', className: 'bg-[#F2FCE2] text-green-700 hover:bg-[#F2FCE2]/80 border-[#F2FCE2]' },
-    'Мука': { variant: 'outline', className: 'bg-[#FEF7CD] text-amber-700 hover:bg-[#FEF7CD]/80 border-[#FEF7CD]' },
-    'Упаковка': { variant: 'outline', className: 'bg-[#FFDEE2] text-rose-700 hover:bg-[#FFDEE2]/80 border-[#FFDEE2]' },
+    'Ингредиент': { variant: 'outline', className: 'bg-blue-50 text-blue-700 hover:bg-blue-50/80 border-blue-100' },
+    'Молочные': { variant: 'outline', className: 'bg-green-50 text-green-700 hover:bg-green-50/80 border-green-100' },
+    'Мука': { variant: 'outline', className: 'bg-amber-50 text-amber-700 hover:bg-amber-50/80 border-amber-100' },
+    'Упаковка': { variant: 'outline', className: 'bg-rose-50 text-rose-700 hover:bg-rose-50/80 border-rose-100' },
   };
   
   // For custom types, generate a consistent pastel color based on the type string
   if (!typeMap[type]) {
     const pastelColors = [
-      { variant: 'outline' as const, className: 'bg-[#E5DEFF] text-indigo-700 hover:bg-[#E5DEFF]/80 border-[#E5DEFF]' }, // Soft Purple
-      { variant: 'outline' as const, className: 'bg-[#FDE1D3] text-orange-700 hover:bg-[#FDE1D3]/80 border-[#FDE1D3]' }, // Soft Peach
-      { variant: 'outline' as const, className: 'bg-[#FEC6A1] text-amber-800 hover:bg-[#FEC6A1]/80 border-[#FEC6A1]' }, // Soft Orange
-      { variant: 'outline' as const, className: 'bg-[#F1F0FB] text-gray-700 hover:bg-[#F1F0FB]/80 border-[#F1F0FB]' }, // Soft Gray
+      { variant: 'outline' as const, className: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-50/80 border-indigo-100' }, // Soft Purple
+      { variant: 'outline' as const, className: 'bg-orange-50 text-orange-700 hover:bg-orange-50/80 border-orange-100' }, // Soft Peach
+      { variant: 'outline' as const, className: 'bg-amber-50 text-amber-700 hover:bg-amber-50/80 border-amber-100' }, // Soft Orange
+      { variant: 'outline' as const, className: 'bg-gray-50 text-gray-700 hover:bg-gray-50/80 border-gray-100' }, // Soft Gray
     ];
     
     // Use hash of string to select a consistent pastel color for custom types
