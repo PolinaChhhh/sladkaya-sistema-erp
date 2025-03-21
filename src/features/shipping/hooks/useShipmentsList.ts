@@ -18,6 +18,7 @@ export const useShipmentsList = () => {
       productionBatchId: string;
       quantity: number;
       price: number;
+      vatRate: number;
     }[];
   }>({
     buyerId: '',
@@ -151,5 +152,23 @@ export const getBuyerName = (buyers: any[], shipping: ShippingDocument): string 
 };
 
 export const calculateTotalAmount = (items: ShippingDocument['items']): number => {
-  return items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  return items.reduce((sum, item) => {
+    const priceWithVat = item.price * (1 + item.vatRate / 100);
+    return sum + (item.quantity * priceWithVat);
+  }, 0);
+};
+
+export const calculateVatAmount = (items: ShippingDocument['items']): number => {
+  return items.reduce((sum, item) => {
+    const vatAmount = item.price * (item.vatRate / 100) * item.quantity;
+    return sum + vatAmount;
+  }, 0);
+};
+
+export const calculatePriceWithVat = (price: number, vatRate: number): number => {
+  return price * (1 + vatRate / 100);
+};
+
+export const formatShipmentNumber = (number: number): string => {
+  return number.toString().padStart(4, '0');
 };

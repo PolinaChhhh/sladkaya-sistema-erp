@@ -4,17 +4,28 @@ import { ShippingDocument } from '../types';
 
 export interface ShippingSlice {
   shippings: ShippingDocument[];
-  addShipping: (shipping: Omit<ShippingDocument, 'id'>) => void;
+  lastShipmentNumber: number; // Track the last used shipment number
+  addShipping: (shipping: Omit<ShippingDocument, 'id' | 'shipmentNumber'>) => void;
   updateShippingStatus: (id: string, status: ShippingDocument['status']) => void;
   deleteShipping: (id: string) => void;
 }
 
-export const createShippingSlice: StateCreator<ShippingSlice> = (set) => ({
+export const createShippingSlice: StateCreator<ShippingSlice> = (set, get) => ({
   shippings: [],
+  lastShipmentNumber: 0, // Initialize at 0, first shipment will be 1
   
-  addShipping: (shipping) => set((state) => ({
-    shippings: [...state.shippings, { ...shipping, id: crypto.randomUUID() }]
-  })),
+  addShipping: (shipping) => set((state) => {
+    const nextShipmentNumber = state.lastShipmentNumber + 1;
+    
+    return {
+      shippings: [...state.shippings, { 
+        ...shipping, 
+        id: crypto.randomUUID(),
+        shipmentNumber: nextShipmentNumber
+      }],
+      lastShipmentNumber: nextShipmentNumber
+    };
+  }),
   
   updateShippingStatus: (id, status) => set((state) => ({
     shippings: state.shippings.map((shipping) => 

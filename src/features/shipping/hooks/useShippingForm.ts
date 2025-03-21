@@ -10,6 +10,7 @@ export const useShippingForm = (
       productionBatchId: string;
       quantity: number;
       price: number;
+      vatRate: number;
     }[];
   },
   setFormData: Dispatch<SetStateAction<{
@@ -19,6 +20,7 @@ export const useShippingForm = (
       productionBatchId: string;
       quantity: number;
       price: number;
+      vatRate: number;
     }[];
   }>>,
   productions: any[],
@@ -51,7 +53,8 @@ export const useShippingForm = (
       items: [...prev.items, { 
         productionBatchId: firstBatch.id, 
         quantity: 1, 
-        price: firstBatch.cost * 1.3 // Default 30% markup
+        price: firstBatch.cost * 1.3, // Default 30% markup
+        vatRate: 20, // Default VAT rate 20%
       }],
     }));
     
@@ -91,3 +94,11 @@ export const useShippingForm = (
     removeShippingItem
   };
 };
+
+// VAT rate options for dropdown
+export const vatRateOptions = [
+  { value: 5, label: '5%' },
+  { value: 7, label: '7%' },
+  { value: 10, label: '10%' },
+  { value: 20, label: '20%' }
+];

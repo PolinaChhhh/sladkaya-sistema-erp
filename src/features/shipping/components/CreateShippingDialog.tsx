@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ShippingDocument } from '@/store/recipeStore';
 import { toast } from 'sonner';
-import { useShippingForm } from '../hooks/useShippingForm';
+import { useShippingForm, vatRateOptions } from '../hooks/useShippingForm';
 import { getProductName } from '../utils/shippingUtils';
-import { calculateTotalAmount } from '../hooks/useShipmentsList';
+import { calculateTotalAmount, calculateVatAmount, calculatePriceWithVat } from '../hooks/useShipmentsList';
 
 interface CreateShippingDialogProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ interface CreateShippingDialogProps {
       productionBatchId: string;
       quantity: number;
       price: number;
+      vatRate: number;
     }[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -31,6 +32,7 @@ interface CreateShippingDialogProps {
       productionBatchId: string;
       quantity: number;
       price: number;
+      vatRate: number;
     }[];
   }>>;
   buyers: any[];
@@ -67,7 +69,7 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Создание отгрузки</DialogTitle>
         </DialogHeader>
@@ -117,18 +119,22 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
             
             {formData.items.length > 0 ? (
               <div className="bg-white/70 rounded-lg border overflow-hidden">
-                <div className="grid grid-cols-12 gap-2 p-3 bg-blue-50 text-xs font-medium text-gray-600">
-                  <div className="col-span-4">Товар</div>
+                <div className="grid grid-cols-16 gap-2 p-3 bg-blue-50 text-xs font-medium text-gray-600">
+                  <div className="col-span-3">Товар</div>
+                  <div className="col-span-2 text-center">В наличии</div>
                   <div className="col-span-2 text-center">Количество</div>
-                  <div className="col-span-2 text-center">Цена</div>
-                  <div className="col-span-3 text-right">Сумма</div>
+                  <div className="col-span-2 text-center">Цена (без НДС)</div>
+                  <div className="col-span-2 text-center">НДС %</div>
+                  <div className="col-span-2 text-center">Цена (с НДС)</div>
+                  <div className="col-span-2 text-right">Сумма</div>
                   <div className="col-span-1"></div>
                 </div>
                 
                 {formData.items.map((item, idx) => {
                   const production = productions.find(p => p.id === item.productionBatchId);
                   const recipe = production ? recipes.find(r => r.id === production.recipeId) : null;
-                  const amount = item.quantity * item.price;
+                  const priceWithVat = calculatePriceWithVat(item.price, item.vatRate);
+                  const amount = item.quantity * priceWithVat;
                   
                   // Calculate available quantity
                   const alreadyShippedQuantity = shippings.reduce((total, shipping) => {
@@ -140,8 +146,8 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
                   const availableQuantity = production ? production.quantity - alreadyShippedQuantity : 0;
                   
                   return (
-                    <div key={idx} className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center">
-                      <div className="col-span-4">
+                    <div key={idx} className="grid grid-cols-16 gap-2 p-3 text-sm border-t border-gray-100 items-center">
+                      <div className="col-span-3">
                         <Select 
                           value={item.productionBatchId} 
                           onValueChange={(value) => updateShippingItem(idx, 'productionBatchId', value)}
@@ -178,6 +184,12 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
                         </Select>
                       </div>
                       
+                      <div className="col-span-2 text-center">
+                        <div className="bg-gray-50 px-3 py-2 rounded border border-gray-200 text-gray-700">
+                          {availableQuantity} {recipe?.outputUnit || 'шт'}
+                        </div>
+                      </div>
+                      
                       <div className="col-span-2">
                         <Input
                           type="number"
@@ -200,7 +212,29 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
                         />
                       </div>
                       
-                      <div className="col-span-3 text-right font-medium">
+                      <div className="col-span-2">
+                        <Select
+                          value={String(item.vatRate)}
+                          onValueChange={(value) => updateShippingItem(idx, 'vatRate', Number(value))}
+                        >
+                          <SelectTrigger className="text-center">
+                            <SelectValue placeholder="НДС %" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {vatRateOptions.map((option) => (
+                              <SelectItem key={option.value} value={String(option.value)}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="col-span-2 text-center font-medium">
+                        {priceWithVat.toFixed(2)} ₽
+                      </div>
+                      
+                      <div className="col-span-2 text-right font-medium">
                         {amount.toFixed(2)} ₽
                       </div>
                       
@@ -218,12 +252,28 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
                   );
                 })}
                 
-                <div className="grid grid-cols-12 gap-2 p-3 bg-blue-50 border-t text-sm">
-                  <div className="col-span-8 text-right font-medium">Итого:</div>
-                  <div className="col-span-3 text-right font-bold">
+                <div className="grid grid-cols-16 gap-2 p-3 bg-blue-50 border-t text-sm">
+                  <div className="col-span-11 text-right font-medium">Сумма без НДС:</div>
+                  <div className="col-span-2 text-right font-medium">
+                    {formData.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)} ₽
+                  </div>
+                  <div className="col-span-3"></div>
+                </div>
+                
+                <div className="grid grid-cols-16 gap-2 p-3 bg-blue-50 border-t text-sm">
+                  <div className="col-span-11 text-right font-medium">НДС:</div>
+                  <div className="col-span-2 text-right font-medium">
+                    {calculateVatAmount(formData.items).toFixed(2)} ₽
+                  </div>
+                  <div className="col-span-3"></div>
+                </div>
+                
+                <div className="grid grid-cols-16 gap-2 p-3 bg-blue-50 border-t text-sm">
+                  <div className="col-span-11 text-right font-medium">Итого с НДС:</div>
+                  <div className="col-span-2 text-right font-bold">
                     {calculateTotalAmount(formData.items).toFixed(2)} ₽
                   </div>
-                  <div className="col-span-1"></div>
+                  <div className="col-span-3"></div>
                 </div>
               </div>
             ) : (
