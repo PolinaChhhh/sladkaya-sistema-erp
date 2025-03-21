@@ -50,7 +50,11 @@ const ProductionPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <ProductionHeader onAddNew={() => setIsCreateDialogOpen(true)} />
+      <ProductionHeader 
+        onAddNew={() => setIsCreateDialogOpen(true)} 
+        onSearchChange={setSearchQuery}
+        searchQuery={searchQuery}
+      />
       
       <ProductionListSection 
         productions={sortedProductions}

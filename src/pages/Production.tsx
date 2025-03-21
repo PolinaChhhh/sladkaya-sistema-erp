@@ -77,6 +77,32 @@ const Production = () => {
     return recipe ? recipe.outputUnit : '';
   };
   
+  // Calculate cost helper
+  const calculateCost = (recipeId: string, quantity: number) => {
+    // Simple cost calculation (can be improved with proper FIFO logic)
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (!recipe) return 0;
+    
+    let totalCost = 0;
+    
+    recipe.items.forEach(item => {
+      if (item.type === 'ingredient') {
+        const ingredient = ingredients.find(i => i.id === item.ingredientId);
+        if (ingredient) {
+          // Calculate based on average cost 
+          const amountNeeded = (item.amount * quantity) / recipe.output;
+          totalCost += amountNeeded * (ingredient.price || 0);
+        }
+      } else if (item.type === 'recipe' && item.recipeId) {
+        // For semi-finished products, calculate recursively
+        const amountNeeded = (item.amount * quantity) / recipe.output;
+        totalCost += calculateCost(item.recipeId, amountNeeded);
+      }
+    });
+    
+    return totalCost;
+  };
+  
   // Dialog handlers
   const openCreateDialog = () => {
     setIsCreateDialogOpen(true);
@@ -154,6 +180,59 @@ const Production = () => {
     }
   };
   
+  // Helper function for ingredient details (simplified)
+  const getIngredientDetails = (ingredientId: string) => {
+    const ingredient = ingredients.find(i => i.id === ingredientId);
+    return ingredient || null;
+  };
+  
+  // Helper function for ingredient usage details (simplified)
+  const getIngredientUsageDetails = (production: ProductionBatch) => {
+    if (!production) return [];
+    
+    const recipe = recipes.find(r => r.id === production.recipeId);
+    if (!recipe) return [];
+    
+    return recipe.items
+      .filter(item => item.type === 'ingredient')
+      .map(item => {
+        const ingredient = ingredients.find(i => i.id === item.ingredientId);
+        if (!ingredient) return null;
+        
+        const amountUsed = (item.amount * production.quantity) / recipe.output;
+        
+        return {
+          ingredientId: item.ingredientId,
+          name: ingredient.name,
+          amount: amountUsed,
+          unit: ingredient.unit,
+          cost: amountUsed * (ingredient.price || 0),
+          fifoDetails: []
+        };
+      })
+      .filter(Boolean);
+  };
+  
+  // Helper function for semi-final breakdown (simplified)
+  const getSemiFinalBreakdown = (production: ProductionBatch) => {
+    if (!production) return [];
+    
+    const recipe = recipes.find(r => r.id === production.recipeId);
+    if (!recipe) return [];
+    
+    return recipe.items
+      .filter(item => item.type === 'recipe' && item.recipeId)
+      .map(item => {
+        const amountUsed = (item.amount * production.quantity) / recipe.output;
+        
+        return {
+          recipeId: item.recipeId as string,
+          amount: amountUsed,
+          cost: calculateCost(item.recipeId as string, amountUsed)
+        };
+      });
+  };
+  
   // Get selected recipe
   const getSelectedRecipe = () => {
     if (!selectedProduction) return null;
@@ -184,6 +263,7 @@ const Production = () => {
         formData={createFormData}
         setFormData={setCreateFormData}
         onSubmit={handleCreateProduction}
+        calculateCost={calculateCost}
         getRecipeOutput={getRecipeOutput}
       />
       
@@ -197,6 +277,7 @@ const Production = () => {
           setFormData={setEditFormData}
           onSubmit={handleEditProduction}
           recipeOutput={selectedProduction ? getRecipeOutput(selectedProduction.recipeId) : ''}
+          calculateCost={calculateCost}
         />
       </Dialog>
       
@@ -215,9 +296,10 @@ const Production = () => {
         onClose={() => setIsDetailDialogOpen(false)}
         production={selectedProduction}
         recipe={getSelectedRecipe()}
-        receipts={receipts}
-        ingredients={ingredients}
+        getIngredientDetails={getIngredientDetails}
         getRecipeName={getRecipeName}
+        getIngredientUsageDetails={getIngredientUsageDetails}
+        getSemiFinalBreakdown={getSemiFinalBreakdown}
       />
     </div>
   );
