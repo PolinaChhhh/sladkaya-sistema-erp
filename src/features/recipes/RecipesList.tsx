@@ -9,6 +9,7 @@ interface RecipesListProps {
   productions?: ProductionBatch[];
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
+  onViewDetails?: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
   getRecipeName: (id: string) => string;
@@ -20,6 +21,7 @@ const RecipesList: React.FC<RecipesListProps> = ({
   productions = [],
   onEdit, 
   onDelete,
+  onViewDetails,
   getIngredientName,
   getIngredientUnit,
   getRecipeName,
@@ -37,7 +39,8 @@ const RecipesList: React.FC<RecipesListProps> = ({
           recipe={recipe} 
           productions={productions}
           onEdit={onEdit} 
-          onDelete={onDelete} 
+          onDelete={onDelete}
+          onViewDetails={onViewDetails}
           getIngredientName={getIngredientName}
           getIngredientUnit={getIngredientUnit}
           getRecipeName={getRecipeName}

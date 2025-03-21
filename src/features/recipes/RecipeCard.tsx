@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Trash2, Clock, Package2, Component } from 'lucide-react';
+import { Edit, Trash2, Clock, Package2, Component, ChevronsRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Recipe, ProductionBatch } from '@/store/types';
@@ -12,6 +12,7 @@ interface RecipeCardProps {
   productions?: ProductionBatch[];
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
+  onViewDetails?: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
   getRecipeName: (id: string) => string;
@@ -23,6 +24,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   productions = [],
   onEdit,
   onDelete,
+  onViewDetails,
   getIngredientName,
   getIngredientUnit,
   getRecipeName,
@@ -79,7 +81,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       </CardHeader>
       <CardContent className="p-4 pt-0 pb-2">
         {recipe.description && (
-          <p className="text-sm text-gray-500 mb-3">{recipe.description}</p>
+          <p className="text-sm text-gray-500 mb-3 line-clamp-2">{recipe.description}</p>
         )}
         <div className="text-sm space-y-2">
           <div className="flex justify-between">
@@ -115,6 +117,18 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               </div>
             ))}
           </div>
+        )}
+        
+        {onViewDetails && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-2 w-full text-confection-600 hover:text-confection-700 hover:bg-confection-50"
+            onClick={() => onViewDetails(recipe)}
+          >
+            Открыть карточку шеф-повара
+            <ChevronsRight className="ml-1 h-4 w-4" />
+          </Button>
         )}
       </CardFooter>
     </Card>
