@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useStore } from '@/store/recipeStore';
 
 interface ProductionDialogProps {
@@ -15,11 +16,13 @@ interface ProductionDialogProps {
     recipeId: string;
     quantity: number;
     date: string;
+    autoProduceSemiFinals: boolean;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     recipeId: string;
     quantity: number;
     date: string;
+    autoProduceSemiFinals: boolean;
   }>>;
   onSubmit: () => void;
   calculateCost: (recipeId: string, quantity: number) => number;
@@ -45,6 +48,10 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   // Get semi-finished and finished recipes
   const semiFinishedRecipes = filteredRecipes.filter(recipe => recipe.category === 'semi-finished');
   const finishedRecipes = filteredRecipes.filter(recipe => recipe.category === 'finished');
+
+  // Check if the selected recipe is a finished product to show the auto-produce option
+  const selectedRecipe = recipes.find(r => r.id === formData.recipeId);
+  const isFinishedProduct = selectedRecipe?.category === 'finished';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -120,6 +127,18 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             />
           </div>
+          
+          {/* Auto-produce toggle for finished products */}
+          {isFinishedProduct && (
+            <div className="flex items-center space-x-2 mt-2">
+              <Switch 
+                id="auto-produce"
+                checked={formData.autoProduceSemiFinals}
+                onCheckedChange={(checked) => setFormData({ ...formData, autoProduceSemiFinals: checked })}
+              />
+              <Label htmlFor="auto-produce">Автоматически производить необходимые полуфабрикаты</Label>
+            </div>
+          )}
           
           {formData.recipeId && formData.recipeId !== '_placeholder' && formData.recipeId !== '_semi_header' && formData.recipeId !== '_finished_header' && (
             <div className="mt-2 p-3 bg-mint-50 rounded-md border border-mint-200">

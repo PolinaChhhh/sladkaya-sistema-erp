@@ -30,10 +30,12 @@ export const useProductionForm = ({
     recipeId: string;
     quantity: number;
     date: string;
+    autoProduceSemiFinals: boolean;
   }>({
     recipeId: recipes.length > 0 ? recipes[0].id : '',
     quantity: 1,
     date: format(new Date(), 'yyyy-MM-dd'),
+    autoProduceSemiFinals: true, // Default to true for auto-production
   });
   
   const [editFormData, setEditFormData] = useState<{
@@ -85,32 +87,38 @@ export const useProductionForm = ({
         }
       }
     } else if (recipe.category === 'finished') {
-      // For finished products, check semi-finished product availability
-      const { canProduce, insufficientItems } = checkSemiFinalAvailability(formData.recipeId, formData.quantity);
-      if (!canProduce) {
-        insufficientResources = insufficientItems;
-      }
-      
-      // Also check if there are any raw ingredients needed
-      for (const item of recipe.items) {
-        if (item.type === 'ingredient' && item.ingredientId) {
-          const ingredient = ingredients.find(i => i.id === item.ingredientId);
-          if (ingredient) {
-            const requiredAmount = item.amount * productionRatio;
-            if (ingredient.quantity < requiredAmount) {
-              insufficientResources.push({
-                name: ingredient.name,
-                required: requiredAmount,
-                available: ingredient.quantity,
-                unit: ingredient.unit
-              });
+      // For finished products, check if we need to auto-produce semi-finished products
+      if (formData.autoProduceSemiFinals) {
+        // We'll handle auto-production in the store, so no need to check availability here
+      } else {
+        // If not auto-producing, check availability
+        const { canProduce, insufficientItems } = checkSemiFinalAvailability(formData.recipeId, formData.quantity);
+        if (!canProduce) {
+          insufficientResources = insufficientItems;
+        }
+        
+        // Also check if there are any raw ingredients needed
+        for (const item of recipe.items) {
+          if (item.type === 'ingredient' && item.ingredientId) {
+            const ingredient = ingredients.find(i => i.id === item.ingredientId);
+            if (ingredient) {
+              const requiredAmount = item.amount * productionRatio;
+              if (ingredient.quantity < requiredAmount) {
+                insufficientResources.push({
+                  name: ingredient.name,
+                  required: requiredAmount,
+                  available: ingredient.quantity,
+                  unit: ingredient.unit
+                });
+              }
             }
           }
         }
       }
     }
     
-    if (insufficientResources.length > 0) {
+    // Only show warning if we're not auto-producing and there are insufficient resources
+    if (!formData.autoProduceSemiFinals && insufficientResources.length > 0) {
       const warningMessage = insufficientResources.map(res => 
         `${res.name}: требуется ${res.required.toFixed(2)} ${res.unit}, доступно ${res.available.toFixed(2)} ${res.unit}`
       ).join('\n');
@@ -127,6 +135,7 @@ export const useProductionForm = ({
       quantity: formData.quantity,
       date: formData.date,
       cost: estimatedCost,
+      autoProduceSemiFinals: formData.autoProduceSemiFinals
     });
     
     toast.success('Запись о производстве добавлена');

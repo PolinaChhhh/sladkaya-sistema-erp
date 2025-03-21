@@ -57,46 +57,63 @@ export const createProduction = (
       for (const item of recipe.items) {
         if (item.type === 'recipe' && item.recipeId) {
           const requiredAmount = item.amount * productionRatio;
+          const semiFinalRecipe = recipes.find(r => r.id === item.recipeId);
           
-          // Calculate cost for the semi-finished ingredient
-          // Use FIFO method to calculate cost based on previous productions
-          const semiFinalProductions = recipes
-            .filter(r => r.id === item.recipeId)
-            .map(() => {
-              // Get all productions for this semi-finished product
-              return recipes
-                .filter(r => r.id === item.recipeId)
-                .flatMap(() => {
-                  // Get all productions for this recipe, sorted by date (oldest first)
-                  return recipes
-                    .filter(r => r.id === item.recipeId)
-                    .flatMap(() => {
-                      return recipes
-                        .filter(r => r.id === item.recipeId);
-                    });
-                });
-            })
-            .flat();
-          
-          if (semiFinalProductions.length > 0) {
-            // If we have any productions for this semi-finished product, use their costs
-            // TODO: Implement actual consumption of semi-finished products
-            // This would require tracking inventory of semi-finished products
-            
-            // For now, just add a calculated cost
-            const semiFinishedCost = calculateSemiFinalCost(
-              item.recipeId,
-              requiredAmount,
-              recipes
-            );
-            
-            totalCost += semiFinishedCost;
+          if (semiFinalRecipe) {
+            // Auto-produce semi-finals if the option is enabled
+            if (production.autoProduceSemiFinals) {
+              // Calculate how many batches of semi-final we need to produce
+              const semiFinalQuantityNeeded = requiredAmount;
+              
+              // Create a new production batch for this semi-final
+              const semiFinalProduction: Omit<ProductionBatch, 'id'> = {
+                recipeId: item.recipeId,
+                quantity: semiFinalQuantityNeeded,
+                date: production.date, // Use the same date
+                cost: 0, // This will be calculated in the recursive call
+              };
+              
+              // Recursively call createProduction to produce the semi-final
+              const semiFinalBatch = createProduction(
+                semiFinalProduction,
+                recipes,
+                ingredients,
+                receipts,
+                updateIngredient,
+                updateReceiptItem,
+                updateRecipe
+              );
+              
+              if (semiFinalBatch) {
+                // If successfully produced, add its cost to the total
+                totalCost += semiFinalBatch.cost;
+              } else {
+                console.error(`Failed to auto-produce semi-final: ${semiFinalRecipe.name}`);
+                // If auto-production fails, we should also fail the main production
+                return null;
+              }
+            } else {
+              // If auto-production is disabled, calculate cost from existing semi-finals
+              const semiFinishedCost = calculateSemiFinalCost(
+                item.recipeId,
+                requiredAmount,
+                recipes
+              );
+              
+              totalCost += semiFinishedCost;
+            }
           }
         } else if (item.type === 'ingredient' && item.ingredientId) {
           // If a finished product also uses raw ingredients directly
           const ingredient = ingredients.find(i => i.id === item.ingredientId);
           if (ingredient) {
             const requiredAmount = item.amount * productionRatio;
+            
+            // Check if we have enough of the ingredient
+            if (ingredient.quantity < requiredAmount) {
+              console.error(`Insufficient ingredient: ${ingredient.name}`);
+              return null; // Don't add production if insufficient ingredients
+            }
             
             // Reduce the ingredient quantity
             updateIngredient(ingredient.id, {

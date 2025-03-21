@@ -33,4 +33,5 @@ export type ProductionBatch = {
   quantity: number;
   date: string;
   cost: number;
+  autoProduceSemiFinals?: boolean;
 };
