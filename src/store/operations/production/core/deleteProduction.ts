@@ -1,7 +1,7 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
 import { restoreIngredientsToReceipts } from '../../../utils/fifo/restoreIngredients';
-import { restoreSemiFinalProductsWithFifo } from '../../../utils/fifo/restoreSemiFinals';
+import { restoreSemiFinalProducts } from '../../../utils/semiFinalProductUtils';
 
 /**
  * Handles deleting a production batch
@@ -16,32 +16,32 @@ export const handleDeleteProduction = (
   updateReceiptItem: (receiptId: string, itemId: string, data: Partial<any>) => void,
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void
 ): void => {
-  const production = productions.find(p => p.id === id);
+  const productionToDelete = productions.find(p => p.id === id);
   
-  if (!production) {
+  if (!productionToDelete) {
     console.error('Production not found');
     return;
   }
   
-  const recipe = recipes.find(r => r.id === production.recipeId);
+  const recipe = recipes.find(r => r.id === productionToDelete.recipeId);
   
   if (recipe) {
-    // Restore ingredients to receipts
+    // Restore ingredients back to receipts
     restoreIngredientsToReceipts(
       recipe,
-      production.quantity,
+      productionToDelete.quantity,
       ingredients,
       receipts,
       updateIngredient,
       updateReceiptItem
     );
     
-    // Restore semi-finished products using FIFO details if available
-    restoreSemiFinalProductsWithFifo(
+    // Restore semi-finished products
+    restoreSemiFinalProducts(
       recipe,
-      production.quantity,
+      productionToDelete.quantity,
+      recipes,
       productions,
-      production.semiFinalConsumptionDetails,
       updateProduction
     );
   }
