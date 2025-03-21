@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch } from '@/store/types';
 import { useProductionForm } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionUtils } from './useProductionUtils';
-import { calculateCostWithFIFO } from '../utils/fifoCalculator';
+import { calculateTotalProductionCost } from '../utils/productionCalculator';
 import { toast } from 'sonner';
 
 export const useProductionState = () => {
@@ -22,9 +23,16 @@ export const useProductionState = () => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
   
-  // Cost calculation function using the FIFO utility
+  // Cost calculation function using both FIFO utility and semi-finished products cost
   const calculateCost = (recipeId: string, quantity: number): number => {
-    return calculateCostWithFIFO(recipeId, quantity, recipes, ingredients, receipts);
+    return calculateTotalProductionCost(
+      recipeId, 
+      quantity, 
+      recipes, 
+      ingredients, 
+      receipts, 
+      productions
+    );
   };
   
   // Hook for form state and handling

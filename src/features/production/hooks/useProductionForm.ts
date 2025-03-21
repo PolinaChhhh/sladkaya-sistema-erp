@@ -40,27 +40,34 @@ export const useProductionForm = ({
   const handleCreateProduction = () => {
     if (!formData.recipeId) {
       toast.error('Выберите рецепт');
-      return;
+      return false;
     }
     
     if (formData.quantity <= 0) {
       toast.error('Количество должно быть больше 0');
-      return;
+      return false;
     }
     
-    // Check if we have enough ingredients for production
+    // Get the recipe
     const recipe = recipes.find(r => r.id === formData.recipeId);
-    if (recipe) {
-      const productionRatio = formData.quantity / recipe.output;
-      let insufficientIngredients = [];
-      
+    if (!recipe) {
+      toast.error('Рецепт не найден');
+      return false;
+    }
+    
+    const productionRatio = formData.quantity / recipe.output;
+    let insufficientResources = [];
+    
+    // Process differently based on recipe category
+    if (recipe.category === 'semi-finished') {
+      // For semi-finished products, check ingredient availability
       for (const item of recipe.items) {
         if (item.type === 'ingredient' && item.ingredientId) {
           const ingredient = ingredients.find(i => i.id === item.ingredientId);
           if (ingredient) {
             const requiredAmount = item.amount * productionRatio;
             if (ingredient.quantity < requiredAmount) {
-              insufficientIngredients.push({
+              insufficientResources.push({
                 name: ingredient.name,
                 required: requiredAmount,
                 available: ingredient.quantity,
@@ -70,26 +77,48 @@ export const useProductionForm = ({
           }
         }
       }
-      
-      if (insufficientIngredients.length > 0) {
-        const warningMessage = insufficientIngredients.map(ing => 
-          `${ing.name}: требуется ${ing.required.toFixed(2)} ${ing.unit}, доступно ${ing.available.toFixed(2)} ${ing.unit}`
-        ).join('\n');
-        
-        toast.error(`Недостаточно ингредиентов:\n${warningMessage}`);
-        return;
+    } else if (recipe.category === 'finished') {
+      // For finished products, check semi-finished product availability
+      for (const item of recipe.items) {
+        if (item.type === 'recipe' && item.recipeId) {
+          const semiFinalRecipe = recipes.find(r => r.id === item.recipeId);
+          if (semiFinalRecipe) {
+            // Calculate how much of this semi-finished product we need
+            const requiredAmount = item.amount * productionRatio;
+            
+            // Calculate how much of this semi-finished product we have in stock
+            const availableAmount = calculateAvailableSemiFinalQuantity(item.recipeId, recipes);
+            
+            if (availableAmount < requiredAmount) {
+              insufficientResources.push({
+                name: semiFinalRecipe.name,
+                required: requiredAmount,
+                available: availableAmount,
+                unit: semiFinalRecipe.outputUnit
+              });
+            }
+          }
+        }
       }
     }
     
-    // The cost will be calculated in the store using FIFO
-    // This is just an estimate for display
+    if (insufficientResources.length > 0) {
+      const warningMessage = insufficientResources.map(res => 
+        `${res.name}: требуется ${res.required.toFixed(2)} ${res.unit}, доступно ${res.available.toFixed(2)} ${res.unit}`
+      ).join('\n');
+      
+      toast.error(`Недостаточно ресурсов:\n${warningMessage}`);
+      return false;
+    }
+    
+    // The cost will be calculated in the store
     const estimatedCost = calculateCost(formData.recipeId, formData.quantity);
     
     addProduction({
       recipeId: formData.recipeId,
       quantity: formData.quantity,
       date: formData.date,
-      cost: estimatedCost, // The actual cost will be recalculated in the store using FIFO
+      cost: estimatedCost,
     });
     
     toast.success('Запись о производстве добавлена');
@@ -104,18 +133,30 @@ export const useProductionForm = ({
       return false;
     }
     
-    // The cost will be recalculated in the store based on FIFO
-    // This is just an estimate for display
+    // The cost will be recalculated in the store
     const estimatedCost = calculateCost(selectedProduction.recipeId, editFormData.quantity);
     
     updateProduction(selectedProduction.id, {
       quantity: editFormData.quantity,
       date: editFormData.date,
-      cost: estimatedCost, // The actual cost will be recalculated in the store using FIFO
+      cost: estimatedCost,
     });
     
     toast.success('Запись о производстве обновлена');
     return true;
+  };
+
+  // Helper function to calculate available semi-final quantity
+  const calculateAvailableSemiFinalQuantity = (recipeId: string, allRecipes: Recipe[]): number => {
+    const semiFinalProductions = recipes
+      .filter(r => r.id === recipeId)
+      .map(recipe => {
+        // Here you would get the total produced amount minus any consumed amount
+        // For simplicity, you can start with just a placeholder
+        return 10; // This should be calculated properly from production history
+      });
+    
+    return semiFinalProductions.length > 0 ? semiFinalProductions[0] : 0;
   };
 
   return {

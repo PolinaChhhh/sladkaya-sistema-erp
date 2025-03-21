@@ -1,4 +1,3 @@
-
 import { Recipe, Ingredient, Receipt, ReceiptItem } from '@/store/types';
 import { getFifoReceiptItems } from '@/store/utils/fifoCalculator';
 

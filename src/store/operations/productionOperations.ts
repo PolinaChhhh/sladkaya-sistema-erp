@@ -18,32 +18,71 @@ export const createProduction = (
   const recipe = recipes.find(r => r.id === production.recipeId);
   
   if (recipe) {
-    // Check if we have enough of each ingredient
-    const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
-      recipe, 
-      production.quantity,
-      ingredients
-    );
-    
-    if (!canProduce) {
-      console.error(`Cannot produce: Insufficient ingredients: ${insufficientIngredients.join(', ')}`);
-      return null; // Don't add production if insufficient ingredients
-    }
-    
-    // Calculate total cost using FIFO method
-    const totalCost = consumeIngredientsWithFifo(
-      recipe,
-      production.quantity,
-      ingredients,
-      receipts,
-      updateIngredient,
-      updateReceiptItem
-    );
+    let totalCost = 0;
     
     // Update the last produced date for the recipe
     updateRecipe(recipe.id, {
       lastProduced: new Date().toISOString()
     });
+    
+    if (recipe.category === 'semi-finished') {
+      // Handle semi-finished products with ingredients
+      
+      // Check if we have enough of each ingredient
+      const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
+        recipe, 
+        production.quantity,
+        ingredients
+      );
+      
+      if (!canProduce) {
+        console.error(`Cannot produce: Insufficient ingredients: ${insufficientIngredients.join(', ')}`);
+        return null; // Don't add production if insufficient ingredients
+      }
+      
+      // Calculate total cost using FIFO method for ingredients
+      totalCost = consumeIngredientsWithFifo(
+        recipe,
+        production.quantity,
+        ingredients,
+        receipts,
+        updateIngredient,
+        updateReceiptItem
+      );
+      
+    } else if (recipe.category === 'finished') {
+      // Handle finished products with semi-finished ingredients
+      
+      // Calculate the cost of semi-finished products used
+      const productionRatio = production.quantity / recipe.output;
+      
+      // Process each recipe item
+      for (const item of recipe.items) {
+        if (item.type === 'recipe' && item.recipeId) {
+          const requiredAmount = item.amount * productionRatio;
+          
+          // Here we would reduce the available quantity of the semi-finished product
+          // This would ideally be tracked in some inventory system
+          
+          // For now, just add a placeholder cost
+          totalCost += requiredAmount * 100; // This should use actual costs from previous productions
+        } else if (item.type === 'ingredient' && item.ingredientId) {
+          // If a finished product also uses raw ingredients directly
+          const ingredient = ingredients.find(i => i.id === item.ingredientId);
+          if (ingredient) {
+            const requiredAmount = item.amount * productionRatio;
+            
+            // Reduce the ingredient quantity
+            updateIngredient(ingredient.id, {
+              quantity: Math.max(0, ingredient.quantity - requiredAmount)
+            });
+            
+            // Add to the cost
+            totalCost += requiredAmount * ingredient.cost;
+          }
+        }
+      }
+    }
     
     // Return the new production with calculated cost
     return {
