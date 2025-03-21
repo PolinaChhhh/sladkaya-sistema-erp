@@ -1,5 +1,6 @@
 
-import { useStore, Receipt } from '@/store/recipeStore';
+import { useStore } from '@/store/recipeStore';
+import { Receipt } from '@/store/types';
 import { format } from 'date-fns';
 
 export const useReceiptDetails = (receipt: Receipt) => {
