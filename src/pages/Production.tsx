@@ -3,7 +3,7 @@ import React from 'react';
 import { useProductionPage } from '@/features/production/hooks/useProductionPage';
 import ProductionList from '@/features/production/components/ProductionList';
 import ProductionHeader from '@/features/production/components/ProductionHeader';
-import ProductionDialogManager from '@/features/production/components/ProductionDialogManager';
+import ProductionDialogs from '@/features/production/components/ProductionDialogs';
 
 const Production = () => {
   const {
@@ -56,7 +56,7 @@ const Production = () => {
         onViewDetails={openDetailDialog}
       />
       
-      <ProductionDialogManager
+      <ProductionDialogs 
         // Create dialog props
         isCreateDialogOpen={isCreateDialogOpen}
         setIsCreateDialogOpen={setIsCreateDialogOpen}
@@ -79,7 +79,9 @@ const Production = () => {
         
         // Detail dialog props
         isDetailDialogOpen={isDetailDialogOpen}
-        setIsDetailDialogOpen={setIsDetailDialogOpen}
+        closeDetailDialog={() => setIsDetailDialogOpen(false)}
+        detailProduction={selectedProduction}
+        selectedRecipe={getSelectedRecipe()}
         
         // Utility functions
         calculateCost={calculateCost}
@@ -88,7 +90,6 @@ const Production = () => {
         getIngredientDetails={getIngredientDetails}
         getIngredientUsageDetails={getIngredientUsageDetails}
         getSemiFinalBreakdown={getSemiFinalBreakdown}
-        getSelectedRecipe={getSelectedRecipe}
       />
     </div>
   );
