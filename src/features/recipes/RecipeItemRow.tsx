@@ -33,7 +33,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   onRemove,
 }) => {
   const selectedType = item.type || 'ingredient';
-  const selectedId = item.ingredientId || item.recipeId || '';
+  const selectedId = selectedType === 'ingredient' ? item.ingredientId || '' : item.recipeId || '';
   
   const handleTypeChange = (type: string) => {
     // Reset the ID when changing type
@@ -64,6 +64,12 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
     }
     return '';
   };
+
+  // Debug logs to see what's happening
+  console.log('RecipeItemRow - item:', item);
+  console.log('RecipeItemRow - selectedType:', selectedType);
+  console.log('RecipeItemRow - selectedId:', selectedId);
+  console.log('RecipeItemRow - recipes available:', recipes);
 
   return (
     <div className="bg-gray-50 p-3 rounded-md">

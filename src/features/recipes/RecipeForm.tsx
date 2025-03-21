@@ -66,16 +66,31 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       return;
     }
     
+    // Default type based on what's available
+    const defaultType = ingredients.length > 0 ? 'ingredient' : 'recipe';
+    const defaultId = defaultType === 'ingredient' && ingredients.length > 0 ? 
+      ingredients[0].id : 
+      (defaultType === 'recipe' && availableRecipes.length > 0 ? availableRecipes[0].id : '');
+    
+    // Create a properly typed new item
+    const newItem: RecipeItem = defaultType === 'ingredient' 
+      ? { type: 'ingredient', ingredientId: defaultId, amount: 0 }
+      : { type: 'recipe', recipeId: defaultId, amount: 0 };
+    
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { type: 'ingredient', ingredientId: "", amount: 0 }],
+      items: [...prev.items, newItem],
     }));
+    
+    console.log('Added new recipe item:', newItem);
   };
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
     const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [field]: value };
     setFormData({ ...formData, items: newItems });
+    
+    console.log('Updated recipe item:', index, field, value, newItems[index]);
   };
   
   const removeRecipeItem = (index: number) => {
@@ -133,6 +148,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       lossPercentage: calculatedLossPercentage
     }));
   }, [calculatedLossPercentage, setFormData]);
+
+  // Debug logging for form data
+  console.log('RecipeForm - formData:', formData);
+  console.log('RecipeForm - availableRecipes:', availableRecipes);
 
   return (
     <DialogContent className="sm:max-w-lg">
