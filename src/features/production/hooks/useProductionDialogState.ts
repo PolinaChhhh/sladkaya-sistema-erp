@@ -1,45 +1,37 @@
 
-import { useCallback } from 'react';
+import { useState } from 'react';
 import { ProductionBatch } from '@/store/types';
-import { useProductionDialogs } from './useProductionDialogs';
-import { useProductionActions } from './useProductionActions';
 
-export const useProductionDialogState = (
-  handleCreateProduction: () => boolean,
-  handleEditProduction: (production: ProductionBatch | null) => boolean,
-  deleteProduction: (id: string) => void,
-  formData: any,
-  editFormData: any
-) => {
-  const {
-    isCreateDialogOpen,
-    setIsCreateDialogOpen,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    isDeleteDialogOpen,
-    setIsDeleteDialogOpen,
-    selectedProduction,
-    setSelectedProduction,
-    openEditDialog,
-    openDeleteDialog
-  } = useProductionDialogs();
+export const useProductionDialogState = () => {
+  // Dialog states
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   
-  const { 
-    onCreateProduction,
-    onEditProduction,
-    onDeleteProduction
-  } = useProductionActions(
-    handleCreateProduction,
-    handleEditProduction,
-    deleteProduction,
-    setIsCreateDialogOpen,
-    setIsEditDialogOpen,
-    setIsDeleteDialogOpen,
-    selectedProduction,
-    formData,
-    editFormData
-  );
+  // Selected production state
+  const [selectedProduction, setSelectedProduction] = useState<ProductionBatch | null>(null);
   
+  // Dialog handlers
+  const openCreateDialog = () => {
+    setIsCreateDialogOpen(true);
+  };
+  
+  const openEditDialog = (production: ProductionBatch) => {
+    setSelectedProduction(production);
+    setIsEditDialogOpen(true);
+  };
+  
+  const openDeleteDialog = (production: ProductionBatch) => {
+    setSelectedProduction(production);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const openDetailDialog = (production: ProductionBatch) => {
+    setSelectedProduction(production);
+    setIsDetailDialogOpen(true);
+  };
+
   return {
     isCreateDialogOpen,
     setIsCreateDialogOpen,
@@ -47,11 +39,12 @@ export const useProductionDialogState = (
     setIsEditDialogOpen,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
+    isDetailDialogOpen,
+    setIsDetailDialogOpen,
     selectedProduction,
+    openCreateDialog,
     openEditDialog,
     openDeleteDialog,
-    handleCreateProduction: onCreateProduction,
-    handleEditProduction: onEditProduction,
-    handleDeleteProduction: onDeleteProduction
+    openDetailDialog
   };
 };
