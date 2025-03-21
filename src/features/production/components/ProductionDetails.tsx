@@ -58,16 +58,15 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
   const semiFinalBreakdown = getSemiFinalBreakdown(recipe.id, production.quantity);
   
   // Calculate the ingredient cost and semi-finished cost separately for display
-  const ingredientCost = ingredientDetails.reduce((sum, item) => sum + item.cost, 0);
+  const ingredientCost = usageDetails.reduce((sum, item) => sum + item.totalCost, 0);
   const semiFinalCost = semiFinalBreakdown.reduce((sum, item) => sum + item.cost, 0);
   
   // Calculate the total cost as the sum of ingredient and semi-finished costs
   const totalIngredientCosts = ingredientCost + semiFinalCost;
   
-  // Use the calculated total or fallback to the production.cost
-  const totalCost = calculateTotalCost 
-    ? calculateTotalCost(recipe.id, production.quantity)
-    : totalIngredientCosts || production.cost;
+  // Use the actual production cost from the production record
+  // which was correctly calculated using FIFO during creation
+  const totalCost = production.cost;
   
   return (
     <DialogContent className="sm:max-w-4xl">

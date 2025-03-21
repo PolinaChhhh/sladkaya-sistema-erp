@@ -21,8 +21,9 @@ const ProductionOverview: React.FC<ProductionOverviewProps> = ({
   totalIngredientCosts,
   totalCost
 }) => {
-  // Calculate unit cost
-  const unitCost = production.quantity > 0 ? totalCost / production.quantity : 0;
+  // Calculate unit cost based on actual production cost, not estimated
+  // This ensures we use the true FIFO-based cost
+  const unitCost = production.quantity > 0 ? production.cost / production.quantity : 0;
 
   return (
     <div className="glass rounded-md overflow-hidden">
@@ -65,7 +66,7 @@ const ProductionOverview: React.FC<ProductionOverviewProps> = ({
           </TableRow>
           <TableRow>
             <TableCell className="font-medium">Общая себестоимость</TableCell>
-            <TableCell>{totalCost.toFixed(2)} ₽</TableCell>
+            <TableCell>{production.cost.toFixed(2)} ₽</TableCell>
           </TableRow>
         </TableBody>
       </Table>

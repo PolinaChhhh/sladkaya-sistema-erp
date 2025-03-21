@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe } from '@/store/types';
@@ -115,8 +116,6 @@ export const useProductionPage = () => {
   };
   
   const getSemiFinalBreakdownWrapped = (recipeId: string, quantity: number) => {
-    // Fix the type error by passing receipts instead of productions
-    // The function expects Recipe[], Ingredient[], Receipt[], ProductionBatch[] in that order
     return getSemiFinalBreakdown(
       recipeId, 
       quantity, 
