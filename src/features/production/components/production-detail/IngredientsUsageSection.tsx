@@ -80,21 +80,54 @@ const IngredientsUsageSection: React.FC<IngredientsUsageSectionProps> = ({
                       Расход по партиям (FIFO):
                     </div>
                     <div className="space-y-2">
-                      {usage.fifoDetails.map((detail, idx) => (
-                        <div key={idx} className="flex justify-between text-sm border-b pb-1 last:border-b-0">
-                          <div>
-                            <span className="text-gray-600">
-                              {detail.receiptDate}
-                              {detail.reference && ` (${detail.reference})`}
-                            </span>
-                          </div>
-                          <div className="flex gap-6">
-                            <span>{detail.amount.toFixed(2)} {usage.unit}</span>
-                            <span>× {detail.unitPrice.toFixed(2)} ₽</span>
-                            <span className="font-medium">{detail.totalCost.toFixed(2)} ₽</span>
-                          </div>
-                        </div>
-                      ))}
+                      {usage.fifoDetails.length > 0 ? (
+                        <table className="w-full text-sm border-collapse">
+                          <thead>
+                            <tr className="text-xs text-gray-500">
+                              <th className="text-left pb-1">Дата поступления</th>
+                              <th className="text-right pb-1">№ документа</th>
+                              <th className="text-right pb-1">Количество</th>
+                              <th className="text-right pb-1">Цена закупки</th>
+                              <th className="text-right pb-1">Стоимость</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {usage.fifoDetails.map((detail, idx) => (
+                              <tr key={idx} className="border-b last:border-b-0">
+                                <td className="py-1 text-left">
+                                  {new Date(detail.receiptDate).toLocaleDateString()}
+                                </td>
+                                <td className="py-1 text-right text-gray-600">
+                                  {detail.reference || '—'}
+                                </td>
+                                <td className="py-1 text-right">
+                                  {detail.amount.toFixed(2)} {usage.unit}
+                                </td>
+                                <td className="py-1 text-right">
+                                  {detail.unitPrice.toFixed(2)} ₽/{usage.unit}
+                                </td>
+                                <td className="py-1 text-right font-medium">
+                                  {detail.totalCost.toFixed(2)} ₽
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="border-t">
+                              <td colSpan={4} className="pt-1 text-right font-medium">
+                                Итого:
+                              </td>
+                              <td className="pt-1 text-right font-bold">
+                                {usage.cost.toFixed(2)} ₽
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      ) : (
+                        <p className="text-gray-500 italic text-sm">
+                          Нет данных о закупках для этого ингредиента
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
