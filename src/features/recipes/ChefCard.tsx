@@ -51,180 +51,172 @@ const ChefCard: React.FC<ChefCardProps> = ({
   
   return (
     <div className="max-w-4xl mx-auto my-8 animate-scale-in">
-      {/* Cover image and header */}
-      <div className="relative rounded-t-xl overflow-hidden h-64 bg-gradient-to-r from-cream-50 to-confection-50">
-        <img 
-          src={recipe.imageUrl || placeholderImage} 
-          alt={recipe.name}
-          className="w-full h-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-        
-        <div className="absolute bottom-0 left-0 p-6 flex w-full justify-between items-end">
-          <div>
-            <div className="flex items-center mb-2 gap-2">
-              <div className="bg-white/90 p-2 rounded-full">
-                <ChefHat className="h-6 w-6 text-confection-600" />
-              </div>
-              <Badge variant="outline" className="bg-white/80 text-xs font-normal">
+      <div className="bg-white rounded-xl p-6 shadow-md">
+        {/* Header with title and edit button */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-confection-100 p-2 rounded-full">
+              <ChefHat className="h-6 w-6 text-confection-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-playfair text-gray-800 font-bold">{recipe.name}</h1>
+              <Badge variant="outline" className="bg-white/80 text-xs font-normal mt-1">
                 {recipe.category === 'finished' ? 'Готовая продукция' : 'Полуфабрикат'}
               </Badge>
             </div>
-            <h1 className="text-3xl font-playfair text-white font-bold">{recipe.name}</h1>
           </div>
           
           {onEdit && (
             <Button 
               onClick={() => onEdit(recipe)} 
               variant="outline" 
-              size="sm" 
-              className="bg-white/90 hover:bg-white"
+              size="sm"
             >
               <Edit className="mr-2 h-4 w-4" />
               Редактировать
             </Button>
           )}
         </div>
-      </div>
-      
-      <div className="grid md:grid-cols-3 gap-6 p-6 bg-white rounded-b-xl shadow-md">
-        {/* Left column: Ingredients and Recipe Image */}
-        <div className="md:col-span-1">
-          {/* Recipe Image - Circular Format */}
-          <div className="flex justify-center mb-6">
-            <Avatar className="h-32 w-32 border-4 border-cream-100">
-              <AvatarImage 
-                src={recipe.imageUrl || placeholderImage} 
-                alt={recipe.name} 
-                className="object-cover"
-              />
-              <AvatarFallback className="text-xl font-playfair text-confection-500">
-                {recipe.name.substring(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          
-          <div className="mb-6">
-            <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
-              <Scale className="h-5 w-5 text-confection-500" />
-              Выход продукта
-            </h2>
-            <div className="bg-cream-50 p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Количество:</span>
-                <span className="font-medium">{recipe.output} {recipe.outputUnit}</span>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Left column: Ingredients and Recipe Image */}
+          <div className="md:col-span-1">
+            {/* Recipe Image - Larger Circular Format */}
+            <div className="flex justify-center mb-6">
+              <Avatar className="h-48 w-48 border-4 border-cream-100">
+                <AvatarImage 
+                  src={recipe.imageUrl || placeholderImage} 
+                  alt={recipe.name} 
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-3xl font-playfair text-confection-500">
+                  {recipe.name.substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
+                <Scale className="h-5 w-5 text-confection-500" />
+                Выход продукта
+              </h2>
+              <div className="bg-cream-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Количество:</span>
+                  <span className="font-medium">{recipe.output} {recipe.outputUnit}</span>
+                </div>
+                
+                {recipe.lossPercentage > 0 && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-gray-600 flex items-center">
+                      <PercentCircle className="h-4 w-4 text-amber-500 mr-1" /> 
+                      Потери:
+                    </span>
+                    <span className="font-medium">{recipe.lossPercentage}%</span>
+                  </div>
+                )}
               </div>
+            </div>
+            
+            <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
+              <UtensilsCrossed className="h-5 w-5 text-confection-500" />
+              Ингредиенты
+            </h2>
+            
+            <div className="space-y-5">
+              {ingredients.length > 0 && (
+                <div className="bg-cream-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">Основные ингредиенты</h3>
+                  <ul className="space-y-2 divide-y divide-cream-200">
+                    {ingredients.map((item, idx) => (
+                      <li key={`ing-${idx}`} className="pt-2 first:pt-0">
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">{getIngredientName(item.ingredientId || '')}</span>
+                          <span className="font-medium">
+                            {item.amount.toFixed(2)} {getIngredientUnit(item.ingredientId || '')}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               
-              {recipe.lossPercentage > 0 && (
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600 flex items-center">
-                    <PercentCircle className="h-4 w-4 text-amber-500 mr-1" /> 
-                    Потери:
-                  </span>
-                  <span className="font-medium">{recipe.lossPercentage}%</span>
+              {semiFinished.length > 0 && (
+                <div className="bg-mint-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">Полуфабрикаты</h3>
+                  <ul className="space-y-2 divide-y divide-mint-200">
+                    {semiFinished.map((item, idx) => (
+                      <li key={`semi-${idx}`} className="pt-2 first:pt-0">
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">{getRecipeName(item.recipeId || '')}</span>
+                          <span className="font-medium">
+                            {item.amount.toFixed(2)} {getRecipeUnit(item.recipeId || '')}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {recipe.tags && recipe.tags.length > 0 && (
+                <div className="mt-4">
+                  <div className="flex flex-wrap gap-1">
+                    {recipe.tags.map(tag => (
+                      <Badge 
+                        key={tag.id}
+                        className="text-xs font-normal text-white"
+                        style={{ backgroundColor: tag.color }}
+                      >
+                        {tag.name}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
           
-          <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
-            <UtensilsCrossed className="h-5 w-5 text-confection-500" />
-            Ингредиенты
-          </h2>
-          
-          <div className="space-y-5">
-            {ingredients.length > 0 && (
-              <div className="bg-cream-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Основные ингредиенты</h3>
-                <ul className="space-y-2 divide-y divide-cream-200">
-                  {ingredients.map((item, idx) => (
-                    <li key={`ing-${idx}`} className="pt-2 first:pt-0">
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">{getIngredientName(item.ingredientId || '')}</span>
-                        <span className="font-medium">
-                          {item.amount} {getIngredientUnit(item.ingredientId || '')}
-                        </span>
+          {/* Right column: Process and image */}
+          <div className="md:col-span-2">
+            <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
+              <Clock className="h-5 w-5 text-confection-500" />
+              Технологический процесс
+            </h2>
+            
+            <div className="bg-white border border-gray-100 rounded-lg p-5 mb-6 shadow-sm">
+              {processSteps.length > 0 ? (
+                <ol className="space-y-4">
+                  {processSteps.map((step, index) => (
+                    <li key={index} className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-confection-100 text-confection-600 flex items-center justify-center font-medium text-sm">
+                        {index + 1}
                       </div>
+                      <div 
+                        className="text-gray-700"
+                        dangerouslySetInnerHTML={{ 
+                          __html: highlightProcessText(step) 
+                        }}
+                      />
                     </li>
                   ))}
-                </ul>
-              </div>
-            )}
+                </ol>
+              ) : (
+                <p className="text-gray-400 italic text-center py-6">
+                  Технологический процесс не описан
+                </p>
+              )}
+            </div>
             
-            {semiFinished.length > 0 && (
-              <div className="bg-mint-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Полуфабрикаты</h3>
-                <ul className="space-y-2 divide-y divide-mint-200">
-                  {semiFinished.map((item, idx) => (
-                    <li key={`semi-${idx}`} className="pt-2 first:pt-0">
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">{getRecipeName(item.recipeId || '')}</span>
-                        <span className="font-medium">
-                          {item.amount} {getRecipeUnit(item.recipeId || '')}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="mt-4">
-                <div className="flex flex-wrap gap-1">
-                  {recipe.tags.map(tag => (
-                    <Badge 
-                      key={tag.id}
-                      className="text-xs font-normal text-white"
-                      style={{ backgroundColor: tag.color }}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Right column: Process and image */}
-        <div className="md:col-span-2">
-          <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-gray-800">
-            <Clock className="h-5 w-5 text-confection-500" />
-            Технологический процесс
-          </h2>
-          
-          <div className="bg-white border border-gray-100 rounded-lg p-5 mb-6 shadow-sm">
-            {processSteps.length > 0 ? (
-              <ol className="space-y-4">
-                {processSteps.map((step, index) => (
-                  <li key={index} className="flex gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-confection-100 text-confection-600 flex items-center justify-center font-medium text-sm">
-                      {index + 1}
-                    </div>
-                    <div 
-                      className="text-gray-700"
-                      dangerouslySetInnerHTML={{ 
-                        __html: highlightProcessText(step) 
-                      }}
-                    />
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="text-gray-400 italic text-center py-6">
-                Технологический процесс не описан
-              </p>
-            )}
-          </div>
-          
-          <div className="text-right">
-            <Button 
-              className="bg-confection-600 hover:bg-confection-700"
-            >
-              Добавить в производство
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="text-right">
+              <Button 
+                className="bg-confection-600 hover:bg-confection-700"
+              >
+                Добавить в производство
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
