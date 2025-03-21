@@ -48,9 +48,11 @@ export const restoreSemiFinalProductsWithFifo = (
             return; // Skip this production but continue with others
           }
           
-          // Update the available quantity of the semi-final production
+          // Update the quantity of the semi-final production
+          // We're using the 'quantity' property which exists in ProductionBatch
+          // instead of 'availableQuantity' which doesn't exist
           updateProduction(productionId, {
-            availableQuantity: (semiFinalProduction.availableQuantity || 0) + amount
+            quantity: semiFinalProduction.quantity + amount
           });
           
           console.log(`Restored ${amount} to semi-final production ${productionId}`);
