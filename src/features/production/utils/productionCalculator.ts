@@ -129,11 +129,10 @@ export const calculateRawIngredientsCost = (
         costForIngredient += remainingToConsume * ingredient.cost;
       }
       
-      // Include cost for this ingredient (both regular and packaging materials)
+      // Include cost for this ingredient
       totalCost += costForIngredient;
       
-      // Log for debugging
-      console.log(`Ingredient ${ingredient.name}: amount=${amountNeeded}, cost=${costForIngredient}, isPackaging=${item.isPackaging}`);
+      console.log(`Ingredient ${ingredient.name}: amount=${amountNeeded}, cost=${costForIngredient.toFixed(2)}, unit=${ingredient.unit}`);
     }
   });
   

@@ -52,6 +52,7 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   // Check if the selected recipe is a finished product to show the auto-produce option
   const selectedRecipe = recipes.find(r => r.id === formData.recipeId);
   const isFinishedProduct = selectedRecipe?.category === 'finished';
+  const outputUnit = formData.recipeId ? getRecipeOutput(formData.recipeId) : '';
 
   // Calculate the estimated cost
   const estimatedCost = (formData.recipeId && formData.quantity > 0) 
@@ -126,7 +127,7 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
             />
             {formData.recipeId && formData.recipeId !== '_placeholder' && formData.recipeId !== '_semi_header' && formData.recipeId !== '_finished_header' && (
               <p className="text-xs text-gray-500">
-                Единица измерения: {getRecipeOutput(formData.recipeId)}
+                Единица измерения: {outputUnit}
               </p>
             )}
           </div>
@@ -164,7 +165,7 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
               </p>
               <p className="text-sm text-gray-600">
                 Себестоимость за единицу: <span className="font-medium">
-                  {unitCost.toFixed(2)} ₽/{getRecipeOutput(formData.recipeId)}
+                  {unitCost.toFixed(2)} ₽/{outputUnit}
                 </span>
               </p>
             </div>
