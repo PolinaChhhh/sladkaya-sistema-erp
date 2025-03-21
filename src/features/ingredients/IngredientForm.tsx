@@ -11,6 +11,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { 
+  Form,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormField,
+  FormDescription,
+  FormMessage 
+} from '@/components/ui/form';
 
 interface IngredientFormData {
   name: string;
@@ -18,6 +27,8 @@ interface IngredientFormData {
   cost: number;
   quantity: number;
   isSemiFinal: boolean;
+  type: string;
+  customType: string;
 }
 
 interface IngredientFormProps {
@@ -27,6 +38,7 @@ interface IngredientFormProps {
   onCancel: () => void;
   onSubmit: () => void;
   submitLabel: string;
+  ingredientTypes: string[];
 }
 
 const IngredientForm: React.FC<IngredientFormProps> = ({
@@ -35,7 +47,8 @@ const IngredientForm: React.FC<IngredientFormProps> = ({
   setFormData,
   onCancel,
   onSubmit,
-  submitLabel
+  submitLabel,
+  ingredientTypes
 }) => {
   return (
     <DialogContent className="sm:max-w-md">
@@ -61,6 +74,38 @@ const IngredientForm: React.FC<IngredientFormProps> = ({
           />
           <Label htmlFor="type-switch">Полуфабрикат</Label>
         </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="ingredient-type">Тип ингредиента</Label>
+          <Select 
+            value={formData.type}
+            onValueChange={(value) => setFormData({ ...formData, type: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Выберите тип ингредиента" />
+            </SelectTrigger>
+            <SelectContent>
+              {ingredientTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Свой тип</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {formData.type === 'custom' && (
+          <div className="grid gap-2">
+            <Label htmlFor="custom-type">Свой тип ингредиента</Label>
+            <Input 
+              id="custom-type" 
+              value={formData.customType}
+              onChange={(e) => setFormData({ ...formData, customType: e.target.value })}
+              placeholder="Введите свой тип ингредиента"
+            />
+          </div>
+        )}
         
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">

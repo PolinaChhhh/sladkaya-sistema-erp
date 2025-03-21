@@ -38,6 +38,7 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Название</TableHead>
+            <TableHead>Категория</TableHead>
             <TableHead>Тип</TableHead>
             <TableHead>Стоимость</TableHead>
             <TableHead>Количество</TableHead>
@@ -57,6 +58,13 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
                 ) : (
                   <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-cream-100 text-cream-800">
                     Ингредиент
+                  </span>
+                )}
+              </TableCell>
+              <TableCell>
+                {ingredient.type && (
+                  <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                    {ingredient.type}
                   </span>
                 )}
               </TableCell>

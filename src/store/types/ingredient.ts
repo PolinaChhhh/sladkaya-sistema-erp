@@ -7,4 +7,5 @@ export type Ingredient = {
   quantity: number;
   lastPurchaseDate: string;
   isSemiFinal: boolean;
+  type: string; // Added type field
 };

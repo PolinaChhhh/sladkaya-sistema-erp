@@ -13,7 +13,11 @@ export const createIngredientSlice: StateCreator<IngredientSlice> = (set) => ({
   ingredients: [],
   
   addIngredient: (ingredient) => set((state) => ({
-    ingredients: [...state.ingredients, { ...ingredient, id: crypto.randomUUID() }]
+    ingredients: [...state.ingredients, { 
+      ...ingredient, 
+      id: crypto.randomUUID(),
+      type: ingredient.type || 'Основной' // Ensure type has a default
+    }]
   })),
   
   updateIngredient: (id, data) => set((state) => ({
