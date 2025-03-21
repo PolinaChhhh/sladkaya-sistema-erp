@@ -52,6 +52,10 @@ const Ingredients = () => {
     return matchesSearch && matchesType;
   });
   
+  // Separate regular ingredients from semi-finished products
+  const regularIngredients = filteredIngredients.filter(ing => !ing.isSemiFinal);
+  const semiFinalIngredients = filteredIngredients.filter(ing => ing.isSemiFinal);
+  
   const initCreateForm = () => {
     setFormData({
       name: '',
@@ -154,14 +158,68 @@ const Ingredients = () => {
         ingredientTypes={allIngredientTypes}
       />
       
-      {filteredIngredients.length > 0 ? (
-        <IngredientTable 
-          ingredients={filteredIngredients} 
-          onEdit={initEditForm} 
-          onDelete={initDeleteConfirm} 
-        />
+      {regularIngredients.length > 0 ? (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Ингредиенты</h2>
+          <IngredientTable 
+            ingredients={regularIngredients} 
+            onEdit={initEditForm} 
+            onDelete={initDeleteConfirm} 
+          />
+        </div>
       ) : (
-        <EmptyState />
+        searchQuery === '' && ingredientTypeFilter === 'all' ? (
+          <EmptyState />
+        ) : (
+          <div className="glass rounded-xl p-6 text-center my-4">
+            <p className="text-gray-500">Нет ингредиентов, соответствующих вашему запросу</p>
+          </div>
+        )
+      )}
+      
+      {semiFinalIngredients.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Полуфабрикаты</h2>
+          <div className="glass rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Название</TableHead>
+                  <TableHead>Количество</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {semiFinalIngredients.map((ingredient) => (
+                  <TableRow key={ingredient.id}>
+                    <TableCell className="font-medium">{ingredient.name}</TableCell>
+                    <TableCell>
+                      <span className={
+                        ingredient.quantity <= 0 
+                          ? "text-red-500 font-medium" 
+                          : ingredient.quantity < 5 
+                            ? "text-orange-500 font-medium"
+                            : ""
+                      }>
+                        {ingredient.quantity} {ingredient.unit}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => initEditForm(ingredient)}>
+                          <Edit className="h-4 w-4 text-gray-500" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => initDeleteConfirm(ingredient)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       )}
       
       {/* Create Ingredient Dialog */}
