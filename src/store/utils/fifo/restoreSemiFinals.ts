@@ -47,11 +47,10 @@ export const restoreSemiFinalProductsWithFifo = (
               console.log(`Decomposing semi-final ${item.name} into original ingredients`);
               
               // Find the recipe for this semi-final
-              const semiFinalRecipeObj = recipes.find(r => r.id === semiFinalRecipeId);
-              if (semiFinalRecipeObj) {
+              if (semiFinalRecipe) {
                 // Restore the ingredients used to create this semi-final
                 restoreIngredientsToReceipts(
-                  semiFinalRecipeObj,
+                  semiFinalRecipe,
                   item.amount,
                   ingredients,
                   receipts,
@@ -142,3 +141,4 @@ export const restoreSemiFinalProductsWithFifo = (
       });
   }
 };
+

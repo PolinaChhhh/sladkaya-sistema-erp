@@ -32,19 +32,26 @@ export const handleDeleteProduction = (
   
   console.log(`Deleting production ${id} of recipe ${recipe.name} (category: ${recipe.category})`);
   
-  // Restore ingredients to receipts
-  restoreIngredientsToReceipts(
-    recipe,
-    production.quantity,
-    ingredients,
-    receipts,
-    updateIngredient,
-    updateReceiptItem
-  );
+  // Check if this is a semi-finished or a finished product
+  const isSemiFinished = recipe.category === 'semi-finished';
+  
+  // Restore ingredients to receipts - but only for semi-finished products
+  // or if the recipe doesn't use any semi-finals
+  if (isSemiFinished || !recipe.items.some(item => item.type === 'recipe')) {
+    console.log(`Restoring ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
+    restoreIngredientsToReceipts(
+      recipe,
+      production.quantity,
+      ingredients,
+      receipts,
+      updateIngredient,
+      updateReceiptItem
+    );
+  }
   
   // If this is a semi-finished product, we want to decompose it to ingredients
   // If it's a finished product, we only want to restore the semi-finished products, not decompose them
-  const shouldDecompose = recipe.category === 'semi-finished';
+  const shouldDecompose = isSemiFinished;
   
   console.log(`Should decompose semi-finals? ${shouldDecompose ? 'Yes' : 'No'} for ${recipe.name}`);
   
