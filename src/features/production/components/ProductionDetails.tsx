@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   DialogContent, 
@@ -9,9 +8,11 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ProductionBatch, Recipe } from '@/store/recipeStore';
 import IngredientsUsageSection from './IngredientsUsageSection';
+import ProductionOverview from './details/ProductionOverview';
+import SemiFinalBreakdown from './details/SemiFinalBreakdown';
+import ProductionDetailsSummary from './details/ProductionDetailsSummary';
 
 interface ProductionDetailsProps {
   production: ProductionBatch;
@@ -68,33 +69,17 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
     ? calculateTotalCost(recipe.id, production.quantity)
     : totalIngredientCosts || production.cost;
   
-  // Calculate unit cost
-  const unitCost = production.quantity > 0 ? totalCost / production.quantity : 0;
-  
   return (
     <DialogContent className="sm:max-w-4xl">
       <DialogHeader>
         <DialogTitle>Детали производства</DialogTitle>
       </DialogHeader>
       
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <span className="text-sm text-gray-500">Продукт:</span>
-          <p className="font-medium">{recipe.name}</p>
-        </div>
-        <div>
-          <span className="text-sm text-gray-500">Дата:</span>
-          <p className="font-medium">{format(new Date(production.date), 'dd.MM.yyyy')}</p>
-        </div>
-        <div>
-          <span className="text-sm text-gray-500">Количество:</span>
-          <p className="font-medium">{production.quantity} {recipe.outputUnit}</p>
-        </div>
-        <div>
-          <span className="text-sm text-gray-500">Себестоимость:</span>
-          <p className="font-medium">{totalCost.toFixed(2)} ₽</p>
-        </div>
-      </div>
+      <ProductionDetailsSummary 
+        production={production} 
+        recipe={recipe} 
+        totalCost={totalCost} 
+      />
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4 w-full">
@@ -106,51 +91,14 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
         </TabsList>
         
         <TabsContent value="overview">
-          <div className="glass rounded-md overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead colSpan={2}>Общая информация</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Продукт</TableCell>
-                  <TableCell>{recipe.name}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Количество</TableCell>
-                  <TableCell>{production.quantity} {recipe.outputUnit}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Дата производства</TableCell>
-                  <TableCell>{format(new Date(production.date), 'dd.MM.yyyy')}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Стоимость ингредиентов</TableCell>
-                  <TableCell>{ingredientCost.toFixed(2)} ₽</TableCell>
-                </TableRow>
-                {semiFinalBreakdown.length > 0 && (
-                  <TableRow>
-                    <TableCell className="font-medium">Стоимость полуфабрикатов</TableCell>
-                    <TableCell>{semiFinalCost.toFixed(2)} ₽</TableCell>
-                  </TableRow>
-                )}
-                <TableRow>
-                  <TableCell className="font-medium">Общая стоимость сырья</TableCell>
-                  <TableCell>{totalIngredientCosts.toFixed(2)} ₽</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Себестоимость единицы</TableCell>
-                  <TableCell>{unitCost.toFixed(2)} ₽/{recipe.outputUnit}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Общая себестоимость</TableCell>
-                  <TableCell>{totalCost.toFixed(2)} ₽</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
+          <ProductionOverview
+            production={production}
+            recipe={recipe}
+            ingredientCost={ingredientCost}
+            semiFinalCost={semiFinalCost}
+            totalIngredientCosts={totalIngredientCosts}
+            totalCost={totalCost}
+          />
         </TabsContent>
         
         <TabsContent value="ingredients">
@@ -159,39 +107,7 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
         
         {semiFinalBreakdown.length > 0 && (
           <TabsContent value="semifinal">
-            <div className="space-y-6">
-              {semiFinalBreakdown.map((semi, index) => (
-                <div key={index} className="glass rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead colSpan={4}>{semi.name} ({semi.quantity} {semi.unit})</TableHead>
-                      </TableRow>
-                      <TableRow>
-                        <TableHead>Ингредиент</TableHead>
-                        <TableHead>Количество</TableHead>
-                        <TableHead>Стоимость за ед.</TableHead>
-                        <TableHead>Общая стоимость</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {semi.ingredients.map((ing, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell>{ing.name}</TableCell>
-                          <TableCell>{ing.amount.toFixed(2)} {ing.unit}</TableCell>
-                          <TableCell>{(ing.cost / ing.amount).toFixed(2)} ₽/{ing.unit}</TableCell>
-                          <TableCell>{ing.cost.toFixed(2)} ₽</TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow>
-                        <TableCell colSpan={3} className="font-medium text-right">Итого:</TableCell>
-                        <TableCell className="font-medium">{semi.cost.toFixed(2)} ₽</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              ))}
-            </div>
+            <SemiFinalBreakdown semiFinalBreakdown={semiFinalBreakdown} />
           </TabsContent>
         )}
       </Tabs>
