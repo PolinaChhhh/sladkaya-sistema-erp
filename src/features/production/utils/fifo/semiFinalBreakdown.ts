@@ -1,5 +1,6 @@
 
-import { Recipe, Ingredient } from '@/store/types';
+import { Recipe, Ingredient, ProductionBatch } from '@/store/types';
+import { ConsumedSemiFinalItem } from '@/store/utils/fifo/consumeSemiFinals';
 
 export interface SemiFinalBreakdown {
   recipeId: string;
@@ -14,6 +15,13 @@ export interface SemiFinalBreakdown {
     unit: string;
     cost: number;
   }[];
+  fifoDetails?: {
+    productionId: string;
+    date: string;
+    quantity: number;
+    unitCost: number;
+    totalCost: number;
+  }[];
 }
 
 /**
@@ -23,7 +31,9 @@ export const getSemiFinalBreakdown = (
   recipeId: string, 
   quantity: number,
   recipes: Recipe[],
-  ingredients: Ingredient[]
+  ingredients: Ingredient[],
+  productions: ProductionBatch[] = [],
+  production?: ProductionBatch
 ): SemiFinalBreakdown[] => {
   const recipe = recipes.find(r => r.id === recipeId);
   if (!recipe) return [];
@@ -40,7 +50,7 @@ export const getSemiFinalBreakdown = (
       
       if (semiRecipe) {
         const semiAmount = item.amount * ratio;
-        const semiCost = calculateCost(semiRecipe, semiAmount, ingredients);
+        let semiCost = 0;
         
         // Get ingredients for this semi-final
         const semiIngredients = semiRecipe.items
@@ -70,13 +80,36 @@ export const getSemiFinalBreakdown = (
             cost: number;
           }[];
         
+        // If we have consumption details for this production and semi-final, use them
+        let fifoDetails;
+        if (production?.semiFinalConsumptionDetails && production.semiFinalConsumptionDetails[semiRecipeId]) {
+          const consumedItems = production.semiFinalConsumptionDetails[semiRecipeId] as ConsumedSemiFinalItem[];
+          
+          fifoDetails = consumedItems.map(consumed => {
+            return {
+              productionId: consumed.productionId,
+              date: consumed.date,
+              quantity: consumed.amount,
+              unitCost: consumed.unitCost,
+              totalCost: consumed.amount * consumed.unitCost
+            };
+          });
+          
+          // Calculate the actual cost from the consumed items
+          semiCost = fifoDetails.reduce((sum, detail) => sum + detail.totalCost, 0);
+        } else {
+          // Fallback to calculating cost directly
+          semiCost = calculateCost(semiRecipe, semiAmount, ingredients);
+        }
+        
         breakdown.push({
           recipeId: semiRecipeId,
           name: semiRecipe.name,
           quantity: semiAmount,
           unit: semiRecipe.outputUnit,
           cost: semiCost,
-          ingredients: semiIngredients
+          ingredients: semiIngredients,
+          fifoDetails
         });
       }
     });
