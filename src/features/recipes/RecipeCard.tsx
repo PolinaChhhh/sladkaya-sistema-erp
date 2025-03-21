@@ -47,6 +47,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     }
   };
   
+  const isFinishedProduct = recipe.category === 'finished';
+  
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4 pb-2">
@@ -80,9 +82,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 pb-2">
-        {recipe.description && (
-          <p className="text-sm text-gray-500 mb-3 line-clamp-2">{recipe.description}</p>
-        )}
         <div className="text-sm space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-500">Выход:</span>
@@ -92,17 +91,21 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             <span className="text-gray-500">Ингредиентов:</span>
             <span>{recipe.items.length}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Произведено:</span>
-            <span>{productionCount} раз</span>
-          </div>
+          {isFinishedProduct && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Произведено:</span>
+              <span>{productionCount} раз</span>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-2 flex flex-col items-stretch gap-2">
-        <div className="flex items-center text-xs text-gray-500 gap-1">
-          <Clock className="h-3 w-3" />
-          <span>Производилось: {formattedLastProduced}</span>
-        </div>
+        {isFinishedProduct && (
+          <div className="flex items-center text-xs text-gray-500 gap-1">
+            <Clock className="h-3 w-3" />
+            <span>Производилось: {formattedLastProduced}</span>
+          </div>
+        )}
         
         {recipe.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
