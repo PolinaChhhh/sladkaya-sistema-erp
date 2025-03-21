@@ -55,20 +55,20 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       output: recipe.output,
       outputUnit: recipe.outputUnit,
       lossPercentage: recipe.lossPercentage || 0,
+      // Ensure correct type for items
       items: recipe.items.map(item => {
-        // Удаляем все рецепты полуфабрикатов из существующих рецептов
         if (item.type === 'recipe') {
           return { 
-            type: 'ingredient',
+            type: 'ingredient' as const,
             ingredientId: '', 
             amount: 0,
             isPackaging: false
           };
         }
         return { ...item };
-      }).filter(item => item.type === 'ingredient'), // Оставляем только ингредиенты
-      category: 'finished', // Всегда устанавливаем категорию как готовая продукция
-      tags: recipe.tags || [], // Handle recipes without tags
+      }).filter(item => item.type === 'ingredient'), // Only keep ingredient items
+      category: 'finished', 
+      tags: recipe.tags || [], 
     });
     setIsEditDialogOpen(true);
   };

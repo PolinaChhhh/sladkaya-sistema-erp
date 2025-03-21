@@ -43,17 +43,13 @@ const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
           <Select 
             value={outputUnit}
             onValueChange={(value) => onOutputUnitChange(value)}
-            disabled={true} // Unit is now automatically set based on category
+            disabled={true} // Unit is now fixed to "шт"
           >
             <SelectTrigger>
               <SelectValue placeholder="Выберите единицу" />
             </SelectTrigger>
             <SelectContent>
-              {category === 'semi-finished' ? (
-                <SelectItem value="кг">кг</SelectItem>
-              ) : (
-                <SelectItem value="шт">шт</SelectItem>
-              )}
+              <SelectItem value="шт">шт</SelectItem>
             </SelectContent>
           </Select>
         </div>

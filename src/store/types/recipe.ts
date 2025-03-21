@@ -7,7 +7,8 @@ export type RecipeItem = {
   isPackaging?: boolean;
 };
 
-export type RecipeCategory = 'semi-finished' | 'finished';
+// Changed from union type to single string literal type
+export type RecipeCategory = 'finished';
 
 export type RecipeTag = {
   id: string;
@@ -37,4 +38,3 @@ export type ProductionBatch = {
   autoProduceSemiFinals?: boolean;
   consumptionDetails?: Record<string, any[]>; // Generic consumption details that can store both ingredient and semi-final consumption
 };
-

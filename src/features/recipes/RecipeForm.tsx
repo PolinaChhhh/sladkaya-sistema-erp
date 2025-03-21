@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
 import RecipeItemsManager from './RecipeItemsManager';
+import RecipeItemRow from './RecipeItemRow'; // Add this import
 import { useRecipeCalculations } from './hooks/useRecipeCalculations';
 
 interface RecipeFormProps {
