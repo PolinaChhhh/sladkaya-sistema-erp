@@ -1,6 +1,7 @@
 
-import { Recipe, Ingredient, ProductionBatch } from '@/store/types';
+import { Recipe, Ingredient, ProductionBatch, Receipt } from '@/store/types';
 import { ConsumedSemiFinalItem } from '@/store/utils/fifo/consumeSemiFinals';
+import { getIngredientUsageDetails } from './ingredientUsageDetails';
 
 export interface SemiFinalBreakdown {
   recipeId: string;
@@ -14,6 +15,14 @@ export interface SemiFinalBreakdown {
     amount: number;
     unit: string;
     cost: number;
+    fifoDetails?: {
+      receiptId: string;
+      referenceNumber?: string;
+      date: string;
+      quantity: number;
+      unitPrice: number;
+      totalPrice: number;
+    }[];
   }[];
   fifoDetails?: {
     productionId: string;
@@ -32,6 +41,7 @@ export const getSemiFinalBreakdown = (
   quantity: number,
   recipes: Recipe[],
   ingredients: Ingredient[],
+  receipts: Receipt[] = [],
   productions: ProductionBatch[] = [],
   production?: ProductionBatch
 ): SemiFinalBreakdown[] => {
@@ -52,7 +62,15 @@ export const getSemiFinalBreakdown = (
         const semiAmount = item.amount * ratio;
         let semiCost = 0;
         
-        // Get ingredients for this semi-final
+        // Get ingredients for this semi-final with FIFO details
+        const ingredientDetails = getIngredientUsageDetails(
+          semiRecipeId,
+          semiAmount,
+          recipes,
+          ingredients,
+          receipts
+        );
+        
         const semiIngredients = semiRecipe.items
           .filter(si => si.type === 'ingredient' && si.ingredientId)
           .map(si => {
@@ -62,23 +80,26 @@ export const getSemiFinalBreakdown = (
             if (semiIngredient) {
               const semiRatio = semiAmount / semiRecipe.output;
               const amount = si.amount * semiRatio;
+              const cost = amount * semiIngredient.cost;
+              
+              // Find the FIFO details for this ingredient if available
+              const fifoDetail = ingredientDetails.find(id => id.ingredientId === semiIngredientId);
+              
               return {
                 ingredientId: semiIngredientId,
                 name: semiIngredient.name,
                 amount,
                 unit: semiIngredient.unit,
-                cost: amount * semiIngredient.cost
+                cost,
+                fifoDetails: fifoDetail?.fifoDetails
               };
             }
             return null;
           })
-          .filter(si => si !== null) as {
-            ingredientId: string;
-            name: string;
-            amount: number;
-            unit: string;
-            cost: number;
-          }[];
+          .filter(si => si !== null) as SemiFinalBreakdown['ingredients'];
+        
+        // Calculate the total cost of all ingredients
+        const ingredientTotalCost = semiIngredients.reduce((sum, ing) => sum + ing.cost, 0);
         
         // If we have consumption details for this production and semi-final, use them
         let fifoDetails;

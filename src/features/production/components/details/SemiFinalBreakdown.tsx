@@ -12,6 +12,7 @@ interface SemiFinalBreakdownProps {
 
 const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakdown }) => {
   const [openItems, setOpenItems] = React.useState<Record<number, boolean>>({});
+  const [openIngredients, setOpenIngredients] = React.useState<Record<string, boolean>>({});
 
   if (semiFinalBreakdown.length === 0) {
     return (
@@ -25,6 +26,14 @@ const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakd
     setOpenItems(prev => ({
       ...prev,
       [index]: !prev[index]
+    }));
+  };
+
+  const toggleIngredient = (semiFinalIndex: number, ingredientIndex: number) => {
+    const key = `${semiFinalIndex}-${ingredientIndex}`;
+    setOpenIngredients(prev => ({
+      ...prev,
+      [key]: !prev[key]
     }));
   };
 
@@ -59,6 +68,7 @@ const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakd
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8"></TableHead>
                   <TableHead>Ингредиент</TableHead>
                   <TableHead>Количество</TableHead>
                   <TableHead>Стоимость за ед.</TableHead>
@@ -66,16 +76,69 @@ const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakd
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {semi.ingredients.map((ing, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{ing.name}</TableCell>
-                    <TableCell>{ing.amount.toFixed(2)} {ing.unit}</TableCell>
-                    <TableCell>{(ing.cost / ing.amount).toFixed(2)} ₽/{ing.unit}</TableCell>
-                    <TableCell>{ing.cost.toFixed(2)} ₽</TableCell>
-                  </TableRow>
-                ))}
+                {semi.ingredients.map((ing, idx) => {
+                  const ingredientKey = `${index}-${idx}`;
+                  const isIngredientOpen = openIngredients[ingredientKey] || false;
+                  const hasIngredientFifo = ing.fifoDetails && ing.fifoDetails.length > 0;
+                  
+                  return (
+                    <React.Fragment key={idx}>
+                      <TableRow>
+                        <TableCell>
+                          {hasIngredientFifo && (
+                            <button
+                              onClick={() => toggleIngredient(index, idx)}
+                              className="p-1 rounded-full hover:bg-gray-100"
+                            >
+                              {isIngredientOpen ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+                        </TableCell>
+                        <TableCell>{ing.name}</TableCell>
+                        <TableCell>{ing.amount.toFixed(2)} {ing.unit}</TableCell>
+                        <TableCell>{(ing.cost / ing.amount).toFixed(2)} ₽/{ing.unit}</TableCell>
+                        <TableCell>{ing.cost.toFixed(2)} ₽</TableCell>
+                      </TableRow>
+                      {hasIngredientFifo && isIngredientOpen && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="bg-gray-50 p-0">
+                            <div className="p-3">
+                              <h4 className="text-xs font-medium mb-2 text-gray-500">Расход по партиям (FIFO):</h4>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Номер поступления</TableHead>
+                                    <TableHead>Дата</TableHead>
+                                    <TableHead>Количество</TableHead>
+                                    <TableHead>Цена за ед.</TableHead>
+                                    <TableHead>Сумма</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {ing.fifoDetails?.map((detail, fidx) => (
+                                    <TableRow key={fidx}>
+                                      <TableCell>{detail.referenceNumber || 'Б/Н'}</TableCell>
+                                      <TableCell>{format(new Date(detail.date), 'dd.MM.yyyy')}</TableCell>
+                                      <TableCell>{detail.quantity.toFixed(2)} {ing.unit}</TableCell>
+                                      <TableCell>{detail.unitPrice.toFixed(2)} ₽</TableCell>
+                                      <TableCell>{detail.totalPrice.toFixed(2)} ₽</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
                 <TableRow>
-                  <TableCell colSpan={3} className="font-medium text-right">Итого:</TableCell>
+                  <TableCell colSpan={4} className="font-medium text-right">Итого:</TableCell>
                   <TableCell className="font-medium">{semi.cost.toFixed(2)} ₽</TableCell>
                 </TableRow>
               </TableBody>
