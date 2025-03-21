@@ -1,16 +1,15 @@
 
-import React, { useState } from 'react';
-import { Plus, X, Search } from 'lucide-react';
+import React from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Ingredient, RecipeItem } from '@/store/recipeStore';
 import { toast } from 'sonner';
-import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import RecipeItemRow from './RecipeItemRow';
+import RecipeOutputFields from './RecipeOutputFields';
 
 interface RecipeFormProps {
   isOpen: boolean;
@@ -47,9 +46,6 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   getIngredientName,
   getIngredientUnit,
 }) => {
-  const [searchValue, setSearchValue] = useState("");
-  const [open, setOpen] = useState<number | null>(null);
-  
   const addRecipeItem = () => {
     if (ingredients.length === 0) {
       toast.error('Сначала добавьте ингредиенты');
@@ -74,12 +70,6 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  const filterIngredients = (value: string) => {
-    return ingredients.filter((ingredient) => 
-      ingredient.name.toLowerCase().includes(value.toLowerCase())
-    );
-  };
-
   return (
     <DialogContent className="sm:max-w-lg">
       <DialogHeader>
@@ -95,6 +85,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             placeholder="Введите название рецепта"
           />
         </div>
+        
         <div className="grid gap-2">
           <Label htmlFor="description">Описание</Label>
           <Textarea 
@@ -104,35 +95,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             placeholder="Описание рецепта (опционально)"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="output">Выход</Label>
-            <Input 
-              id="output" 
-              type="number"
-              min="0.1"
-              step="0.1"
-              value={formData.output}
-              onChange={(e) => setFormData({ ...formData, output: parseFloat(e.target.value) || 0 })}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="outputUnit">Единица измерения</Label>
-            <Select 
-              value={formData.outputUnit}
-              onValueChange={(value) => setFormData({ ...formData, outputUnit: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите единицу" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="кг">кг</SelectItem>
-                <SelectItem value="л">л</SelectItem>
-                <SelectItem value="шт">шт</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        
+        <RecipeOutputFields 
+          output={formData.output}
+          outputUnit={formData.outputUnit}
+          onOutputChange={(value) => setFormData({ ...formData, output: value })}
+          onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
+        />
         
         <div className="space-y-3 mt-2">
           <div className="flex justify-between items-center">
@@ -145,93 +114,16 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           {formData.items.length > 0 ? (
             <div className="space-y-3 mt-3">
               {formData.items.map((item, index) => (
-                <div key={index} className="bg-gray-50 p-3 rounded-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Popover open={open === index} onOpenChange={(isOpen) => setOpen(isOpen ? index : null)}>
-                      <PopoverTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          role="combobox" 
-                          aria-expanded={open === index} 
-                          className="flex-1 justify-between">
-                          {item.ingredientId ? getIngredientName(item.ingredientId) : "Выберите ингредиент"}
-                          <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[300px] p-0" align="start">
-                        <Command>
-                          <CommandInput 
-                            placeholder="Поиск ингредиента..." 
-                            className="h-9" 
-                            value={searchValue}
-                            onValueChange={setSearchValue}
-                          />
-                          <CommandEmpty>Ингредиенты не найдены.</CommandEmpty>
-                          <CommandGroup className="max-h-[200px] overflow-y-auto">
-                            {filterIngredients(searchValue).map((ingredient) => (
-                              <CommandItem
-                                key={ingredient.id}
-                                value={ingredient.name}
-                                onSelect={() => {
-                                  updateRecipeItem(index, 'ingredientId', ingredient.id);
-                                  setSearchValue("");
-                                  setOpen(null);
-                                }}
-                              >
-                                {ingredient.name}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => removeRecipeItem(index)}
-                    >
-                      <X className="h-4 w-4 text-gray-500" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2">
-                      <Input 
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        className="w-full"
-                        value={item.amount}
-                        onChange={(e) => updateRecipeItem(index, 'amount', parseFloat(e.target.value) || 0)}
-                        placeholder="Количество"
-                      />
-                      <span className="text-sm text-gray-500 w-8">
-                        {getIngredientUnit(item.ingredientId)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <div className="w-full relative">
-                        <Input 
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          className="w-full pr-8"
-                          value={item.lossPercentage || 0}
-                          onChange={(e) => updateRecipeItem(index, 'lossPercentage', parseFloat(e.target.value) || 0)}
-                          placeholder="Потери"
-                        />
-                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">%</span>
-                      </div>
-                      <Label className="text-xs text-gray-500 whitespace-nowrap" htmlFor={`loss-${index}`}>
-                        Потери
-                      </Label>
-                    </div>
-                  </div>
-                </div>
+                <RecipeItemRow
+                  key={index}
+                  item={item}
+                  index={index}
+                  ingredients={ingredients}
+                  getIngredientName={getIngredientName}
+                  getIngredientUnit={getIngredientUnit}
+                  onUpdate={updateRecipeItem}
+                  onRemove={removeRecipeItem}
+                />
               ))}
             </div>
           ) : (
