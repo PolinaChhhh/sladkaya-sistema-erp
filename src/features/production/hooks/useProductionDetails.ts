@@ -7,16 +7,17 @@ import { calculateSemiFinishedCostBreakdown } from '../utils/productionCalculato
 
 export interface IngredientUsageDetail {
   ingredientId: string;
-  ingredientName: string;
-  totalAmount: number;
+  name: string;
+  amount: number;
   unit: string;
-  usageBreakdown: {
+  cost: number;
+  fifoDetails: {
     receiptDate: string;
     amount: number;
     unitPrice: number;
     totalCost: number;
+    reference?: string;
   }[];
-  totalCost: number;
 }
 
 export const useProductionDetails = () => {
@@ -122,7 +123,7 @@ export const useProductionDetails = () => {
       
       // Get FIFO receipts for this ingredient
       const receiptItems = getFifoReceiptItems(ingredientId, receipts);
-      const usageBreakdown: IngredientUsageDetail['usageBreakdown'] = [];
+      const fifoDetails: IngredientUsageDetail['fifoDetails'] = [];
       
       let remainingToConsume = totalAmount;
       let totalCost = 0;
@@ -134,11 +135,15 @@ export const useProductionDetails = () => {
         const consumeAmount = Math.min(remainingToConsume, receiptItem.remainingQuantity + (totalAmount * 0.1)); // Add a buffer for simulation
         const cost = consumeAmount * receiptItem.unitPrice;
         
-        usageBreakdown.push({
+        // Find the receipt to get the reference number
+        const receipt = receipts.find(r => r.id === receiptItem.receiptId);
+        
+        fifoDetails.push({
           receiptDate: receiptItem.receiptDate,
           amount: consumeAmount,
           unitPrice: receiptItem.unitPrice,
-          totalCost: cost
+          totalCost: cost,
+          reference: receipt?.referenceNumber
         });
         
         totalCost += cost;
@@ -146,12 +151,13 @@ export const useProductionDetails = () => {
       }
       
       // If we couldn't find receipts for everything, use current price
-      if (remainingToConsume > 0) {
-        usageBreakdown.push({
+      if (remainingToConsume > 0 && remainingToConsume > 0.001) { // Add a small threshold to avoid floating point issues
+        fifoDetails.push({
           receiptDate: new Date().toISOString(),
           amount: remainingToConsume,
           unitPrice: ingredient.cost,
-          totalCost: remainingToConsume * ingredient.cost
+          totalCost: remainingToConsume * ingredient.cost,
+          reference: 'Текущая цена'
         });
         
         totalCost += remainingToConsume * ingredient.cost;
@@ -159,11 +165,11 @@ export const useProductionDetails = () => {
       
       details.push({
         ingredientId,
-        ingredientName: ingredient.name,
-        totalAmount,
+        name: ingredient.name,
+        amount: totalAmount,
         unit: ingredient.unit,
-        usageBreakdown,
-        totalCost
+        cost: totalCost,
+        fifoDetails
       });
     });
 

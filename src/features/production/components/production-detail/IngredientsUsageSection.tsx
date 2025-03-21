@@ -13,7 +13,7 @@ interface IngredientUsageDetail {
     amount: number;
     unitPrice: number;
     totalCost: number;
-    reference: string;
+    reference?: string;
   }[];
 }
 
