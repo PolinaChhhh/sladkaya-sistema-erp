@@ -61,20 +61,24 @@ export const handleDeleteProduction = (
   // Restore semi-finished products using FIFO details if available
   // Only if the recipe has any semi-final products
   if (recipe.items.some(item => item.type === 'recipe')) {
-    restoreSemiFinalProductsWithFifo(
-      recipe,
-      production.quantity,
-      productions,
-      // Safe casting the consumption details to the expected type
-      production.consumptionDetails as unknown as Record<string, any[]>,
-      updateProduction,
-      recipes,
-      ingredients,
-      receipts,
-      updateIngredient,
-      updateReceiptItem,
-      shouldDecompose // Set based on recipe category to correctly handle decomposition
-    );
+    try {
+      restoreSemiFinalProductsWithFifo(
+        recipe,
+        production.quantity,
+        productions,
+        // Safe casting the consumption details to the expected type
+        production.consumptionDetails as unknown as Record<string, any[]>,
+        updateProduction,
+        recipes,
+        ingredients,
+        receipts,
+        updateIngredient,
+        updateReceiptItem,
+        shouldDecompose // Set based on recipe category to correctly handle decomposition
+      );
+    } catch (error) {
+      console.error('Error restoring semi-finals:', error);
+    }
   }
   
   if (shouldDecompose) {

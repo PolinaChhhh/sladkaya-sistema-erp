@@ -37,7 +37,7 @@ export const restoreIngredientsToReceipts = (
         console.log(`Updated ingredient quantity: ${ingredient.quantity} + ${amountToRestore} = ${ingredient.quantity + amountToRestore}`);
         
         // If we have consumption details, use them for precise restoration
-        if (consumptionDetails && consumptionDetails[item.ingredientId]) {
+        if (consumptionDetails && consumptionDetails[item.ingredientId] && consumptionDetails[item.ingredientId].length > 0) {
           const consumedItems = consumptionDetails[item.ingredientId];
           console.log(`Found ${consumedItems.length} consumed receipt items for ${ingredient.name}`);
           
