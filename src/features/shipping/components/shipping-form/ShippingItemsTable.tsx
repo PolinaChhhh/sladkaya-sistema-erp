@@ -35,6 +35,8 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
     );
   }
 
+  console.log('Shipping items table:', { items, productions, shippings });
+
   return (
     <div className="bg-white/70 rounded-lg border overflow-hidden">
       <ShippingTableHeader />
@@ -43,12 +45,25 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
         const production = productions.find(p => p.id === item.productionBatchId);
         const recipe = production ? recipes.find(r => r.id === production.recipeId) : null;
         
-        // Calculate available quantity
+        console.log('Processing item:', { 
+          item, 
+          productionId: item.productionBatchId,
+          production: production,
+          productionQuantity: production?.quantity
+        });
+        
+        // Calculate available quantity - only count shipped items from existing shipments, not the current form
         const alreadyShippedQuantity = shippings.reduce((total, shipping) => {
           return total + shipping.items
             .filter(shippingItem => shippingItem.productionBatchId === item.productionBatchId)
             .reduce((sum, shippingItem) => sum + shippingItem.quantity, 0);
         }, 0);
+        
+        console.log('Shipped quantity calculation:', { 
+          productionId: item.productionBatchId,
+          alreadyShippedQuantity,
+          originalQuantity: production?.quantity
+        });
         
         const availableQuantity = production ? production.quantity - alreadyShippedQuantity : 0;
         const productName = recipe?.name || 'Неизвестно';

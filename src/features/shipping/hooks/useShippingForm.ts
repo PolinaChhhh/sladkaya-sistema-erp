@@ -31,13 +31,21 @@ export const useShippingForm = (
       return { error: 'Нет доступных партий продукции' };
     }
     
+    // Filter out productions that have already been fully shipped
     const availableProductions = productions.filter(p => {
-      // Filter out productions that have already been fully shipped
+      // Calculate already shipped quantity
       const alreadyShippedQuantity = shippings.reduce((total, shipping) => {
         return total + shipping.items
           .filter(item => item.productionBatchId === p.id)
           .reduce((sum, item) => sum + item.quantity, 0);
       }, 0);
+      
+      console.log('Checking production availability:', { 
+        productionId: p.id, 
+        totalQuantity: p.quantity,
+        shippedQuantity: alreadyShippedQuantity,
+        available: p.quantity - alreadyShippedQuantity
+      });
       
       return p.quantity > alreadyShippedQuantity;
     });
