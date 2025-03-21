@@ -6,10 +6,14 @@ import ProductionHeader from '@/features/production/components/ProductionHeader'
 import ProductionDialogs from '@/features/production/components/ProductionDialogs';
 
 const Production = () => {
+  // The hook is now much cleaner with all the functionality divided into submodules
   const {
+    // Search and filtering
     searchQuery,
     setSearchQuery,
     filteredProductions,
+    
+    // Dialog states
     isCreateDialogOpen,
     setIsCreateDialogOpen,
     isEditDialogOpen,
@@ -18,22 +22,29 @@ const Production = () => {
     setIsDeleteDialogOpen,
     isDetailDialogOpen,
     setIsDetailDialogOpen,
+    
+    // Current selection and form data
     selectedProduction,
     createFormData,
     setCreateFormData,
     editFormData,
     setEditFormData,
+    
+    // Actions
     openCreateDialog,
     handleCreateProduction,
     handleEditProduction,
     handleDeleteProduction,
+    
+    // Utility functions
     getRecipeName,
     getRecipeOutput,
-    calculateCost,
     getIngredientDetails,
     getIngredientUsageDetails,
     getSemiFinalBreakdown,
     getSelectedRecipe,
+    
+    // Dialog openers
     openEditDialog,
     openDeleteDialog,
     openDetailDialog
@@ -84,7 +95,6 @@ const Production = () => {
         selectedRecipe={getSelectedRecipe()}
         
         // Utility functions
-        calculateCost={calculateCost}
         getRecipeName={getRecipeName}
         getRecipeOutput={getRecipeOutput}
         getIngredientDetails={getIngredientDetails}
