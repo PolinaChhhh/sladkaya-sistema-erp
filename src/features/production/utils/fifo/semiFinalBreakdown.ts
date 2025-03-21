@@ -62,13 +62,15 @@ export const getSemiFinalBreakdown = (
         const semiAmount = item.amount * ratio;
         let semiCost = 0;
         
-        // Get ingredients for this semi-final with FIFO details
+        // Get ingredients for this semi-final with FIFO details, but only if they're
+        // related to the current production
         const ingredientDetails = getIngredientUsageDetails(
           semiRecipeId,
           semiAmount,
           recipes,
           ingredients,
-          receipts
+          receipts,
+          production // Pass the current production to get actual consumption details
         );
         
         const semiIngredients = semiRecipe.items
@@ -82,7 +84,7 @@ export const getSemiFinalBreakdown = (
               const amount = si.amount * semiRatio;
               const cost = amount * semiIngredient.cost;
               
-              // Find the FIFO details for this ingredient if available
+              // Find the FIFO details for this ingredient if available from the consumption details
               const fifoDetail = ingredientDetails.find(id => id.ingredientId === semiIngredientId);
               
               return {
@@ -120,8 +122,10 @@ export const getSemiFinalBreakdown = (
           // Calculate the actual cost from the consumed items
           semiCost = fifoDetails.reduce((sum, detail) => sum + detail.totalCost, 0);
         } else {
-          // Fallback to calculating cost directly
+          // If we don't have consumption details, don't show any FIFO breakdown
+          // since we don't know which batches were actually consumed
           semiCost = calculateCost(semiRecipe, semiAmount, ingredients);
+          fifoDetails = undefined;
         }
         
         breakdown.push({

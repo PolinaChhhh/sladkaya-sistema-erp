@@ -75,31 +75,15 @@ export const getIngredientUsageDetails = (
             fifoDetails
           });
         } else {
-          // Fallback to the old method if consumption details aren't available
-          // Added null check for receipts and items
-          const fifoDetails = (receipts || [])
-            .filter(receipt => receipt.items && receipt.items.some(i => i.ingredientId === ingredientId))
-            .flatMap(receipt => {
-              return receipt.items
-                .filter(i => i.ingredientId === ingredientId)
-                .map(i => ({
-                  receiptId: receipt.id,
-                  referenceNumber: receipt.referenceNumber,
-                  date: receipt.date,
-                  quantity: i.quantity,
-                  unitPrice: i.unitPrice,
-                  totalPrice: i.quantity * i.unitPrice
-                }));
-            })
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-          
+          // When consumption details aren't available, we don't show any FIFO details
+          // as they are not actually used in this production
           usageDetails.push({
             ingredientId,
             name: ingredient.name,
             totalAmount: amountNeeded,
             unit: ingredient.unit,
             totalCost: amountNeeded * ingredient.cost,
-            fifoDetails
+            fifoDetails: [] // Empty array since we don't know which specific receipts were consumed
           });
         }
       }
