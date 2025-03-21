@@ -2,10 +2,11 @@
 import React from 'react';
 import RecipeCard from './RecipeCard';
 import EmptyState from './EmptyState';
-import { Recipe } from '@/store/recipeStore';
+import { Recipe, ProductionBatch } from '@/store/types';
 
 interface RecipesListProps {
   recipes: Recipe[];
+  productions?: ProductionBatch[];
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
@@ -16,6 +17,7 @@ interface RecipesListProps {
 
 const RecipesList: React.FC<RecipesListProps> = ({ 
   recipes, 
+  productions = [],
   onEdit, 
   onDelete,
   getIngredientName,
@@ -33,6 +35,7 @@ const RecipesList: React.FC<RecipesListProps> = ({
         <RecipeCard 
           key={recipe.id} 
           recipe={recipe} 
+          productions={productions}
           onEdit={onEdit} 
           onDelete={onDelete} 
           getIngredientName={getIngredientName}

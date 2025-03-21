@@ -69,6 +69,7 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
         
         <RecipesList 
           recipes={filteredRecipes} 
+          productions={productions}
           onEdit={onEdit}
           onDelete={onDelete}
           getIngredientName={getIngredientName}

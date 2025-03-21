@@ -9,18 +9,24 @@ import { ru } from 'date-fns/locale';
 
 interface RecipeCardProps {
   recipe: Recipe;
-  productions: ProductionBatch[];
+  productions?: ProductionBatch[];
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
+  getIngredientUnit: (id: string) => string;
+  getRecipeName: (id: string) => string;
+  getRecipeUnit: (id: string) => string;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
   recipe,
-  productions,
+  productions = [],
   onEdit,
   onDelete,
-  getIngredientName
+  getIngredientName,
+  getIngredientUnit,
+  getRecipeName,
+  getRecipeUnit
 }) => {
   // Format the last production date
   const formattedLastProduced = recipe.lastProduced
@@ -88,7 +94,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <span>Производилось: {formattedLastProduced}</span>
         </div>
         
-        {recipe.tags.length > 0 && (
+        {recipe.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {recipe.tags.map(tag => (
               <div 
