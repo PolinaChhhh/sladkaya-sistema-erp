@@ -24,41 +24,44 @@ export const restoreIngredientsToReceipts = (
   
   recipe.items.forEach(item => {
     if (item.type === 'ingredient' && item.ingredientId) {
-      const ingredient = ingredients.find(i => i.id === item.ingredientId);
+      const ingredientIdStr = String(item.ingredientId);
+      const ingredient = ingredients.find(i => String(i.id) === ingredientIdStr);
       
       if (ingredient) {
         const amountToRestore = item.amount * ratio;
         console.log(`Need to restore ${amountToRestore} of ${ingredient.name} (id: ${ingredient.id})`);
         
-        // Restore the ingredient quantity
-        updateIngredient(ingredient.id, {
-          quantity: ingredient.quantity + amountToRestore
+        // Важно: сначала обновляем количество ингредиента
+        const newQuantity = ingredient.quantity + amountToRestore;
+        console.log(`Updating ingredient ${ingredient.name} quantity: ${ingredient.quantity} + ${amountToRestore} = ${newQuantity}`);
+        
+        // Явно преобразуем ID к строке и принудительно вызываем обновление
+        updateIngredient(String(ingredient.id), {
+          quantity: newQuantity
         });
-        console.log(`Updated ingredient quantity: ${ingredient.quantity} + ${amountToRestore} = ${ingredient.quantity + amountToRestore}`);
         
-        // Normalize the ingredient ID to ensure it matches the keys in consumptionDetails
-        const ingredientKey = String(item.ingredientId);
-        console.log(`Restoring ingredient ${ingredient.name} using key: ${ingredientKey}`);
+        // Нормализуем ID ингредиента для соответствия ключам в consumptionDetails
+        console.log(`Restoring ingredient ${ingredient.name} using key: ${ingredientIdStr}`);
         
-        // If we have consumption details, use them for precise restoration
-        if (consumptionDetails && consumptionDetails[ingredientKey] && consumptionDetails[ingredientKey].length > 0) {
-          const consumedItems = consumptionDetails[ingredientKey];
+        // Если у нас есть детали потребления, используем их для точного восстановления
+        if (consumptionDetails && consumptionDetails[ingredientIdStr] && consumptionDetails[ingredientIdStr].length > 0) {
+          const consumedItems = consumptionDetails[ingredientIdStr];
           console.log(`Found ${consumedItems.length} consumed receipt items for ${ingredient.name}`);
           
-          // Restore to each receipt item based on recorded consumption
+          // Восстанавливаем по каждому элементу чека на основе записанного потребления
           consumedItems.forEach(consumed => {
-            // Convert IDs to strings to ensure consistent comparison
+            // Преобразуем ID к строкам для обеспечения согласованного сравнения
             const receiptIdStr = String(consumed.receiptId);
             const itemIdStr = String(consumed.itemId);
             
             console.log(`Precisely restoring ${consumed.amount} of ${ingredient.name} to receipt ${receiptIdStr}, item ${itemIdStr}`);
             
-            // Find the current remaining quantity of the receipt item
+            // Находим текущее оставшееся количество элемента чека
             const receipt = receipts.find(r => String(r.id) === receiptIdStr);
             
             if (!receipt) {
               console.error(`Receipt not found: receiptId=${receiptIdStr}`);
-              return; // Skip this item but continue with others
+              return; // Пропускаем этот элемент, но продолжаем с другими
             }
             
             const receiptItem = receipt.items.find(ri => String(ri.id) === itemIdStr);
@@ -67,7 +70,7 @@ export const restoreIngredientsToReceipts = (
               const newRemainingQuantity = receiptItem.remainingQuantity + consumed.amount;
               console.log(`Updating receipt item ${itemIdStr} remaining quantity: ${receiptItem.remainingQuantity} + ${consumed.amount} = ${newRemainingQuantity}`);
               
-              // Make sure we're passing string IDs to updateReceiptItem
+              // Убедимся, что передаем строковые ID в updateReceiptItem
               updateReceiptItem(receiptIdStr, itemIdStr, {
                 remainingQuantity: newRemainingQuantity
               });
@@ -77,13 +80,13 @@ export const restoreIngredientsToReceipts = (
             }
           });
         } else {
-          // Fallback to the original method when consumption details aren't available
-          console.log(`No consumption details available for ${ingredient.name} (key: ${ingredientKey}), using ratio-based restoration`);
+          // Запасной вариант для оригинального метода, когда детали потребления недоступны
+          console.log(`No consumption details available for ${ingredient.name} (key: ${ingredientIdStr}), using ratio-based restoration`);
           
-          // For deleted productions, we'll restore to the newest receipt items
+          // Для удаленных продуктов мы восстановим в самые новые элементы чека
           const receiptItems = receipts
             .flatMap(receipt => receipt.items
-              .filter(item => item.ingredientId === ingredient.id)
+              .filter(item => String(item.ingredientId) === ingredientIdStr)
               .map(item => ({
                 ...item,
                 receiptId: receipt.id,
@@ -98,7 +101,7 @@ export const restoreIngredientsToReceipts = (
           for (const receiptItem of receiptItems) {
             if (remainingToRestore <= 0) break;
             
-            // We can't restore more than was originally in the receipt
+            // Мы не можем восстановить больше, чем было изначально в чеке
             const originalTotal = receiptItem.quantity;
             const currentRemaining = receiptItem.remainingQuantity;
             const consumed = originalTotal - currentRemaining;
@@ -109,7 +112,7 @@ export const restoreIngredientsToReceipts = (
               console.log(`Ratio-based: Restoring ${restoreAmount} of ${ingredient.name} to receipt ${receiptItem.receiptId}, item ${receiptItem.id}`);
               console.log(`Receipt item details: original=${originalTotal}, remaining=${currentRemaining}, consumed=${consumed}`);
               
-              // Make sure we're passing string IDs
+              // Убедимся, что передаем строковые ID
               const receiptIdStr = String(receiptItem.receiptId);
               const itemIdStr = String(receiptItem.id);
               

@@ -16,21 +16,24 @@ export const handleDeleteProduction = (
   updateReceiptItem: (receiptId: string, itemId: string, data: Partial<any>) => void,
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void
 ): void => {
-  const production = productions.find(p => p.id === id);
+  // Ensure id is a string for consistent comparison
+  const idStr = String(id);
+  
+  const production = productions.find(p => String(p.id) === idStr);
   
   if (!production) {
-    console.error('Production not found');
+    console.error(`Production not found: ${idStr}`);
     return;
   }
   
-  const recipe = recipes.find(r => r.id === production.recipeId);
+  const recipe = recipes.find(r => String(r.id) === String(production.recipeId));
   
   if (!recipe) {
-    console.error('Recipe not found');
+    console.error(`Recipe not found: ${production.recipeId}`);
     return;
   }
   
-  console.log(`Deleting production ${id} of recipe ${recipe.name} (category: ${recipe.category})`);
+  console.log(`Deleting production ${idStr} of recipe ${recipe.name} (category: ${recipe.category})`);
   console.log(`Production has consumptionDetails: ${!!production.consumptionDetails}`);
   if (production.consumptionDetails) {
     console.log(`Consumption details keys: ${Object.keys(production.consumptionDetails).join(', ')}`);
@@ -82,8 +85,8 @@ export const handleDeleteProduction = (
   }
   
   if (shouldDecompose) {
-    console.log(`Semi-finished production ${id} has been deleted and ingredients have been returned to stock`);
+    console.log(`Semi-finished production ${idStr} has been deleted and ingredients have been returned to stock`);
   } else {
-    console.log(`Finished production ${id} has been deleted and semi-finals have been restored to stock`);
+    console.log(`Finished production ${idStr} has been deleted and semi-finals have been restored to stock`);
   }
 };

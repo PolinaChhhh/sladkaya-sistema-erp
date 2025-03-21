@@ -59,15 +59,18 @@ export const restoreSemiFinalProductsWithFifo = (
           // Update the quantity of the semi-final production
           // We're using the 'quantity' property which exists in ProductionBatch
           // instead of 'availableQuantity' which doesn't exist
+          const newQuantity = semiFinalProduction.quantity + amount;
+          console.log(`Updating production ${productionIdStr} quantity from ${semiFinalProduction.quantity} to ${newQuantity}`);
+          
           updateProduction(productionIdStr, {
-            quantity: semiFinalProduction.quantity + amount
+            quantity: newQuantity
           });
           
-          console.log(`Restored ${amount} to semi-final production ${productionIdStr}, new quantity: ${semiFinalProduction.quantity + amount}`);
+          console.log(`Restored ${amount} to semi-final production ${productionIdStr}, new quantity: ${newQuantity}`);
           
           // If we should decompose, we need to restore the ingredients of the semi-final
           if (shouldDecompose) {
-            const semiFinalRecipe = recipes.find(r => r.id === semiFinalProduction.recipeId);
+            const semiFinalRecipe = recipes.find(r => String(r.id) === String(semiFinalProduction.recipeId));
             
             if (!semiFinalRecipe) {
               console.error(`Semi-final recipe not found: ${semiFinalProduction.recipeId}`);
@@ -87,7 +90,7 @@ export const restoreSemiFinalProductsWithFifo = (
               receipts,
               updateIngredient,
               updateReceiptItem,
-              semiFinalConsumptionDetails
+              semiFinalConsumptionDetails // Pass consumption details for precise restoration
             );
           }
         });

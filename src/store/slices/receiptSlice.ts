@@ -1,3 +1,4 @@
+
 import { StateCreator } from 'zustand';
 import { Receipt, ReceiptItem } from '../types';
 import { IngredientSlice } from './ingredientSlice';
@@ -141,16 +142,37 @@ export const createReceiptSlice: StateCreator<
     console.log(`Updating receipt item: receiptId=${receiptIdStr}, itemId=${itemIdStr}, data=`, data);
     
     set((state) => {
+      // Глубокая проверка наличия чека и элемента
+      const receipt = state.receipts.find(r => String(r.id) === receiptIdStr);
+      if (!receipt) {
+        console.error(`Receipt not found with id ${receiptIdStr}`);
+        return { receipts: state.receipts };
+      }
+      
+      const existingItem = receipt.items.find(i => String(i.id) === itemIdStr);
+      if (!existingItem) {
+        console.error(`Receipt item not found with id ${itemIdStr} in receipt ${receiptIdStr}`);
+        return { receipts: state.receipts };
+      }
+      
       // Create a new receipts array to trigger a state update
       const updatedReceipts = state.receipts.map(receipt => {
         if (String(receipt.id) === receiptIdStr) {
+          const updatedItems = receipt.items.map(item => {
+            if (String(item.id) === itemIdStr) {
+              // Create a new object with merged values
+              const updatedItem = { ...item, ...data };
+              console.log(`Before update: ${JSON.stringify(item)}`);
+              console.log(`After update: ${JSON.stringify(updatedItem)}`);
+              return updatedItem;
+            }
+            return item;
+          });
+          
+          // Create a new receipt object with the updated items
           return {
             ...receipt,
-            items: receipt.items.map(item => 
-              String(item.id) === itemIdStr
-                ? { ...item, ...data }
-                : item
-            )
+            items: updatedItems
           };
         }
         return receipt;
