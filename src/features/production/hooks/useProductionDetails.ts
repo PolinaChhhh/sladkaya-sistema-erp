@@ -1,9 +1,23 @@
+
 import { useState, useMemo } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe, Ingredient, Receipt } from '@/store/types';
-import { IngredientUsageDetail } from '../components/ProductionDetailDialog';
 import { getFifoReceiptItems } from '@/store/utils/fifoCalculator';
 import { calculateSemiFinishedCostBreakdown } from '../utils/productionCalculator';
+
+export interface IngredientUsageDetail {
+  ingredientId: string;
+  ingredientName: string;
+  totalAmount: number;
+  unit: string;
+  usageBreakdown: {
+    receiptDate: string;
+    amount: number;
+    unitPrice: number;
+    totalCost: number;
+  }[];
+  totalCost: number;
+}
 
 export const useProductionDetails = () => {
   const { recipes, ingredients, receipts, productions } = useStore();
