@@ -34,7 +34,8 @@ const ProductionPage = () => {
     openDeleteDialog,
     calculateCost,
     getRecipeName,
-    getRecipeOutput
+    getRecipeOutput,
+    checkSemiFinalAvailability
   } = useProductionState();
 
   return (

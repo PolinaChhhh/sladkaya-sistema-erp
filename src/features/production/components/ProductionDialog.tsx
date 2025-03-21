@@ -36,6 +36,11 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   getRecipeOutput
 }) => {
   const { recipes } = useStore();
+  
+  // Filter recipes to show by category
+  const filteredRecipes = recipes.filter(recipe => 
+    recipe.category === 'semi-finished' || recipe.category === 'finished'
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,11 +59,25 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
                 <SelectValue placeholder="Выберите рецепт" />
               </SelectTrigger>
               <SelectContent>
-                {recipes.map((recipe) => (
-                  <SelectItem key={recipe.id} value={recipe.id}>
-                    {recipe.name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="" disabled>Выберите рецепт</SelectItem>
+                <SelectItem value="" disabled className="font-semibold text-sm text-gray-500">-- Полуфабрикаты --</SelectItem>
+                {filteredRecipes
+                  .filter(recipe => recipe.category === 'semi-finished')
+                  .map((recipe) => (
+                    <SelectItem key={recipe.id} value={recipe.id}>
+                      {recipe.name}
+                    </SelectItem>
+                  ))
+                }
+                <SelectItem value="" disabled className="font-semibold text-sm text-gray-500">-- Готовые изделия --</SelectItem>
+                {filteredRecipes
+                  .filter(recipe => recipe.category === 'finished')
+                  .map((recipe) => (
+                    <SelectItem key={recipe.id} value={recipe.id}>
+                      {recipe.name}
+                    </SelectItem>
+                  ))
+                }
               </SelectContent>
             </Select>
           </div>

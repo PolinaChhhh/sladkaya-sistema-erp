@@ -7,17 +7,24 @@ import { toast } from 'sonner';
 interface UseProductionFormProps {
   recipes: Recipe[];
   ingredients: any[];
+  productions: ProductionBatch[];
   addProduction: (production: Omit<ProductionBatch, 'id'>) => void;
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void;
   calculateCost: (recipeId: string, quantity: number) => number;
+  checkSemiFinalAvailability: (recipeId: string, quantity: number) => { 
+    canProduce: boolean; 
+    insufficientItems: Array<{name: string, required: number, available: number, unit: string}> 
+  };
 }
 
 export const useProductionForm = ({
   recipes,
   ingredients,
+  productions,
   addProduction,
   updateProduction,
-  calculateCost
+  calculateCost,
+  checkSemiFinalAvailability
 }: UseProductionFormProps) => {
   const [formData, setFormData] = useState<{
     recipeId: string;
@@ -79,22 +86,23 @@ export const useProductionForm = ({
       }
     } else if (recipe.category === 'finished') {
       // For finished products, check semi-finished product availability
+      const { canProduce, insufficientItems } = checkSemiFinalAvailability(formData.recipeId, formData.quantity);
+      if (!canProduce) {
+        insufficientResources = insufficientItems;
+      }
+      
+      // Also check if there are any raw ingredients needed
       for (const item of recipe.items) {
-        if (item.type === 'recipe' && item.recipeId) {
-          const semiFinalRecipe = recipes.find(r => r.id === item.recipeId);
-          if (semiFinalRecipe) {
-            // Calculate how much of this semi-finished product we need
+        if (item.type === 'ingredient' && item.ingredientId) {
+          const ingredient = ingredients.find(i => i.id === item.ingredientId);
+          if (ingredient) {
             const requiredAmount = item.amount * productionRatio;
-            
-            // Calculate how much of this semi-finished product we have in stock
-            const availableAmount = calculateAvailableSemiFinalQuantity(item.recipeId, recipes);
-            
-            if (availableAmount < requiredAmount) {
+            if (ingredient.quantity < requiredAmount) {
               insufficientResources.push({
-                name: semiFinalRecipe.name,
+                name: ingredient.name,
                 required: requiredAmount,
-                available: availableAmount,
-                unit: semiFinalRecipe.outputUnit
+                available: ingredient.quantity,
+                unit: ingredient.unit
               });
             }
           }
@@ -144,19 +152,6 @@ export const useProductionForm = ({
     
     toast.success('Запись о производстве обновлена');
     return true;
-  };
-
-  // Helper function to calculate available semi-final quantity
-  const calculateAvailableSemiFinalQuantity = (recipeId: string, allRecipes: Recipe[]): number => {
-    const semiFinalProductions = recipes
-      .filter(r => r.id === recipeId)
-      .map(recipe => {
-        // Here you would get the total produced amount minus any consumed amount
-        // For simplicity, you can start with just a placeholder
-        return 10; // This should be calculated properly from production history
-      });
-    
-    return semiFinalProductions.length > 0 ? semiFinalProductions[0] : 0;
   };
 
   return {

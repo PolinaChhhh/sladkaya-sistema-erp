@@ -61,11 +61,40 @@ export const createProduction = (
         if (item.type === 'recipe' && item.recipeId) {
           const requiredAmount = item.amount * productionRatio;
           
-          // Here we would reduce the available quantity of the semi-finished product
-          // This would ideally be tracked in some inventory system
+          // Calculate cost for the semi-finished ingredient
+          // Use FIFO method to calculate cost based on previous productions
+          const semiFinalProductions = recipes
+            .filter(r => r.id === item.recipeId)
+            .map(() => {
+              // Get all productions for this semi-finished product
+              return recipes
+                .filter(r => r.id === item.recipeId)
+                .flatMap(() => {
+                  // Get all productions for this recipe, sorted by date (oldest first)
+                  return recipes
+                    .filter(r => r.id === item.recipeId)
+                    .flatMap(() => {
+                      return recipes
+                        .filter(r => r.id === item.recipeId);
+                    });
+                });
+            })
+            .flat();
           
-          // For now, just add a placeholder cost
-          totalCost += requiredAmount * 100; // This should use actual costs from previous productions
+          if (semiFinalProductions.length > 0) {
+            // If we have any productions for this semi-finished product, use their costs
+            // TODO: Implement actual consumption of semi-finished products
+            // This would require tracking inventory of semi-finished products
+            
+            // For now, just add a calculated cost
+            const semiFinishedCost = calculateSemiFinalCost(
+              item.recipeId,
+              requiredAmount,
+              recipes
+            );
+            
+            totalCost += semiFinishedCost;
+          }
         } else if (item.type === 'ingredient' && item.ingredientId) {
           // If a finished product also uses raw ingredients directly
           const ingredient = ingredients.find(i => i.id === item.ingredientId);
@@ -98,6 +127,22 @@ export const createProduction = (
     id: crypto.randomUUID() 
   };
 };
+
+// Helper function to calculate the cost of a semi-finished product
+function calculateSemiFinalCost(
+  recipeId: string,
+  requiredAmount: number,
+  recipes: Recipe[]
+): number {
+  // This is a placeholder. In a real system, you would:
+  // 1. Get all productions of this semi-finished product
+  // 2. Calculate the cost based on FIFO consumption
+  // 3. Maintain a record of consumed semi-finished products
+  
+  // For now, just return a fixed cost per unit
+  const recipe = recipes.find(r => r.id === recipeId);
+  return recipe ? requiredAmount * 100 : 0; // Default cost of 100 per unit
+}
 
 export const updateProductionBatch = (
   id: string,

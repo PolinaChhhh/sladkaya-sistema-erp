@@ -35,6 +35,13 @@ export const useProductionState = () => {
     );
   };
   
+  // Hook for recipe utilities
+  const { 
+    getRecipeName, 
+    getRecipeOutput, 
+    checkSemiFinalAvailability 
+  } = useProductionUtils(recipes, productions);
+  
   // Hook for form state and handling
   const { 
     formData, 
@@ -46,9 +53,11 @@ export const useProductionState = () => {
   } = useProductionForm({
     recipes,
     ingredients,
+    productions,
     addProduction,
     updateProduction,
-    calculateCost
+    calculateCost,
+    checkSemiFinalAvailability
   });
   
   // Hook for dialog state
@@ -63,9 +72,6 @@ export const useProductionState = () => {
     openEditDialog,
     openDeleteDialog
   } = useProductionDialogs();
-  
-  // Hook for recipe utilities
-  const { getRecipeName, getRecipeOutput } = useProductionUtils(recipes);
   
   // Handle delete production
   const handleDeleteProduction = () => {
@@ -114,6 +120,7 @@ export const useProductionState = () => {
     openDeleteDialog,
     calculateCost,
     getRecipeName,
-    getRecipeOutput
+    getRecipeOutput,
+    checkSemiFinalAvailability
   };
 };
