@@ -3,17 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { 
   DialogContent, 
   DialogHeader, 
-  DialogTitle,
-  DialogFooter
+  DialogTitle
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Recipe } from '@/store/recipeStore';
 import { ProductionFormData } from '../hooks/useProductionPage';
-import { AlertCircle } from 'lucide-react';
+import { SelectRecipeStep, QuantityStep, SemiFinalsStep, FormFooter } from './form-steps';
 
 interface ProductionFormProps {
   title: string;
@@ -38,9 +32,6 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
   // Find the selected recipe to get its unit and required semi-finals
   const selectedRecipe = recipes.find(r => r.id === formData.recipeId);
   const outputUnit = selectedRecipe ? selectedRecipe.outputUnit : '';
-  
-  // Filtered recipes - only show finished products for the first step
-  const finishedRecipes = recipes.filter(r => r.category === 'finished');
   
   // Get required semi-finals for the selected recipe
   const requiredSemiFinals = selectedRecipe 
@@ -134,105 +125,38 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
         
         <div className="grid gap-4 py-4">
           {currentStep === 'select-recipe' && (
-            <div>
-              <Label htmlFor="recipe">Продукт</Label>
-              <Select
-                value={formData.recipeId}
-                onValueChange={(value) => onFormDataChange({ recipeId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите продукт" />
-                </SelectTrigger>
-                <SelectContent>
-                  {finishedRecipes.map((recipe) => (
-                    <SelectItem key={recipe.id} value={recipe.id}>
-                      {recipe.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectRecipeStep 
+              recipes={recipes}
+              selectedRecipeId={formData.recipeId}
+              onRecipeChange={(value) => onFormDataChange({ recipeId: value })}
+            />
           )}
           
           {currentStep === 'enter-quantity' && (
-            <>
-              <div>
-                <Label htmlFor="quantity">Количество</Label>
-                <div className="flex">
-                  <Input
-                    id="quantity"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={formData.quantity}
-                    onChange={(e) => onFormDataChange({ quantity: parseFloat(e.target.value) || 0 })}
-                  />
-                  <span className="ml-2 flex items-center text-sm">{outputUnit}</span>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="date">Дата производства</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => onFormDataChange({ date: e.target.value })}
-                />
-              </div>
-            </>
+            <QuantityStep
+              quantity={formData.quantity}
+              onQuantityChange={(value) => onFormDataChange({ quantity: value })}
+              date={formData.date}
+              onDateChange={(value) => onFormDataChange({ date: value })}
+              outputUnit={outputUnit}
+            />
           )}
           
           {currentStep === 'select-semifinals' && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Требуемые полуфабрикаты</h3>
-              
-              {requiredSemiFinals.length > 0 ? (
-                <div className="space-y-2 border rounded-md p-3">
-                  {requiredSemiFinals.map((semiFinal) => (
-                    <div key={semiFinal.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`semi-final-${semiFinal.id}`}
-                        checked={formData.semiFinalsToProduce?.includes(semiFinal.id) ?? true}
-                        onCheckedChange={() => toggleSemiFinal(semiFinal.id)}
-                      />
-                      <Label htmlFor={`semi-final-${semiFinal.id}`} className="text-sm font-normal">
-                        {semiFinal.name} (требуется {semiFinal.amount.toFixed(2)})
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center p-3 text-sm text-amber-600 bg-amber-50 rounded-md">
-                  <AlertCircle className="h-4 w-4 mr-2" />
-                  <span>У данного продукта нет полуфабрикатов</span>
-                </div>
-              )}
-              
-              <div className="pt-2">
-                <p className="text-xs text-gray-500">
-                  Выбранные полуфабрикаты будут произведены автоматически перед основным продуктом
-                </p>
-              </div>
-            </div>
+            <SemiFinalsStep
+              requiredSemiFinals={requiredSemiFinals}
+              selectedSemiFinals={formData.semiFinalsToProduce || []}
+              onSemiFinalToggle={toggleSemiFinal}
+            />
           )}
         </div>
         
-        <DialogFooter>
-          {currentStep !== 'select-recipe' && (
-            <Button type="button" variant="outline" onClick={handlePrevStep}>
-              Назад
-            </Button>
-          )}
-          
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Отмена
-          </Button>
-          
-          <Button type="submit" className="bg-cream-600 hover:bg-cream-700">
-            {currentStep === 'select-semifinals' ? 'Сохранить' : 'Далее'}
-          </Button>
-        </DialogFooter>
+        <FormFooter
+          currentStep={currentStep}
+          onPrevious={handlePrevStep}
+          onCancel={onCancel}
+          onNext={handleNextStep}
+        />
       </form>
     </DialogContent>
   );
