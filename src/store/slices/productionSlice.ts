@@ -3,6 +3,7 @@ import { StateCreator } from 'zustand';
 import { ProductionBatch, Recipe, Ingredient, Receipt, ReceiptItem } from '../types';
 import { consumeIngredientsWithFifo } from '../utils/fifoCalculator';
 import { calculateTotalProductionCost } from '@/features/production/utils/productionCalculator';
+import { deleteProductionBatch } from '../operations/production/deleteProduction';
 
 export interface ProductionSlice {
   productions: ProductionBatch[];
@@ -11,15 +12,20 @@ export interface ProductionSlice {
   deleteProduction: (id: string) => void;
 }
 
+type ProductionDependencies = {
+  recipes: Recipe[];
+  ingredients: Ingredient[];
+  receipts: Receipt[];
+  updateIngredient: (id: string, data: Partial<Ingredient>) => void;
+  updateReceiptItem: (receiptId: string, itemId: string, data: Partial<ReceiptItem>) => void;
+  updateRecipe: (id: string, data: Partial<Recipe>) => void;
+};
+
 export const createProductionSlice: StateCreator<
-  ProductionSlice & {
-    recipes: Recipe[];
-    ingredients: Ingredient[];
-    receipts: Receipt[];
-    updateIngredient: (id: string, data: Partial<Ingredient>) => void;
-    updateReceiptItem: (receiptId: string, itemId: string, data: Partial<ReceiptItem>) => void;
-    updateRecipe: (id: string, data: Partial<Recipe>) => void;
-  }
+  ProductionSlice & ProductionDependencies,
+  [],
+  [],
+  ProductionSlice
 > = (set, get) => ({
   productions: [],
   
@@ -105,7 +111,20 @@ export const createProductionSlice: StateCreator<
     )
   })),
   
-  deleteProduction: (id) => set((state) => ({
-    productions: state.productions.filter((prod) => prod.id !== id)
-  })),
+  deleteProduction: (id) => {
+    const { productions, recipes, ingredients, receipts, updateIngredient, updateReceiptItem } = get();
+    
+    // Use the deleteProductionBatch utility to handle the deletion
+    const updatedProductions = deleteProductionBatch(
+      id,
+      productions,
+      recipes,
+      ingredients,
+      receipts,
+      updateIngredient,
+      updateReceiptItem
+    );
+    
+    set({ productions: updatedProductions });
+  },
 });
