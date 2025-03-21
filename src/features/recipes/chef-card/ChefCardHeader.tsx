@@ -14,12 +14,12 @@ const ChefCardHeader: React.FC<ChefCardHeaderProps> = ({ recipe, onEdit }) => {
   return (
     <div className="flex justify-between items-center mb-6">
       <div className="flex items-center gap-3">
-        <div className="bg-confection-100 p-2 rounded-full">
-          <ChefHat className="h-6 w-6 text-confection-600" />
+        <div className="bg-rose-100 p-2 rounded-full">
+          <ChefHat className="h-6 w-6 text-rose-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-playfair text-gray-800 font-bold">{recipe.name}</h1>
-          <Badge variant="outline" className="bg-white/80 text-xs font-normal mt-1">
+          <h1 className="text-3xl font-playfair text-rose-700 font-bold">{recipe.name}</h1>
+          <Badge variant="outline" className="bg-white text-xs font-normal mt-1 border-cream-200">
             {recipe.category === 'finished' ? 'Готовая продукция' : 'Полуфабрикат'}
           </Badge>
         </div>
@@ -30,6 +30,7 @@ const ChefCardHeader: React.FC<ChefCardHeaderProps> = ({ recipe, onEdit }) => {
           onClick={() => onEdit(recipe)} 
           variant="outline" 
           size="sm"
+          className="border-rose-200 text-rose-600 hover:bg-rose-50"
         >
           <Edit className="mr-2 h-4 w-4" />
           Редактировать

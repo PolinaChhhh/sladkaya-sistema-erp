@@ -13,13 +13,13 @@ const RecipeImage: React.FC<RecipeImageProps> = ({ name, imageUrl }) => {
   
   return (
     <div className="flex justify-center mb-6">
-      <Avatar className="h-48 w-48 border-4 border-cream-100">
+      <Avatar className="h-48 w-48 border-4 border-cream-100 shadow-md">
         <AvatarImage 
           src={imageUrl || placeholderImage} 
           alt={name} 
           className="object-cover"
         />
-        <AvatarFallback className="text-3xl font-playfair text-confection-500">
+        <AvatarFallback className="text-3xl font-playfair text-rose-500 bg-rose-50">
           {name.substring(0, 2)}
         </AvatarFallback>
       </Avatar>

@@ -33,6 +33,7 @@ export type Recipe = {
   category: RecipeCategory;
   tags: RecipeTag[];
   imageUrl?: string; // Add image URL field
+  preparationTime?: number; // Add preparation time field (in minutes)
 };
 
 export type ProductionBatch = {

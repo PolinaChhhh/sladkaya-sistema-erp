@@ -68,7 +68,10 @@ const ChefCard: React.FC<ChefCardProps> = ({
           {/* Right column: Process */}
           <div className="md:col-span-2">
             {/* Recipe Process Section */}
-            <RecipeProcess processSteps={processSteps} />
+            <RecipeProcess 
+              processSteps={processSteps} 
+              preparationTime={recipe.preparationTime}
+            />
           </div>
         </div>
       </div>
