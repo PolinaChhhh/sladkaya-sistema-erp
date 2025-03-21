@@ -17,7 +17,7 @@ interface RecipeItemsManagerProps {
   getRecipeName: (id: string) => string;
   getRecipeUnit: (id: string) => string;
   onUpdateItems: (items: RecipeItem[]) => void;
-  category: 'semi-finished' | 'finished';
+  category: 'finished';
 }
 
 const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
@@ -32,48 +32,22 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   onUpdateItems,
   category,
 }) => {
-  // Filter semi-finished recipes for use in finished products
-  const availableRecipes = recipes.filter(recipe => 
-    recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
-  );
-
   const addRecipeItem = () => {
-    // For finished products, only allow recipe type (semi-finished products)
-    // For semi-finished products, only allow ingredient type
-    if (category === 'semi-finished') {
-      if (ingredients.length === 0) {
-        toast.error('Сначала добавьте ингредиенты');
-        return;
-      }
-      
-      const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
-      const newItem: RecipeItem = { 
-        type: 'ingredient', 
-        ingredientId: defaultId, 
-        amount: 0,
-        isPackaging: false 
-      };
-      
-      console.log('Added new ingredient item:', newItem);
-      onUpdateItems([...items, newItem]);
-    } else {
-      // For finished products
-      if (availableRecipes.length === 0) {
-        toast.error('Сначала создайте полуфабрикаты');
-        return;
-      }
-      
-      const defaultId = availableRecipes.length > 0 ? availableRecipes[0].id : '';
-      const newItem: RecipeItem = { 
-        type: 'recipe', 
-        recipeId: defaultId, 
-        amount: 0,
-        isPackaging: false
-      };
-      
-      console.log('Added new recipe item:', newItem);
-      onUpdateItems([...items, newItem]);
+    if (ingredients.length === 0) {
+      toast.error('Сначала добавьте ингредиенты');
+      return;
     }
+      
+    const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
+    const newItem: RecipeItem = { 
+      type: 'ingredient', 
+      ingredientId: defaultId, 
+      amount: 0,
+      isPackaging: false 
+    };
+      
+    console.log('Added new ingredient item:', newItem);
+    onUpdateItems([...items, newItem]);
   };
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
@@ -97,7 +71,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     <div className="space-y-3 mt-2">
       <div className="flex justify-between items-center">
         <Label>
-          {category === 'finished' ? 'Полуфабрикаты' : 'Ингредиенты'}
+          Ингредиенты
         </Label>
         <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
           <Plus className="h-3 w-3 mr-1" /> Добавить
@@ -112,7 +86,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               item={item}
               index={index}
               ingredients={ingredients}
-              recipes={availableRecipes}
+              recipes={[]}
               getIngredientName={getIngredientName}
               getIngredientUnit={getIngredientUnit}
               getRecipeName={getRecipeName}
@@ -120,16 +94,14 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               onUpdate={updateRecipeItem}
               onRemove={removeRecipeItem}
               allowRecipeItems={false}
-              forceRecipeItems={category === 'finished'}
-              forcedType={category === 'semi-finished' ? 'ingredient' : 'recipe'}
+              forceRecipeItems={false}
+              forcedType="ingredient"
             />
           ))}
         </div>
       ) : (
         <p className="text-sm text-gray-500 py-2">
-          {category === 'finished' 
-            ? 'Нет добавленных полуфабрикатов' 
-            : 'Нет добавленных ингредиентов'}
+          Нет добавленных ингредиентов
         </p>
       )}
     </div>

@@ -2,12 +2,11 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Ingredient, RecipeItem, Recipe, RecipeCategory, RecipeTag } from '@/store/recipeStore';
+import { Ingredient, RecipeItem, Recipe, RecipeTag } from '@/store/recipeStore';
 import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
 import RecipeItemsManager from './RecipeItemsManager';
-import RecipeItemRow from './RecipeItemRow'; // Added this import
 import { useRecipeCalculations } from './hooks/useRecipeCalculations';
 
 interface RecipeFormProps {
@@ -21,7 +20,7 @@ interface RecipeFormProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
-    category: RecipeCategory;
+    category: 'finished';
     tags: RecipeTag[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -31,7 +30,7 @@ interface RecipeFormProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
-    category: RecipeCategory;
+    category: 'finished';
     tags: RecipeTag[];
   }>>;
   onSubmit: () => void;
@@ -76,36 +75,15 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   }, [calculatedLossPercentage, setFormData]);
 
-  // Automatically set the output unit based on category
+  // Automatically set the output unit to "шт"
   useEffect(() => {
-    if (formData.category === 'semi-finished' && formData.outputUnit !== 'кг') {
-      setFormData(prev => ({
-        ...prev,
-        outputUnit: 'кг'
-      }));
-    } else if (formData.category === 'finished' && formData.outputUnit !== 'шт') {
+    if (formData.outputUnit !== 'шт') {
       setFormData(prev => ({
         ...prev,
         outputUnit: 'шт'
       }));
     }
-  }, [formData.category, formData.outputUnit, setFormData]);
-
-  // Handle category change
-  const handleCategoryChange = (category: RecipeCategory) => {
-    setFormData({
-      ...formData,
-      category,
-      outputUnit: category === 'semi-finished' ? 'кг' : 'шт'
-    });
-
-    // Since we changed category, we should clear the items
-    // to avoid mixing semi-finished and finished product items
-    setFormData(prev => ({
-      ...prev,
-      items: []
-    }));
-  };
+  }, [formData.outputUnit, setFormData]);
 
   // Handle tags change
   const handleTagsChange = (tags: RecipeTag[]) => {
@@ -115,7 +93,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   };
 
-  // Separate items by type (ingredients/recipes vs packaging)
+  // Separate items by type (ingredients vs packaging)
   const mainItems = formData.items.filter(item => !item.isPackaging);
   const packagingItems = formData.items.filter(item => item.isPackaging);
 
@@ -164,11 +142,9 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         <RecipeBasicFields
           name={formData.name}
           description={formData.description}
-          category={formData.category}
           tags={formData.tags}
           onNameChange={(value) => setFormData({ ...formData, name: value })}
           onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
-          onCategoryChange={handleCategoryChange}
           onTagsChange={handleTagsChange}
         />
         

@@ -1,7 +1,6 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
 import { restoreIngredientsToReceipts } from '../../../utils/fifo/restoreIngredients';
-import { restoreSemiFinalProductsWithFifo } from '../../../utils/fifo/restoreSemiFinals';
 
 /**
  * Handles deleting a production batch
@@ -33,20 +32,13 @@ export const handleDeleteProduction = (
     return;
   }
   
-  console.log(`Deleting production ${idStr} of recipe ${recipe.name} (category: ${recipe.category})`);
+  console.log(`Deleting production ${idStr} of recipe ${recipe.name}`);
   console.log(`Production has consumptionDetails: ${!!production.consumptionDetails}`);
   if (production.consumptionDetails) {
     console.log(`Consumption details keys: ${Object.keys(production.consumptionDetails).join(', ')}`);
   }
   
-  // Check if this is a semi-finished or a finished product
-  const isSemiFinished = recipe.category === 'semi-finished';
-  
-  // Always restore direct ingredients to receipts for any production containing ingredients
-  // This handles both packaging materials for finished products and all ingredients for semi-finished products
-  console.log(`Restoring direct ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
-  
-  // Важно: передаем actual quantity из production для точного восстановления
+  // Restore ingredients to receipts
   restoreIngredientsToReceipts(
     recipe,
     production.quantity,
@@ -57,38 +49,5 @@ export const handleDeleteProduction = (
     production.consumptionDetails // Pass consumption details for precise restoration
   );
   
-  // If this is a semi-finished product, we want to decompose it to ingredients
-  // If it's a finished product, we only want to restore the semi-finished products, not decompose them
-  const shouldDecompose = isSemiFinished;
-  
-  console.log(`Should decompose semi-finals? ${shouldDecompose ? 'Yes' : 'No'} for ${recipe.name}`);
-  
-  // Restore semi-finished products using FIFO details if available
-  // Only if the recipe has any semi-final products
-  if (recipe.items.some(item => item.type === 'recipe')) {
-    try {
-      restoreSemiFinalProductsWithFifo(
-        recipe,
-        production.quantity,
-        productions,
-        // Safe casting the consumption details to the expected type
-        production.consumptionDetails || {}, // Provide empty object if undefined
-        updateProduction,
-        recipes,
-        ingredients,
-        receipts,
-        updateIngredient,
-        updateReceiptItem,
-        shouldDecompose // Set based on recipe category to correctly handle decomposition
-      );
-    } catch (error) {
-      console.error('Error restoring semi-finals:', error);
-    }
-  }
-  
-  if (shouldDecompose) {
-    console.log(`Semi-finished production ${idStr} has been deleted and ingredients have been returned to stock`);
-  } else {
-    console.log(`Finished production ${idStr} has been deleted and semi-finals have been restored to stock`);
-  }
+  console.log(`Production ${idStr} has been deleted and ingredients have been returned to stock`);
 };

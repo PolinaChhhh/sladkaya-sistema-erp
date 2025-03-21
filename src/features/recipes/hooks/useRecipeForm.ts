@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Recipe, RecipeItem, RecipeCategory, RecipeTag } from '@/store/recipeStore';
+import { Recipe, RecipeItem, RecipeTag } from '@/store/recipeStore';
 import { toast } from 'sonner';
 
 interface UseRecipeFormProps {
@@ -20,16 +20,16 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
-    category: RecipeCategory;
+    category: 'finished';
     tags: RecipeTag[];
   }>({
     name: '',
     description: '',
     output: 1,
-    outputUnit: 'кг',
+    outputUnit: 'шт',
     lossPercentage: 0,
     items: [],
-    category: 'semi-finished',
+    category: 'finished',
     tags: [],
   });
   
@@ -38,10 +38,10 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       name: '',
       description: '',
       output: 1,
-      outputUnit: 'кг',
+      outputUnit: 'шт',
       lossPercentage: 0,
       items: [],
-      category: 'semi-finished',
+      category: 'finished',
       tags: [],
     });
     setIsCreateDialogOpen(true);
@@ -56,16 +56,18 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: recipe.outputUnit,
       lossPercentage: recipe.lossPercentage || 0,
       items: recipe.items.map(item => {
-        // Ensure backward compatibility for old recipe items
-        if (!item.type) {
+        // Удаляем все рецепты полуфабрикатов из существующих рецептов
+        if (item.type === 'recipe') {
           return { 
-            ...item, 
-            type: 'ingredient' 
+            type: 'ingredient',
+            ingredientId: '', 
+            amount: 0,
+            isPackaging: false
           };
         }
         return { ...item };
-      }),
-      category: recipe.category || 'semi-finished', // Default for backward compatibility
+      }).filter(item => item.type === 'ingredient'), // Оставляем только ингредиенты
+      category: 'finished', // Всегда устанавливаем категорию как готовая продукция
       tags: recipe.tags || [], // Handle recipes without tags
     });
     setIsEditDialogOpen(true);
@@ -85,7 +87,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: formData.outputUnit,
       lossPercentage: formData.lossPercentage,
       lastProduced: null,
-      category: formData.category,
+      category: 'finished',
       tags: formData.tags,
     });
     
@@ -108,7 +110,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       output: formData.output,
       outputUnit: formData.outputUnit,
       lossPercentage: formData.lossPercentage,
-      category: formData.category,
+      category: 'finished',
       tags: formData.tags,
     });
     

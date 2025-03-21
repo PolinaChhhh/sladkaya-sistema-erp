@@ -24,7 +24,9 @@ export const createRecipeSlice: StateCreator<
     recipes: [...state.recipes, { 
       ...recipe, 
       id: crypto.randomUUID(),
-      tags: recipe.tags || [] // Ensure tags is defined
+      tags: recipe.tags || [], // Ensure tags is defined
+      category: 'finished', // Всегда устанавливаем категорию как готовая продукция
+      items: recipe.items.filter(item => item.type === 'ingredient') // Оставляем только ингредиенты
     }]
   })),
   
@@ -34,7 +36,11 @@ export const createRecipeSlice: StateCreator<
         ...recipe, 
         ...data,
         // Ensure tags is defined when updating
-        tags: data.tags !== undefined ? data.tags : recipe.tags || []
+        tags: data.tags !== undefined ? data.tags : recipe.tags || [],
+        // Убедимся, что категория всегда "finished"
+        category: 'finished',
+        // Если обновляем элементы, фильтруем только ингредиенты
+        items: data.items ? data.items.filter(item => item.type === 'ingredient') : recipe.items
       } : recipe
     )
   })),
