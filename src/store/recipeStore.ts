@@ -16,13 +16,13 @@ export type {
   Recipe, 
   Supplier, 
   Receipt, 
-  ReceiptItem,  // Add ReceiptItem export
+  ReceiptItem,  
   ShippingDocument, 
   Buyer,
   ProductionBatch, 
-  RecipeItem,    // Add RecipeItem export
-  RecipeCategory, // Add RecipeCategory export
-  RecipeTag      // Add RecipeTag export
+  RecipeItem,    
+  RecipeCategory, 
+  RecipeTag      
 } from './types';
 
 // Create the store combining all slices
@@ -56,7 +56,22 @@ export const useStore = create<StoreState>()(
         error: null
       }),
       {
-        name: 'recipe-store'
+        name: 'recipe-store',
+        // Add storage configuration to ensure data persists properly
+        partialize: (state) => ({
+          ingredients: state.ingredients,
+          recipes: state.recipes,
+          suppliers: state.suppliers,
+          receipts: state.receipts,
+          productions: state.productions,
+          shipments: state.shipments,
+          buyers: state.buyers,
+          // Don't persist these states
+          isLoading: false,
+          error: null
+        }),
+        // Ensure version is set to detect storage schema changes
+        version: 1
       }
     )
   )
