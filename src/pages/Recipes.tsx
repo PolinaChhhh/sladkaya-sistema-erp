@@ -1,136 +1,47 @@
 
 import React, { useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
-import { useStore, Recipe } from '@/store/recipeStore';
-import { toast } from 'sonner';
+import { useStore } from '@/store/recipeStore';
 
 // Import refactored components
 import RecipeHeader from '@/features/recipes/RecipeHeader';
 import RecipeSearch from '@/features/recipes/RecipeSearch';
 import RecipesList from '@/features/recipes/RecipesList';
-import RecipeForm from '@/features/recipes/RecipeForm';
-import DeleteConfirmDialog from '@/features/recipes/DeleteConfirmDialog';
+import RecipeDialogs from '@/features/recipes/RecipeDialogs';
+
+// Import custom hooks
+import { useRecipeForm } from '@/features/recipes/hooks/useRecipeForm';
+import { useRecipeDelete } from '@/features/recipes/hooks/useRecipeDelete';
 
 const Recipes = () => {
   const { recipes, ingredients, addRecipe, updateRecipe, deleteRecipe } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   
-  const [formData, setFormData] = useState<{
-    name: string;
-    description: string;
-    output: number;
-    outputUnit: string;
-    lossPercentage: number;
-    items: {
-      type?: 'ingredient' | 'recipe';
-      ingredientId?: string;
-      recipeId?: string;
-      amount: number;
-    }[];
-  }>({
-    name: '',
-    description: '',
-    output: 1,
-    outputUnit: 'кг',
-    lossPercentage: 0,
-    items: [],
-  });
+  // Use custom hooks
+  const { 
+    formData, 
+    setFormData,
+    isCreateDialogOpen,
+    setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    selectedRecipe: formSelectedRecipe,
+    initCreateForm,
+    initEditForm,
+    handleCreateRecipe,
+    handleUpdateRecipe
+  } = useRecipeForm({ addRecipe, updateRecipe });
+  
+  const {
+    isDeleteConfirmOpen,
+    setIsDeleteConfirmOpen,
+    selectedRecipe: deleteSelectedRecipe,
+    initDeleteConfirm,
+    handleDeleteRecipe
+  } = useRecipeDelete({ deleteRecipe });
   
   const filteredRecipes = recipes.filter(recipe => 
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
-  const initCreateForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      output: 1,
-      outputUnit: 'кг',
-      lossPercentage: 0,
-      items: [],
-    });
-    setIsCreateDialogOpen(true);
-  };
-  
-  const initEditForm = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setFormData({
-      name: recipe.name,
-      description: recipe.description,
-      output: recipe.output,
-      outputUnit: recipe.outputUnit,
-      lossPercentage: recipe.lossPercentage || 0,
-      items: recipe.items.map(item => {
-        // Ensure backward compatibility for old recipe items
-        if (!item.type) {
-          return { 
-            ...item, 
-            type: 'ingredient' 
-          };
-        }
-        return { ...item };
-      }),
-    });
-    setIsEditDialogOpen(true);
-  };
-  
-  const initDeleteConfirm = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setIsDeleteConfirmOpen(true);
-  };
-  
-  const handleCreateRecipe = () => {
-    if (formData.name.trim() === '') {
-      toast.error('Введите название рецепта');
-      return;
-    }
-    
-    addRecipe({
-      name: formData.name,
-      description: formData.description,
-      items: formData.items,
-      output: formData.output,
-      outputUnit: formData.outputUnit,
-      lossPercentage: formData.lossPercentage,
-      lastProduced: null,
-    });
-    
-    toast.success('Рецепт успешно создан');
-    setIsCreateDialogOpen(false);
-  };
-  
-  const handleUpdateRecipe = () => {
-    if (!selectedRecipe) return;
-    
-    if (formData.name.trim() === '') {
-      toast.error('Введите название рецепта');
-      return;
-    }
-    
-    updateRecipe(selectedRecipe.id, {
-      name: formData.name,
-      description: formData.description,
-      items: formData.items,
-      output: formData.output,
-      outputUnit: formData.outputUnit,
-      lossPercentage: formData.lossPercentage,
-    });
-    
-    toast.success('Рецепт успешно обновлен');
-    setIsEditDialogOpen(false);
-  };
-  
-  const handleDeleteRecipe = () => {
-    if (!selectedRecipe) return;
-    
-    deleteRecipe(selectedRecipe.id);
-    toast.success('Рецепт успешно удален');
-    setIsDeleteConfirmOpen(false);
-  };
   
   const getIngredientName = (id: string) => {
     const ingredient = ingredients.find(i => i.id === id);
@@ -152,6 +63,9 @@ const Recipes = () => {
     return recipe ? recipe.outputUnit : '';
   };
 
+  // Use the current selected recipe (either from form or delete context)
+  const selectedRecipe = formSelectedRecipe || deleteSelectedRecipe;
+
   return (
     <div className="max-w-5xl mx-auto">
       <RecipeHeader onAddNew={initCreateForm} />
@@ -171,51 +85,27 @@ const Recipes = () => {
         getRecipeUnit={getRecipeUnit}
       />
       
-      {/* Create Recipe Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <RecipeForm
-          isOpen={isCreateDialogOpen}
-          onClose={() => setIsCreateDialogOpen(false)}
-          title="Создать новый рецепт"
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleCreateRecipe}
-          ingredients={ingredients}
-          recipes={recipes}
-          getIngredientName={getIngredientName}
-          getIngredientUnit={getIngredientUnit}
-          getRecipeName={getRecipeName}
-          getRecipeUnit={getRecipeUnit}
-        />
-      </Dialog>
-      
-      {/* Edit Recipe Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <RecipeForm
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          title="Редактировать рецепт"
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleUpdateRecipe}
-          ingredients={ingredients}
-          recipes={recipes}
-          currentRecipeId={selectedRecipe?.id}
-          getIngredientName={getIngredientName}
-          getIngredientUnit={getIngredientUnit}
-          getRecipeName={getRecipeName}
-          getRecipeUnit={getRecipeUnit}
-        />
-      </Dialog>
-      
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DeleteConfirmDialog
-          name={selectedRecipe?.name || ''}
-          onCancel={() => setIsDeleteConfirmOpen(false)}
-          onConfirm={handleDeleteRecipe}
-        />
-      </Dialog>
+      {/* Use the RecipeDialogs component */}
+      <RecipeDialogs
+        isCreateDialogOpen={isCreateDialogOpen}
+        setIsCreateDialogOpen={setIsCreateDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        setIsEditDialogOpen={setIsEditDialogOpen}
+        isDeleteConfirmOpen={isDeleteConfirmOpen}
+        setIsDeleteConfirmOpen={setIsDeleteConfirmOpen}
+        formData={formData}
+        setFormData={setFormData}
+        selectedRecipe={selectedRecipe}
+        handleCreateRecipe={handleCreateRecipe}
+        handleUpdateRecipe={handleUpdateRecipe}
+        handleDeleteRecipe={handleDeleteRecipe}
+        ingredients={ingredients}
+        recipes={recipes}
+        getIngredientName={getIngredientName}
+        getIngredientUnit={getIngredientUnit}
+        getRecipeName={getRecipeName}
+        getRecipeUnit={getRecipeUnit}
+      />
     </div>
   );
 };
