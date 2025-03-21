@@ -18,7 +18,7 @@ interface ProductionDetailsProps {
   recipe: Recipe | null;
   getRecipeName: (id: string) => string;
   getRecipeOutput: (id: string) => string;
-  getIngredientDetails: (recipes: Recipe[], recipeId: string, quantity: number) => any[];
+  getIngredientDetails: (recipeId: string, quantity: number) => any[];
   getIngredientUsageDetails: (recipeId: string, quantity: number) => any[];
   getSemiFinalBreakdown: (recipeId: string, quantity: number) => any[];
   onClose: () => void;
@@ -50,7 +50,7 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
     );
   }
   
-  const ingredientDetails = getIngredientDetails([recipe], recipe.id, production.quantity);
+  const ingredientDetails = getIngredientDetails(recipe.id, production.quantity);
   const usageDetails = getIngredientUsageDetails(recipe.id, production.quantity);
   const semiFinalBreakdown = getSemiFinalBreakdown(recipe.id, production.quantity);
   

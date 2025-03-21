@@ -18,16 +18,19 @@ export const getIngredientDetails = (
   const recipe = recipes.find(r => r.id === recipeId);
   if (!recipe) return [];
 
-  return recipe.ingredients.map(item => {
-    const ingredient = ingredients.find(i => i.id === item.ingredientId);
-    const amount = (item.amount * quantity) / recipe.outputQuantity;
-    
-    return {
-      ingredientId: item.ingredientId,
-      name: ingredient ? ingredient.name : 'Неизвестный ингредиент',
-      amount: amount,
-      unit: ingredient ? ingredient.unit : '',
-      cost: amount * (ingredient ? ingredient.price : 0)
-    };
-  });
+  return recipe.items
+    .filter(item => item.type === 'ingredient' && item.ingredientId)
+    .map(item => {
+      const ingredientId = item.ingredientId as string;
+      const ingredient = ingredients.find(i => i.id === ingredientId);
+      const amount = (item.amount * quantity) / recipe.output;
+      
+      return {
+        ingredientId: ingredientId,
+        name: ingredient ? ingredient.name : 'Неизвестный ингредиент',
+        amount: amount,
+        unit: ingredient ? ingredient.unit : '',
+        cost: amount * (ingredient ? ingredient.cost : 0)
+      };
+    });
 };

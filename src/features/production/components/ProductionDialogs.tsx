@@ -36,10 +36,9 @@ interface ProductionDialogsProps {
   selectedRecipe: Recipe | null;
   
   // Utility functions
-  calculateCost: (recipe: Recipe, quantity: number) => number;
   getRecipeName: (id: string) => string;
   getRecipeOutput: (id: string) => string;
-  getIngredientDetails: (recipes: Recipe[], recipeId: string, quantity: number) => any[];
+  getIngredientDetails: (recipeId: string, quantity: number) => any[];
   getIngredientUsageDetails: (recipeId: string, quantity: number) => any[];
   getSemiFinalBreakdown: (recipeId: string, quantity: number) => any[];
 }
@@ -72,7 +71,6 @@ const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
   selectedRecipe,
   
   // Utility functions
-  calculateCost,
   getRecipeName,
   getRecipeOutput,
   getIngredientDetails,
