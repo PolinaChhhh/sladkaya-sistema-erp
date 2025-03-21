@@ -35,19 +35,17 @@ export const handleDeleteProduction = (
   // Check if this is a semi-finished or a finished product
   const isSemiFinished = recipe.category === 'semi-finished';
   
-  // Restore ingredients to receipts - but only for semi-finished products
-  // or if the recipe doesn't use any semi-finals
-  if (isSemiFinished || !recipe.items.some(item => item.type === 'recipe')) {
-    console.log(`Restoring ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
-    restoreIngredientsToReceipts(
-      recipe,
-      production.quantity,
-      ingredients,
-      receipts,
-      updateIngredient,
-      updateReceiptItem
-    );
-  }
+  // Always restore ingredients to receipts for any production containing ingredients
+  // This handles both packaging materials for finished products and all ingredients for semi-finished products
+  console.log(`Restoring direct ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
+  restoreIngredientsToReceipts(
+    recipe,
+    production.quantity,
+    ingredients,
+    receipts,
+    updateIngredient,
+    updateReceiptItem
+  );
   
   // If this is a semi-finished product, we want to decompose it to ingredients
   // If it's a finished product, we only want to restore the semi-finished products, not decompose them
@@ -56,20 +54,23 @@ export const handleDeleteProduction = (
   console.log(`Should decompose semi-finals? ${shouldDecompose ? 'Yes' : 'No'} for ${recipe.name}`);
   
   // Restore semi-finished products using FIFO details if available
-  restoreSemiFinalProductsWithFifo(
-    recipe,
-    production.quantity,
-    productions,
-    // Safe casting the consumption details to the expected type
-    production.consumptionDetails as unknown as Record<string, any[]>,
-    updateProduction,
-    recipes,
-    ingredients,
-    receipts,
-    updateIngredient,
-    updateReceiptItem,
-    shouldDecompose // Set based on recipe category to correctly handle decomposition
-  );
+  // Only if the recipe has any semi-final products
+  if (recipe.items.some(item => item.type === 'recipe')) {
+    restoreSemiFinalProductsWithFifo(
+      recipe,
+      production.quantity,
+      productions,
+      // Safe casting the consumption details to the expected type
+      production.consumptionDetails as unknown as Record<string, any[]>,
+      updateProduction,
+      recipes,
+      ingredients,
+      receipts,
+      updateIngredient,
+      updateReceiptItem,
+      shouldDecompose // Set based on recipe category to correctly handle decomposition
+    );
+  }
   
   if (shouldDecompose) {
     console.log(`Semi-finished production ${id} has been deleted and ingredients have been returned to stock`);
