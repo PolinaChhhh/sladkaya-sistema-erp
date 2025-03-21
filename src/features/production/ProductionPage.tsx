@@ -6,8 +6,10 @@ import ProductionList from './components/ProductionList';
 import ProductionDialog from './components/ProductionDialog';
 import EditProductionDialog from './components/EditProductionDialog';
 import DeleteConfirmDialog from './components/DeleteConfirmDialog';
+import ProductionDetailDialog from './components/ProductionDetailDialog';
 import SearchBar from './components/SearchBar';
 import { useProductionState } from './hooks/useProductionState';
+import { useProductionDetails } from './hooks/useProductionDetails';
 import EmptyState from './components/EmptyState';
 import { Dialog } from '@/components/ui/dialog';
 
@@ -38,6 +40,16 @@ const ProductionPage = () => {
     checkSemiFinalAvailability
   } = useProductionState();
 
+  const {
+    isDetailDialogOpen,
+    openDetailDialog,
+    closeDetailDialog,
+    selectedProduction: detailProduction,
+    selectedRecipe,
+    getIngredientDetails,
+    getIngredientUsageDetails
+  } = useProductionDetails();
+
   console.log("Create dialog open:", isCreateDialogOpen);
   console.log("Form data:", formData);
 
@@ -60,6 +72,7 @@ const ProductionPage = () => {
           getRecipeOutput={getRecipeOutput}
           onEdit={openEditDialog}
           onDelete={openDeleteDialog}
+          onViewDetails={openDetailDialog}
         />
       ) : (
         <EmptyState icon={TrendingUp} />
@@ -95,6 +108,16 @@ const ProductionPage = () => {
           onConfirm={handleDeleteProduction}
         />
       </Dialog>
+      
+      <ProductionDetailDialog 
+        isOpen={isDetailDialogOpen}
+        onClose={closeDetailDialog}
+        production={detailProduction}
+        recipe={selectedRecipe}
+        getIngredientDetails={getIngredientDetails}
+        getRecipeName={getRecipeName}
+        getIngredientUsageDetails={getIngredientUsageDetails}
+      />
     </div>
   );
 };

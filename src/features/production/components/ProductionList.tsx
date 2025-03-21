@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Calendar, DollarSign, ChefHat, Info, Edit, Trash2 } from 'lucide-react';
+import { Calendar, DollarSign, ChefHat, Info, Edit, Trash2, Eye } from 'lucide-react';
 import GlassMorphicCard from '@/components/ui/GlassMorphicCard';
 import { Button } from '@/components/ui/button';
 import { ProductionBatch } from '@/store/types';
@@ -12,6 +12,7 @@ interface ProductionListProps {
   getRecipeOutput: (recipeId: string) => string;
   onEdit: (production: ProductionBatch) => void;
   onDelete: (production: ProductionBatch) => void;
+  onViewDetails: (production: ProductionBatch) => void;
 }
 
 const ProductionList: React.FC<ProductionListProps> = ({ 
@@ -19,7 +20,8 @@ const ProductionList: React.FC<ProductionListProps> = ({
   getRecipeName,
   getRecipeOutput,
   onEdit,
-  onDelete
+  onDelete,
+  onViewDetails
 }) => {
   const formatDate = (dateString: string): string => {
     try {
@@ -77,6 +79,14 @@ const ProductionList: React.FC<ProductionListProps> = ({
               </div>
               
               <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onViewDetails(production)}
+                  title="Просмотреть детали"
+                >
+                  <Eye className="h-4 w-4 text-blue-500" />
+                </Button>
                 <Button 
                   variant="ghost" 
                   size="icon" 
