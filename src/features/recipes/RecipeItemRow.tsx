@@ -124,63 +124,66 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           </ToggleGroup>
         )}
         
-        {displayType === 'ingredient' && (
-          <Select
-            value={item.ingredientId || ''}
-            onValueChange={handleIngredientChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите ингредиент" />
-            </SelectTrigger>
-            <SelectContent>
-              {ingredients.map((ingredient) => (
-                <SelectItem key={ingredient.id} value={ingredient.id}>
-                  {ingredient.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        
-        {displayType === 'recipe' && (
-          <Select
-            value={item.recipeId || ''}
-            onValueChange={handleRecipeChange}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите полуфабрикат" />
-            </SelectTrigger>
-            <SelectContent>
-              {recipes.map((recipe) => (
-                <SelectItem key={recipe.id} value={recipe.id}>
-                  {recipe.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        
-        <div className="flex items-center gap-1 mt-2">
-          <Input 
-            type="number"
-            min="0.01"
-            step="0.01"
-            className="w-24"
-            value={item.amount || ''}
-            onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
-            placeholder="Кол-во"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex-grow">
+            {displayType === 'ingredient' && (
+              <Select
+                value={item.ingredientId || ''}
+                onValueChange={handleIngredientChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите ингредиент" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ingredients.map((ingredient) => (
+                    <SelectItem key={ingredient.id} value={ingredient.id}>
+                      {ingredient.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            
+            {displayType === 'recipe' && (
+              <Select
+                value={item.recipeId || ''}
+                onValueChange={handleRecipeChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Выберите полуфабрикат" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recipes.map((recipe) => (
+                    <SelectItem key={recipe.id} value={recipe.id}>
+                      {recipe.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
           
-          <span className="text-sm text-gray-500 w-8">
-            {getDisplayUnit()}
-          </span>
+          <div className="flex items-center gap-1 min-w-[120px]">
+            <Input 
+              type="number"
+              min="0.01"
+              step="0.01"
+              className="w-20"
+              value={item.amount || ''}
+              onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
+              placeholder="Кол-во"
+            />
+            
+            <span className="text-sm text-gray-500 w-8">
+              {getDisplayUnit()}
+            </span>
+          </div>
           
           <Button 
             type="button" 
             variant="ghost" 
             size="icon"
             onClick={() => onRemove(index)}
-            className="ml-auto"
           >
             <X className="h-4 w-4 text-gray-500" />
           </Button>
