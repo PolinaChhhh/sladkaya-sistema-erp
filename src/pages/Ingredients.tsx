@@ -1,16 +1,13 @@
 
 import React from 'react';
 import { Dialog } from '@/components/ui/dialog';
-import { Ingredient } from '@/store/recipeStore';
 
 // Import our components
 import IngredientHeader from '@/features/ingredients/IngredientHeader';
 import IngredientFilter from '@/features/ingredients/IngredientFilter';
-import IngredientTable from '@/features/ingredients/IngredientTable';
 import IngredientForm from '@/features/ingredients/IngredientForm';
 import DeleteConfirmDialog from '@/features/ingredients/DeleteConfirmDialog';
-import EmptyState from '@/features/ingredients/EmptyState';
-import SemiFinalIngredientTable from '@/features/ingredients/SemiFinalIngredientTable';
+import IngredientsContent from '@/features/ingredients/IngredientsContent';
 import { useIngredients } from '@/features/ingredients/hooks/useIngredients';
 
 const Ingredients = () => {
@@ -50,35 +47,14 @@ const Ingredients = () => {
         ingredientTypes={allIngredientTypes}
       />
       
-      {regularIngredients.length > 0 ? (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Ингредиенты</h2>
-          <IngredientTable 
-            ingredients={regularIngredients} 
-            onEdit={initEditForm} 
-            onDelete={initDeleteConfirm} 
-          />
-        </div>
-      ) : (
-        searchQuery === '' && ingredientTypeFilter === 'all' ? (
-          <EmptyState />
-        ) : (
-          <div className="glass rounded-xl p-6 text-center my-4">
-            <p className="text-gray-500">Нет ингредиентов, соответствующих вашему запросу</p>
-          </div>
-        )
-      )}
-      
-      {semiFinalIngredients.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Полуфабрикаты</h2>
-          <SemiFinalIngredientTable
-            ingredients={semiFinalIngredients}
-            onEdit={initEditForm}
-            onDelete={initDeleteConfirm}
-          />
-        </div>
-      )}
+      <IngredientsContent
+        regularIngredients={regularIngredients}
+        semiFinalIngredients={semiFinalIngredients}
+        searchQuery={searchQuery}
+        ingredientTypeFilter={ingredientTypeFilter}
+        onEdit={initEditForm}
+        onDelete={initDeleteConfirm}
+      />
       
       {/* Create Ingredient Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
