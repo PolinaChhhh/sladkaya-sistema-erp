@@ -27,13 +27,27 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
 }) => {
   return (
     <div className="bg-gray-50 p-3 rounded-md">
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2">
         <IngredientSelector 
           ingredients={ingredients}
           selectedIngredientId={item.ingredientId}
           onSelect={(ingredientId) => onUpdate(index, 'ingredientId', ingredientId)}
           getIngredientName={getIngredientName}
         />
+        
+        <Input 
+          type="number"
+          min="0.01"
+          step="0.01"
+          className="w-24"
+          value={item.amount}
+          onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
+          placeholder="Кол-во"
+        />
+        
+        <span className="text-sm text-gray-500 w-8">
+          {getIngredientUnit(item.ingredientId)}
+        </span>
         
         <Button 
           type="button" 
@@ -43,21 +57,6 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
         >
           <X className="h-4 w-4 text-gray-500" />
         </Button>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <Input 
-          type="number"
-          min="0.01"
-          step="0.01"
-          className="w-full"
-          value={item.amount}
-          onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
-          placeholder="Количество"
-        />
-        <span className="text-sm text-gray-500 w-8">
-          {getIngredientUnit(item.ingredientId)}
-        </span>
       </div>
     </div>
   );

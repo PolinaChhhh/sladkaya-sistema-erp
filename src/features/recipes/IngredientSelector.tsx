@@ -35,7 +35,13 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           variant="outline" 
           role="combobox" 
           aria-expanded={isOpen} 
-          className="flex-1 justify-between">
+          className="flex-1 justify-between"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault(); // Предотвращаем перенаправление
+            setIsOpen(true);
+          }}
+        >
           {selectedIngredientId ? getIngredientName(selectedIngredientId) : "Выберите ингредиент"}
           <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
