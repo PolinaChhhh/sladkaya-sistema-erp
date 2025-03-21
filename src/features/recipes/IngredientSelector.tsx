@@ -37,10 +37,6 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           aria-expanded={isOpen} 
           className="flex-1 justify-between"
           type="button"
-          onClick={(e) => {
-            e.preventDefault(); // Предотвращаем перенаправление
-            setIsOpen(true);
-          }}
         >
           {selectedIngredientId ? getIngredientName(selectedIngredientId) : "Выберите ингредиент"}
           <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -53,6 +49,7 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
             className="h-9" 
             value={searchValue}
             onValueChange={setSearchValue}
+            autoFocus={true}
           />
           <CommandEmpty>Ингредиенты не найдены.</CommandEmpty>
           <CommandGroup className="max-h-[200px] overflow-y-auto">
