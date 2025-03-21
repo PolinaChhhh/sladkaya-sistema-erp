@@ -52,7 +52,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-medium flex items-center gap-2">
-            <div className={`p-1 rounded-full ${recipe.category === 'finished' ? 'bg-green-100' : 'bg-blue-100'}`}>
+            <div className={`p-2 rounded-full ${recipe.category === 'finished' ? 'bg-green-100' : 'bg-blue-100'}`}>
               {getCategoryIcon()}
             </div>
             {recipe.name}
