@@ -6,7 +6,10 @@ import { useProductionForm, ProductionFormData } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionFilter } from './useProductionFilter';
 import { getIngredientDetails, calculateTotalCost } from '../utils/productionCalculations';
-import { getIngredientUsageDetails, getSemiFinalBreakdown } from '../utils/fifoUtils';
+import { 
+  getIngredientUsageDetails, 
+  getSemiFinalBreakdown 
+} from '../utils/fifo';
 import { getRecipeName, getRecipeOutput, getSelectedRecipe } from '../utils/recipeUtils';
 
 export type { ProductionFormData } from './useProductionForm';

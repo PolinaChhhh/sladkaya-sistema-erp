@@ -1,24 +1,6 @@
-
 import React from 'react';
 import IngredientUsageItem from './IngredientUsageItem';
-
-interface FifoDetail {
-  receiptId: string;
-  referenceNumber?: string;
-  date: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-interface IngredientUsage {
-  ingredientId: string;
-  name: string;
-  totalAmount: number;
-  unit: string;
-  totalCost: number;
-  fifoDetails: FifoDetail[];
-}
+import { IngredientUsage } from '../../utils/fifo/types';
 
 interface IngredientUsageListProps {
   usageDetails: IngredientUsage[];

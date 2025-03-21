@@ -1,27 +1,9 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import FifoDetailsTable from './FifoDetailsTable';
-
-interface FifoDetail {
-  receiptId: string;
-  referenceNumber?: string;
-  date: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-interface IngredientUsage {
-  ingredientId: string;
-  name: string;
-  totalAmount: number;
-  unit: string;
-  totalCost: number;
-  fifoDetails: FifoDetail[];
-}
+import { IngredientUsage } from '../../utils/fifo/types';
 
 interface IngredientUsageItemProps {
   usage: IngredientUsage;

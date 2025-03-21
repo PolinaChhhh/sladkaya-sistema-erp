@@ -1,24 +1,9 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-interface SemiFinalIngredient {
-  name: string;
-  amount: number;
-  unit: string;
-  cost: number;
-}
-
-interface SemiFinalItem {
-  name: string;
-  quantity: number;
-  unit: string;
-  cost: number;
-  ingredients: SemiFinalIngredient[];
-}
+import { SemiFinalBreakdown as SemiFinalBreakdownType } from '../../utils/fifo';
 
 interface SemiFinalBreakdownProps {
-  semiFinalBreakdown: SemiFinalItem[];
+  semiFinalBreakdown: SemiFinalBreakdownType[];
 }
 
 const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakdown }) => {
