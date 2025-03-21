@@ -78,11 +78,22 @@ export const getFifoReceiptItems = (
       .map(item => ({
         ...item,
         receiptId: receipt.id,
-        receiptDate: receipt.date
+        receiptDate: receipt.date,
+        referenceNumber: receipt.referenceNumber
       }))
     )
     .sort((a, b) => new Date(a.receiptDate).getTime() - new Date(b.receiptDate).getTime());
 };
+
+// Track which receipt items were consumed for a specific production
+interface ConsumedReceiptItem {
+  receiptId: string;
+  itemId: string;
+  amount: number;
+  unitPrice: number;
+  date: string;
+  referenceNumber?: string;
+}
 
 // Consume ingredients using FIFO and calculate cost
 export const consumeIngredientsWithFifo = (
@@ -92,9 +103,12 @@ export const consumeIngredientsWithFifo = (
   receipts: Receipt[],
   updateIngredient: (id: string, data: Partial<Ingredient>) => void,
   updateReceiptItem: (receiptId: string, itemId: string, data: Partial<ReceiptItem>) => void
-): number => {
+): { totalCost: number; consumptionDetails: Record<string, ConsumedReceiptItem[]> } => {
   const productionRatio = quantity / recipe.output;
   let totalCost = 0;
+  
+  // Track which receipt items were consumed for each ingredient
+  const consumptionDetails: Record<string, ConsumedReceiptItem[]> = {};
   
   recipe.items.forEach(item => {
     if (item.type === 'ingredient' && item.ingredientId) {
@@ -104,6 +118,9 @@ export const consumeIngredientsWithFifo = (
         const amountNeeded = item.amount * productionRatio;
         let remainingToConsume = amountNeeded;
         let ingredientCost = 0;
+        
+        // Initialize the consumption tracking for this ingredient
+        consumptionDetails[item.ingredientId] = [];
         
         // Get all receipt items for this ingredient, sorted by date (oldest first)
         const allReceiptItems = getFifoReceiptItems(item.ingredientId, receipts);
@@ -115,7 +132,18 @@ export const consumeIngredientsWithFifo = (
           const consumeAmount = Math.min(remainingToConsume, receiptItem.remainingQuantity);
           
           // Calculate the cost for this portion using the receipt's unit price
-          ingredientCost += consumeAmount * receiptItem.unitPrice;
+          const portionCost = consumeAmount * receiptItem.unitPrice;
+          ingredientCost += portionCost;
+          
+          // Track this consumption
+          consumptionDetails[item.ingredientId].push({
+            receiptId: receiptItem.receiptId,
+            itemId: receiptItem.id,
+            amount: consumeAmount,
+            unitPrice: receiptItem.unitPrice,
+            date: receiptItem.receiptDate,
+            referenceNumber: receiptItem.referenceNumber
+          });
           
           // Reduce the remaining amount from this receipt item
           updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
@@ -136,7 +164,7 @@ export const consumeIngredientsWithFifo = (
     }
   });
   
-  return totalCost;
+  return { totalCost, consumptionDetails };
 };
 
 // Restore ingredients to receipt items, newest first (for deleting productions)

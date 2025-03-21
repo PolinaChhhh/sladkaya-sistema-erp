@@ -97,7 +97,15 @@ export const useProductionPage = () => {
   };
   
   const getIngredientUsageDetailsWrapped = (recipeId: string, quantity: number) => {
-    return getIngredientUsageDetails(recipeId, quantity, recipes, ingredients, receipts);
+    // Pass the selected production to get actual consumption details
+    return getIngredientUsageDetails(
+      recipeId, 
+      quantity, 
+      recipes, 
+      ingredients, 
+      receipts, 
+      selectedProduction
+    );
   };
   
   const getSemiFinalBreakdownWrapped = (recipeId: string, quantity: number) => {

@@ -42,7 +42,7 @@ export const handleAddProduction = (
   }
   
   // Calculate cost using FIFO method for direct ingredients
-  let cost = consumeIngredientsWithFifo(
+  const { totalCost: ingredientCost, consumptionDetails } = consumeIngredientsWithFifo(
     recipe,
     production.quantity,
     ingredients,
@@ -61,14 +61,15 @@ export const handleAddProduction = (
   );
   
   // Add semi-final cost to total cost
-  cost += semiFinalCost;
+  const totalCost = ingredientCost + semiFinalCost;
   
   // Create new production with calculated cost
   const newProduction = {
     ...production,
     id: crypto.randomUUID(),
-    cost: cost,
-    date: new Date().toISOString()
+    cost: totalCost,
+    date: new Date().toISOString(),
+    consumptionDetails // Store the consumption details with the production
   };
   
   // Update the lastProduced date for the recipe

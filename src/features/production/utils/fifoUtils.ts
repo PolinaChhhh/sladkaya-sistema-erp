@@ -1,5 +1,5 @@
 
-import { Recipe, Receipt, Ingredient } from '@/store/types';
+import { Recipe, Receipt, Ingredient, ProductionBatch, ConsumedReceiptItem } from '@/store/types';
 
 export interface IngredientUsageDetail {
   ingredientId: string;
@@ -34,13 +34,15 @@ export interface SemiFinalBreakdown {
 
 /**
  * Get detailed information about how ingredients are used from FIFO receipts
+ * based on actual consumption details stored with the production
  */
 export const getIngredientUsageDetails = (
   recipeId: string, 
   quantity: number,
   recipes: Recipe[],
   ingredients: Ingredient[],
-  receipts: Receipt[]
+  receipts: Receipt[],
+  production?: ProductionBatch
 ): IngredientUsageDetail[] => {
   const recipe = recipes.find(r => r.id === recipeId);
   if (!recipe) return [];
@@ -58,31 +60,61 @@ export const getIngredientUsageDetails = (
       if (ingredient) {
         const amountNeeded = item.amount * ratio;
         
-        // Find all receipts that include this ingredient and extract FIFO details
-        const fifoDetails = receipts
-          .filter(receipt => receipt.items.some(i => i.ingredientId === ingredientId))
-          .flatMap(receipt => {
-            return receipt.items
-              .filter(i => i.ingredientId === ingredientId)
-              .map(i => ({
-                receiptId: receipt.id,
-                referenceNumber: receipt.referenceNumber,
-                date: receipt.date,
-                quantity: i.quantity,
-                unitPrice: i.unitPrice,
-                totalPrice: i.quantity * i.unitPrice
-              }));
-          })
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        
-        usageDetails.push({
-          ingredientId,
-          name: ingredient.name,
-          totalAmount: amountNeeded,
-          unit: ingredient.unit,
-          totalCost: amountNeeded * ingredient.cost,
-          fifoDetails
-        });
+        // If we have consumption details for this production, use them
+        if (production?.consumptionDetails && production.consumptionDetails[ingredientId]) {
+          const consumedItems = production.consumptionDetails[ingredientId];
+          const fifoDetails = consumedItems.map(consumed => {
+            // Find the receipt that this item belongs to
+            const receipt = receipts.find(r => r.id === consumed.receiptId);
+            
+            return {
+              receiptId: consumed.receiptId,
+              referenceNumber: consumed.referenceNumber || receipt?.referenceNumber,
+              date: consumed.date,
+              quantity: consumed.amount,
+              unitPrice: consumed.unitPrice,
+              totalPrice: consumed.amount * consumed.unitPrice
+            };
+          });
+          
+          // Calculate the actual cost from the consumed items
+          const totalCost = fifoDetails.reduce((sum, detail) => sum + detail.totalPrice, 0);
+          
+          usageDetails.push({
+            ingredientId,
+            name: ingredient.name,
+            totalAmount: amountNeeded,
+            unit: ingredient.unit,
+            totalCost,
+            fifoDetails
+          });
+        } else {
+          // Fallback to the old method if consumption details aren't available
+          const fifoDetails = receipts
+            .filter(receipt => receipt.items.some(i => i.ingredientId === ingredientId))
+            .flatMap(receipt => {
+              return receipt.items
+                .filter(i => i.ingredientId === ingredientId)
+                .map(i => ({
+                  receiptId: receipt.id,
+                  referenceNumber: receipt.referenceNumber,
+                  date: receipt.date,
+                  quantity: i.quantity,
+                  unitPrice: i.unitPrice,
+                  totalPrice: i.quantity * i.unitPrice
+                }));
+            })
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          
+          usageDetails.push({
+            ingredientId,
+            name: ingredient.name,
+            totalAmount: amountNeeded,
+            unit: ingredient.unit,
+            totalCost: amountNeeded * ingredient.cost,
+            fifoDetails
+          });
+        }
       }
     });
   
