@@ -36,9 +36,13 @@ export const restoreIngredientsToReceipts = (
         });
         console.log(`Updated ingredient quantity: ${ingredient.quantity} + ${amountToRestore} = ${ingredient.quantity + amountToRestore}`);
         
+        // Normalize the ingredient ID to ensure it matches the keys in consumptionDetails
+        const ingredientKey = String(item.ingredientId);
+        console.log(`Restoring ingredient ${ingredient.name} using key: ${ingredientKey}`);
+        
         // If we have consumption details, use them for precise restoration
-        if (consumptionDetails && consumptionDetails[item.ingredientId] && consumptionDetails[item.ingredientId].length > 0) {
-          const consumedItems = consumptionDetails[item.ingredientId];
+        if (consumptionDetails && consumptionDetails[ingredientKey] && consumptionDetails[ingredientKey].length > 0) {
+          const consumedItems = consumptionDetails[ingredientKey];
           console.log(`Found ${consumedItems.length} consumed receipt items for ${ingredient.name}`);
           
           // Restore to each receipt item based on recorded consumption
@@ -63,7 +67,7 @@ export const restoreIngredientsToReceipts = (
           });
         } else {
           // Fallback to the original method when consumption details aren't available
-          console.log(`No consumption details available for ${ingredient.name}, using ratio-based restoration`);
+          console.log(`No consumption details available for ${ingredient.name} (key: ${ingredientKey}), using ratio-based restoration`);
           
           // For deleted productions, we'll restore to the newest receipt items
           const receiptItems = receipts
@@ -112,3 +116,4 @@ export const restoreIngredientsToReceipts = (
     }
   });
 };
+

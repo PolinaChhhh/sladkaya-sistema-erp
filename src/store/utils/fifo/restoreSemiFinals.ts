@@ -29,12 +29,16 @@ export const restoreSemiFinalProductsWithFifo = (
       
       if (!recipeId) return;
       
+      // Normalize the recipe ID to ensure it matches the keys in consumptionDetails
+      const recipeKey = String(recipeId);
+      console.log(`Restoring semi-final with recipeId ${recipeId} using key: ${recipeKey}`);
+      
       // Check if we have consumption details for this semi-final
-      if (consumptionDetails && consumptionDetails[recipeId]) {
-        console.log(`Found semi-final consumption details for recipe ${recipeId}`);
+      if (consumptionDetails && consumptionDetails[recipeKey]) {
+        console.log(`Found semi-final consumption details for recipe ${recipeKey}`);
         
         // Get the consumption details for this semi-final
-        const usedProductions = consumptionDetails[recipeId];
+        const usedProductions = consumptionDetails[recipeKey];
         
         // Process each production that was consumed
         usedProductions.forEach(usedProduction => {
@@ -84,7 +88,8 @@ export const restoreSemiFinalProductsWithFifo = (
           }
         });
       } else {
-        console.log(`No consumption details found for semi-final recipeId=${recipeId}`);
+        console.log(`No consumption details found for semi-final recipeId=${recipeKey}`);
       }
     });
 };
+
