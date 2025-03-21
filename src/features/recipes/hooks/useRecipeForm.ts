@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Recipe, RecipeItem, RecipeTag } from '@/store/recipeStore';
+import { Recipe, RecipeItem, RecipeTag } from '@/store/types';
 import { toast } from 'sonner';
 
 interface UseRecipeFormProps {
@@ -65,7 +65,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
             isPackaging: false
           };
         }
-        return { ...item };
+        return { ...item, type: 'ingredient' as const };
       }).filter(item => item.type === 'ingredient'), // Only keep ingredient items
       category: 'finished', 
       tags: recipe.tags || [], 
