@@ -7,19 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface RecipeOutputFieldsProps {
   output: number;
   outputUnit: string;
-  lossPercentage: number;
+  calculatedLossPercentage: number;
+  totalIngredientsWeight: number;
   onOutputChange: (value: number) => void;
   onOutputUnitChange: (value: string) => void;
-  onLossPercentageChange: (value: number) => void;
 }
 
 const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
   output,
   outputUnit,
-  lossPercentage,
+  calculatedLossPercentage,
+  totalIngredientsWeight,
   onOutputChange,
   onOutputUnitChange,
-  onLossPercentageChange,
 }) => {
   return (
     <div className="grid gap-4">
@@ -53,21 +53,18 @@ const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
         </div>
       </div>
       
-      <div className="grid gap-2">
-        <Label htmlFor="lossPercentage">Процент потерь (для всего рецепта)</Label>
-        <div className="relative">
-          <Input
-            id="lossPercentage"
-            type="number"
-            min="0"
-            max="100"
-            step="0.1"
-            className="pr-8"
-            value={lossPercentage || 0}
-            onChange={(e) => onLossPercentageChange(parseFloat(e.target.value) || 0)}
-            placeholder="Потери"
-          />
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">%</span>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label>Вес всех ингредиентов</Label>
+          <div className="h-10 px-3 py-2 border rounded-md flex items-center text-sm">
+            {totalIngredientsWeight.toFixed(2)} кг
+          </div>
+        </div>
+        <div className="grid gap-2">
+          <Label>Процент потерь (расчетный)</Label>
+          <div className={`h-10 px-3 py-2 border rounded-md flex items-center text-sm ${calculatedLossPercentage > 0 ? 'text-amber-600' : calculatedLossPercentage < 0 ? 'text-red-600' : ''}`}>
+            {calculatedLossPercentage.toFixed(2)}%
+          </div>
         </div>
       </div>
     </div>

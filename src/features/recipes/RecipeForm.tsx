@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,6 +71,44 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     setFormData({ ...formData, items: newItems });
   };
 
+  // Calculate total ingredients weight and loss percentage
+  const { totalIngredientsWeight, calculatedLossPercentage } = useMemo(() => {
+    // Sum up the weights of all ingredients (assuming all are in kg or convertible to kg)
+    const total = formData.items.reduce((sum, item) => {
+      if (!item.ingredientId || !item.amount) return sum;
+      
+      const unit = getIngredientUnit(item.ingredientId);
+      let weightInKg = item.amount;
+      
+      // Convert to kg if needed (simplified conversion)
+      if (unit === 'г') {
+        weightInKg = item.amount / 1000;
+      }
+      
+      return sum + weightInKg;
+    }, 0);
+    
+    // Calculate loss percentage based on output and total weight
+    let lossPercentage = 0;
+    if (total > 0 && formData.outputUnit === 'кг') {
+      // If output is less than ingredients, there's a loss
+      lossPercentage = ((total - formData.output) / total) * 100;
+    }
+    
+    return { 
+      totalIngredientsWeight: total, 
+      calculatedLossPercentage: lossPercentage 
+    };
+  }, [formData.items, formData.output, formData.outputUnit, getIngredientUnit]);
+
+  // Update lossPercentage in formData whenever it's calculated
+  React.useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      lossPercentage: calculatedLossPercentage
+    }));
+  }, [calculatedLossPercentage, setFormData]);
+
   return (
     <DialogContent className="sm:max-w-lg">
       <DialogHeader>
@@ -100,10 +138,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         <RecipeOutputFields 
           output={formData.output}
           outputUnit={formData.outputUnit}
-          lossPercentage={formData.lossPercentage}
+          calculatedLossPercentage={calculatedLossPercentage}
+          totalIngredientsWeight={totalIngredientsWeight}
           onOutputChange={(value) => setFormData({ ...formData, output: value })}
           onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
-          onLossPercentageChange={(value) => setFormData({ ...formData, lossPercentage: value })}
         />
         
         <div className="space-y-3 mt-2">
