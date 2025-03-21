@@ -35,7 +35,7 @@ export const handleDeleteProduction = (
   // Check if this is a semi-finished or a finished product
   const isSemiFinished = recipe.category === 'semi-finished';
   
-  // Always restore ingredients to receipts for any production containing ingredients
+  // Always restore direct ingredients to receipts for any production containing ingredients
   // This handles both packaging materials for finished products and all ingredients for semi-finished products
   console.log(`Restoring direct ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
   restoreIngredientsToReceipts(
