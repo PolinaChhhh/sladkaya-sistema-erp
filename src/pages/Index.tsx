@@ -2,12 +2,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassMorphicCard from '@/components/ui/GlassMorphicCard';
-import { ChefHat, Box, TrendingUp, Truck, Bot } from 'lucide-react';
+import { ChefHat, Box, TrendingUp, Truck, Bot, FileText } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { ingredients, recipes, productions, shippings } = useStore();
+  const { ingredients, recipes, productions, shippings, receipts } = useStore();
   
   const stats = [
     {
@@ -38,6 +38,13 @@ const Index = () => {
       path: '/shipping',
       bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
     },
+    {
+      title: 'Поступления',
+      value: receipts.length,
+      icon: <FileText className="h-5 w-5 text-purple-500" />,
+      path: '/receipts',
+      bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100',
+    },
   ];
 
   return (
@@ -49,7 +56,7 @@ const Index = () => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
         {stats.map((stat, index) => (
           <GlassMorphicCard 
             key={index}

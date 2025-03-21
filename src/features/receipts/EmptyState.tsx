@@ -19,7 +19,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     <div className="text-center py-10 border border-dashed rounded-lg bg-gray-50">
       <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
       <p className="text-sm text-gray-500 mb-4">{description}</p>
-      <Button onClick={onAction} className="bg-cream-600 hover:bg-cream-700">
+      <Button onClick={onAction} className="bg-purple-600 hover:bg-purple-700">
         <PlusCircle className="mr-2 h-4 w-4" />
         {buttonText}
       </Button>
