@@ -4,6 +4,7 @@ export type RecipeItem = {
   ingredientId?: string;
   recipeId?: string;
   amount: number;
+  isPackaging?: boolean;
 };
 
 export type RecipeCategory = 'semi-finished' | 'finished';

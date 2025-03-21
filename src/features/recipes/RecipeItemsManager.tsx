@@ -50,7 +50,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
       const newItem: RecipeItem = { 
         type: 'ingredient', 
         ingredientId: defaultId, 
-        amount: 0 
+        amount: 0,
+        isPackaging: false 
       };
       
       console.log('Added new ingredient item:', newItem);
@@ -66,7 +67,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
       const newItem: RecipeItem = { 
         type: 'recipe', 
         recipeId: defaultId, 
-        amount: 0 
+        amount: 0,
+        isPackaging: false
       };
       
       console.log('Added new recipe item:', newItem);

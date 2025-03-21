@@ -114,6 +114,46 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   };
 
+  // Separate items by type (ingredients/recipes vs packaging)
+  const mainItems = formData.items.filter(item => !item.isPackaging);
+  const packagingItems = formData.items.filter(item => item.isPackaging);
+
+  // Handle adding a packaging ingredient
+  const handleAddPackaging = () => {
+    if (ingredients.length === 0) {
+      toast.error('Сначала добавьте ингредиенты');
+      return;
+    }
+    
+    const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
+    const newItem: RecipeItem = {
+      type: 'ingredient',
+      ingredientId: defaultId,
+      amount: 0,
+      isPackaging: true
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }));
+  };
+
+  // Update items with the new packaging status
+  const updateMainItems = (items: RecipeItem[]) => {
+    setFormData(prev => ({
+      ...prev,
+      items: [...packagingItems, ...items.map(item => ({ ...item, isPackaging: false }))]
+    }));
+  };
+
+  const updatePackagingItems = (items: RecipeItem[]) => {
+    setFormData(prev => ({
+      ...prev,
+      items: [...mainItems, ...items.map(item => ({ ...item, isPackaging: true }))]
+    }));
+  };
+
   return (
     <DialogContent className="sm:max-w-lg">
       <DialogHeader>
@@ -142,7 +182,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         />
         
         <RecipeItemsManager
-          items={formData.items}
+          items={mainItems}
           ingredients={ingredients}
           recipes={recipes}
           currentRecipeId={currentRecipeId}
@@ -150,9 +190,61 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           getIngredientUnit={getIngredientUnit}
           getRecipeName={getRecipeName}
           getRecipeUnit={getRecipeUnit}
-          onUpdateItems={(items) => setFormData({ ...formData, items })}
+          onUpdateItems={updateMainItems}
           category={formData.category}
         />
+        
+        <div className="border-t pt-3 mt-3">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-medium">Упаковка</h3>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={handleAddPackaging}
+              className="flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-package">
+                <path d="m7.5 4.27 9 5.15" />
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                <path d="m3.3 7 8.7 5 8.7-5" />
+                <path d="M12 22V12" />
+              </svg>
+              Добавить упаковку
+            </Button>
+          </div>
+
+          {packagingItems.length > 0 ? (
+            <div className="space-y-2">
+              {packagingItems.map((item, index) => (
+                <RecipeItemRow
+                  key={`packaging-${index}`}
+                  item={item}
+                  index={index}
+                  ingredients={ingredients}
+                  recipes={[]}
+                  getIngredientName={getIngredientName}
+                  getIngredientUnit={getIngredientUnit}
+                  getRecipeName={getRecipeName}
+                  getRecipeUnit={getRecipeUnit}
+                  onUpdate={(idx, field, value) => {
+                    const newItems = [...packagingItems];
+                    newItems[idx] = { ...newItems[idx], [field]: value };
+                    updatePackagingItems(newItems);
+                  }}
+                  onRemove={(idx) => {
+                    updatePackagingItems(packagingItems.filter((_, i) => i !== idx));
+                  }}
+                  forcedType="ingredient"
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 py-2">
+              Нет добавленной упаковки
+            </p>
+          )}
+        </div>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
