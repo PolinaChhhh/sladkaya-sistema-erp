@@ -16,11 +16,13 @@ export const calculateIngredientsNeeded = (
     }));
 };
 
-// Check if there are sufficient ingredients for a production
+// Check if there are sufficient ingredients and semi-finished products for a production
 export const checkIngredientsAvailability = (
   recipe: Recipe | undefined,
   quantity: number,
-  ingredients: Ingredient[]
+  ingredients: Ingredient[],
+  recipes?: Recipe[],
+  productions?: any[]
 ): { canProduce: boolean; insufficientIngredients: string[] } => {
   if (!recipe) {
     return { canProduce: false, insufficientIngredients: ['Recipe not found'] };
@@ -30,6 +32,7 @@ export const checkIngredientsAvailability = (
   let canProduce = true;
   const insufficientIngredients: string[] = [];
   
+  // Check regular ingredients
   recipe.items.forEach(item => {
     if (item.type === 'ingredient' && item.ingredientId) {
       const ingredient = ingredients.find(i => i.id === item.ingredientId);
@@ -39,6 +42,22 @@ export const checkIngredientsAvailability = (
         if (ingredient.quantity < amountNeeded) {
           canProduce = false;
           insufficientIngredients.push(ingredient.name);
+        }
+      }
+    } else if (item.type === 'recipe' && item.recipeId && recipes && productions) {
+      // Check semi-finished products
+      const semiFinalRecipe = recipes.find(r => r.id === item.recipeId);
+      if (semiFinalRecipe) {
+        const amountNeeded = item.amount * productionRatio;
+        
+        // Calculate available quantity of this semi-finished product
+        const availableQuantity = productions
+          .filter(p => p.recipeId === item.recipeId)
+          .reduce((total, p) => total + p.quantity, 0);
+        
+        if (availableQuantity < amountNeeded) {
+          canProduce = false;
+          insufficientIngredients.push(semiFinalRecipe.name);
         }
       }
     }

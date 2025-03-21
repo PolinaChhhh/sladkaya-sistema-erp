@@ -13,7 +13,7 @@ export interface ProductionFormData {
 }
 
 export const useProductionForm = () => {
-  const { recipes, ingredients, addProduction, updateProduction } = useStore();
+  const { recipes, ingredients, productions, addProduction, updateProduction } = useStore();
   
   const [createFormData, setCreateFormData] = useState<ProductionFormData>({
     recipeId: recipes.length > 0 ? recipes[0].id : '',
@@ -42,11 +42,13 @@ export const useProductionForm = () => {
       return;
     }
     
-    // Check if we have enough ingredients
+    // Check if we have enough ingredients and semi-finished products
     const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
       recipe,
       createFormData.quantity,
-      ingredients
+      ingredients,
+      recipes,
+      productions
     );
     
     if (!canProduce) {
@@ -89,7 +91,9 @@ export const useProductionForm = () => {
       const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
         recipe,
         additionalQuantity,
-        ingredients
+        ingredients,
+        recipes,
+        productions
       );
       
       if (!canProduce) {
