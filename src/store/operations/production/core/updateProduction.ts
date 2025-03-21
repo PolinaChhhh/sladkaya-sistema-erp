@@ -31,6 +31,8 @@ export const handleUpdateProduction = (
     const recipe = recipes.find(r => r.id === originalProduction.recipeId);
     
     if (recipe) {
+      console.log(`Updating production ${id} quantity from ${originalProduction.quantity} to ${data.quantity}`);
+      
       // First restore the original ingredients
       restoreIngredientsToReceipts(
         recipe,

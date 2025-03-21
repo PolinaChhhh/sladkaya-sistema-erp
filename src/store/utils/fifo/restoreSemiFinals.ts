@@ -19,6 +19,7 @@ export const restoreSemiFinalProductsWithFifo = (
       items.forEach(item => {
         const production = productions.find(p => p.id === item.productionId);
         if (production) {
+          console.log(`Restoring ${item.amount} of semi-final ${item.name} to production ${item.productionId}`);
           updateProduction(item.productionId, {
             quantity: production.quantity + item.amount
           });
@@ -35,6 +36,8 @@ export const restoreSemiFinalProductsWithFifo = (
       .forEach(item => {
         const semiFinalId = item.recipeId as string;
         const amountToRestore = item.amount * productionRatio;
+        
+        console.log(`Need to restore ${amountToRestore} of semi-final ${semiFinalId}`);
         
         // Find productions of this semi-final with quantity 0
         // We'll restore to the most recent productions first (LIFO for restoration)
@@ -56,6 +59,7 @@ export const restoreSemiFinalProductsWithFifo = (
           
           if (restoreAmount > 0) {
             // Update the production quantity
+            console.log(`Restoring ${restoreAmount} of semi-final to production ${prod.id}`);
             updateProduction(prod.id, {
               quantity: prod.quantity + restoreAmount
             });

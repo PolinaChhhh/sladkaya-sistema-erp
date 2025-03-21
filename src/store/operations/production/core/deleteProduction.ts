@@ -26,6 +26,8 @@ export const handleDeleteProduction = (
   const recipe = recipes.find(r => r.id === production.recipeId);
   
   if (recipe) {
+    console.log(`Deleting production ${id} of recipe ${recipe.name}`);
+    
     // Restore ingredients to receipts
     restoreIngredientsToReceipts(
       recipe,
