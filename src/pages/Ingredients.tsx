@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { useStore, Ingredient } from '@/store/recipeStore';
@@ -14,13 +13,14 @@ import {
   TableRow 
 } from '@/components/ui/table';
 
-// Import our new components
+// Import our components
 import IngredientHeader from '@/features/ingredients/IngredientHeader';
 import IngredientFilter from '@/features/ingredients/IngredientFilter';
 import IngredientTable from '@/features/ingredients/IngredientTable';
 import IngredientForm from '@/features/ingredients/IngredientForm';
 import DeleteConfirmDialog from '@/features/ingredients/DeleteConfirmDialog';
 import EmptyState from '@/features/ingredients/EmptyState';
+import SemiFinalIngredientTable from '@/features/ingredients/SemiFinalIngredientTable';
 
 const DEFAULT_INGREDIENT_TYPE = 'Ингредиент';
 
@@ -190,45 +190,11 @@ const Ingredients = () => {
       {semiFinalIngredients.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Полуфабрикаты</h2>
-          <div className="glass rounded-xl overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Название</TableHead>
-                  <TableHead>Количество</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {semiFinalIngredients.map((ingredient) => (
-                  <TableRow key={ingredient.id}>
-                    <TableCell className="font-medium">{ingredient.name}</TableCell>
-                    <TableCell>
-                      <span className={
-                        ingredient.quantity <= 0 
-                          ? "text-red-500 font-medium" 
-                          : ingredient.quantity < 5 
-                            ? "text-orange-500 font-medium"
-                            : ""
-                      }>
-                        {ingredient.quantity} {ingredient.unit}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => initEditForm(ingredient)}>
-                          <Edit className="h-4 w-4 text-gray-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => initDeleteConfirm(ingredient)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <SemiFinalIngredientTable
+            ingredients={semiFinalIngredients}
+            onEdit={initEditForm}
+            onDelete={initDeleteConfirm}
+          />
         </div>
       )}
       
