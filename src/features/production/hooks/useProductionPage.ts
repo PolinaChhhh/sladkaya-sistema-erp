@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe } from '@/store/types';
@@ -112,7 +111,15 @@ export const useProductionPage = () => {
   };
   
   const getSemiFinalBreakdownWrapped = (recipeId: string, quantity: number) => {
-    return getSemiFinalBreakdown(recipeId, quantity, recipes, ingredients);
+    // Pass the selected production to get FIFO details for semi-finals
+    return getSemiFinalBreakdown(
+      recipeId, 
+      quantity, 
+      recipes, 
+      ingredients,
+      productions,  // Pass the productions array
+      selectedProduction  // Pass the selected production for consumption details
+    );
   };
   
   const calculateTotalCostWrapped = (recipeId: string, quantity: number) => {

@@ -91,7 +91,7 @@ const SemiFinalBreakdown: React.FC<SemiFinalBreakdownProps> = ({ semiFinalBreakd
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {semi.fifoDetails.map((detail, fidx) => (
+                        {semi.fifoDetails?.map((detail, fidx) => (
                           <TableRow key={fidx}>
                             <TableCell>{format(new Date(detail.date), 'dd.MM.yyyy')}</TableCell>
                             <TableCell>{detail.quantity.toFixed(2)} {semi.unit}</TableCell>
