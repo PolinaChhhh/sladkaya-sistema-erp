@@ -35,25 +35,28 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           getIngredientName={getIngredientName}
         />
         
-        <Input 
-          type="number"
-          min="0.01"
-          step="0.01"
-          className="w-24"
-          value={item.amount}
-          onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
-          placeholder="Кол-во"
-        />
-        
-        <span className="text-sm text-gray-500 w-8">
-          {getIngredientUnit(item.ingredientId)}
-        </span>
+        <div className="flex items-center gap-1">
+          <Input 
+            type="number"
+            min="0.01"
+            step="0.01"
+            className="w-24"
+            value={item.amount || ''}
+            onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
+            placeholder="Кол-во"
+          />
+          
+          <span className="text-sm text-gray-500 w-8">
+            {getIngredientUnit(item.ingredientId)}
+          </span>
+        </div>
         
         <Button 
           type="button" 
           variant="ghost" 
           size="icon"
           onClick={() => onRemove(index)}
+          className="ml-auto"
         >
           <X className="h-4 w-4 text-gray-500" />
         </Button>

@@ -27,6 +27,12 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
       ingredient.name.toLowerCase().includes(value.toLowerCase())
     );
   };
+  
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    // This prevents the default navigation behavior
+    e.preventDefault();
+    setIsOpen(true);
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -37,6 +43,7 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           aria-expanded={isOpen} 
           className="flex-1 justify-between"
           type="button"
+          onClick={handleTriggerClick}
         >
           {selectedIngredientId ? getIngredientName(selectedIngredientId) : "Выберите ингредиент"}
           <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
