@@ -1,6 +1,6 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
-import { consumeIngredientsWithFifo } from '../../../utils/fifoCalculator';
+import { consumeIngredientsWithFifo } from '../../../utils/fifo/consumeIngredients';
 import { consumeSemiFinalProducts } from '../../../utils/semiFinalProductUtils';
 import { autoProduceSemiFinals } from './autoProduceSemiFinals';
 

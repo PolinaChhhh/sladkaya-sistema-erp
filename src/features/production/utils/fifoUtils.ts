@@ -1,5 +1,6 @@
 
-import { Recipe, Receipt, Ingredient, ProductionBatch, ConsumedReceiptItem } from '@/store/types';
+import { Recipe, Receipt, Ingredient, ProductionBatch } from '@/store/types';
+import { ConsumedReceiptItem } from '@/store/utils/fifo/consumeIngredients';
 
 export interface IngredientUsageDetail {
   ingredientId: string;

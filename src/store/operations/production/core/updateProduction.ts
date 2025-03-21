@@ -1,6 +1,7 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
-import { consumeIngredientsWithFifo, restoreIngredientsToReceipts } from '../../../utils/fifoCalculator';
+import { consumeIngredientsWithFifo } from '../../../utils/fifo/consumeIngredients';
+import { restoreIngredientsToReceipts } from '../../../utils/fifo/restoreIngredients';
 import { consumeSemiFinalProducts, restoreSemiFinalProducts } from '../../../utils/semiFinalProductUtils';
 
 /**
