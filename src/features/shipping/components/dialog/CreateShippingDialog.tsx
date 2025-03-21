@@ -2,9 +2,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useShippingForm } from '../hooks/useShippingForm';
+import { useShippingForm } from '../../hooks/useShippingForm';
 import { ShippingDocument } from '@/store/recipeStore';
-import { ShippingFormHeader, ShippingFormBasicFields, ShippingItemsTable } from './shipping-form';
+import DialogBody from './DialogBody';
 
 interface CreateShippingDialogProps {
   isOpen: boolean;
@@ -62,32 +62,17 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
           <DialogTitle>{isEditing ? 'Редактировать отгрузку' : 'Создать отгрузку'}</DialogTitle>
         </DialogHeader>
         
-        <div className="my-4 space-y-6">
-          <ShippingFormHeader
-            onAddItem={() => {
-              const result = addShippingItem();
-              if (result.error) {
-                // Could use toast here
-                alert(result.error);
-              }
-            }}
-          />
-          
-          <ShippingFormBasicFields
-            buyers={buyers}
-            formData={formData}
-            setFormData={setFormData}
-          />
-          
-          <ShippingItemsTable
-            items={formData.items}
-            productions={productions}
-            recipes={recipes}
-            shippings={shippings}
-            updateShippingItem={updateShippingItem}
-            removeShippingItem={removeShippingItem}
-          />
-        </div>
+        <DialogBody 
+          formData={formData}
+          setFormData={setFormData}
+          buyers={buyers}
+          productions={productions}
+          recipes={recipes}
+          shippings={shippings}
+          addShippingItem={addShippingItem}
+          updateShippingItem={updateShippingItem}
+          removeShippingItem={removeShippingItem}
+        />
         
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

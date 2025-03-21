@@ -1,9 +1,10 @@
+
 import React from 'react'; 
 import { useShipmentsList } from './hooks/useShipmentsList';
 import ShippingHeader from './components/ShippingHeader';
 import ShippingCard from './components/ShippingCard';
 import EmptyShippingState from './components/EmptyShippingState';
-import CreateShippingDialog from './components/CreateShippingDialog';
+import { CreateShippingDialog } from './components/dialog';
 import DeleteShippingDialog from './components/DeleteShippingDialog';
 
 const ShipmentsList = () => {
