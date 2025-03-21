@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Trash2, Clock, Tag } from 'lucide-react';
+import { Edit, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Recipe, ProductionBatch } from '@/store/types';
@@ -80,12 +80,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             <span className="text-gray-500">Произведено:</span>
             <span>{productionCount} раз</span>
           </div>
-          {recipe.lossPercentage !== undefined && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Потери:</span>
-              <span>{recipe.lossPercentage.toFixed(2)}%</span>
-            </div>
-          )}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-2 flex flex-col items-stretch gap-2">

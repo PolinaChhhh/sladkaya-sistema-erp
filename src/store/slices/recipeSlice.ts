@@ -1,4 +1,3 @@
-
 import { StateCreator } from 'zustand';
 import { Recipe } from '../types';
 
@@ -26,7 +25,10 @@ export const createRecipeSlice: StateCreator<
       id: crypto.randomUUID(),
       tags: recipe.tags || [], // Ensure tags is defined
       category: 'finished', // Always set category as finished
-      items: recipe.items.filter(item => item.type === 'ingredient') // Keep only ingredients
+      items: recipe.items.filter(item => 
+        // Keep only ingredients and filter out packaging items
+        item.type === 'ingredient' && !item.isPackaging
+      ) 
     }]
   })),
   
@@ -39,8 +41,10 @@ export const createRecipeSlice: StateCreator<
         tags: data.tags !== undefined ? data.tags : recipe.tags || [],
         // Ensure category is always "finished"
         category: 'finished',
-        // If updating items, filter only ingredients
-        items: data.items ? data.items.filter(item => item.type === 'ingredient') : recipe.items
+        // If updating items, filter out only valid ingredients (no packaging)
+        items: data.items ? data.items.filter(item => 
+          item.type === 'ingredient' && !item.isPackaging
+        ) : recipe.items
       } : recipe
     )
   })),

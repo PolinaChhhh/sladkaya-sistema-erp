@@ -24,7 +24,7 @@ export type Recipe = {
   output: number;
   outputUnit: string;
   lastProduced: string | null;
-  lossPercentage?: number;
+  lossPercentage?: number; // Keep as optional for backward compatibility
   category: RecipeCategory;
   tags: RecipeTag[];
 };

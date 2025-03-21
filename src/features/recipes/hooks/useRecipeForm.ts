@@ -18,7 +18,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     description: string;
     output: number;
     outputUnit: string;
-    lossPercentage: number;
     items: RecipeItem[];
     category: 'finished';
     tags: RecipeTag[];
@@ -27,7 +26,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     description: '',
     output: 1,
     outputUnit: 'шт',
-    lossPercentage: 0,
     items: [],
     category: 'finished',
     tags: [],
@@ -39,7 +37,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       description: '',
       output: 1,
       outputUnit: 'шт',
-      lossPercentage: 0,
       items: [],
       category: 'finished',
       tags: [],
@@ -54,7 +51,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       description: recipe.description,
       output: recipe.output,
       outputUnit: recipe.outputUnit,
-      lossPercentage: recipe.lossPercentage || 0,
       // Ensure correct type for items
       items: recipe.items.map(item => {
         if (item.type === 'recipe') {
@@ -85,7 +81,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       items: formData.items,
       output: formData.output,
       outputUnit: formData.outputUnit,
-      lossPercentage: formData.lossPercentage,
       lastProduced: null,
       category: 'finished',
       tags: formData.tags,
@@ -109,7 +104,6 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       items: formData.items,
       output: formData.output,
       outputUnit: formData.outputUnit,
-      lossPercentage: formData.lossPercentage,
       category: 'finished',
       tags: formData.tags,
     });

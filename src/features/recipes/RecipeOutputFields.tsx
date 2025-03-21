@@ -8,8 +8,6 @@ import { RecipeCategory } from '@/store/types';
 interface RecipeOutputFieldsProps {
   output: number;
   outputUnit: string;
-  calculatedLossPercentage: number;
-  totalIngredientsWeight: number;
   category: RecipeCategory;
   onOutputChange: (value: number) => void;
   onOutputUnitChange: (value: string) => void;
@@ -18,8 +16,6 @@ interface RecipeOutputFieldsProps {
 const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
   output,
   outputUnit,
-  calculatedLossPercentage,
-  totalIngredientsWeight,
   category,
   onOutputChange,
   onOutputUnitChange,
@@ -52,21 +48,6 @@ const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
               <SelectItem value="шт">шт</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label>Вес всех ингредиентов</Label>
-          <div className="h-10 px-3 py-2 border rounded-md flex items-center text-sm">
-            {totalIngredientsWeight.toFixed(2)} кг
-          </div>
-        </div>
-        <div className="grid gap-2">
-          <Label>Процент потерь (расчетный)</Label>
-          <div className={`h-10 px-3 py-2 border rounded-md flex items-center text-sm ${calculatedLossPercentage > 0 ? 'text-amber-600' : calculatedLossPercentage < 0 ? 'text-red-600' : ''}`}>
-            {calculatedLossPercentage.toFixed(2)}%
-          </div>
         </div>
       </div>
     </div>
