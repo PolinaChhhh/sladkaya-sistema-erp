@@ -1,16 +1,22 @@
 
 import React from 'react';
-import { Clock, ArrowRight, Timer } from 'lucide-react';
+import { Clock, ArrowRight, Thermometer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Progress } from '@/components/ui/progress';
 
 interface RecipeProcessProps {
   processSteps: string[];
   preparationTime?: number;
+  category: 'finished' | 'semi-finished';
+  bakingTemperature?: number;
 }
 
-const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparationTime }) => {
+const RecipeProcess: React.FC<RecipeProcessProps> = ({ 
+  processSteps, 
+  preparationTime, 
+  category,
+  bakingTemperature
+}) => {
   const highlightProcessText = (text: string) => {
     const keyWords = ['mix', 'bake', 'cool', 'stir', 'whisk', 'fold', 'knead', 'melt', 'sift', 'beat', 'chill', 'boil', 'simmer', 'roast', 'fry'];
     
@@ -38,22 +44,6 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
           <Clock className="h-5 w-5 text-mint-600" />
           Технологический процесс
         </h2>
-        
-        {preparationTime && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1 text-sm text-gray-600 bg-cream-50 px-3 py-1 rounded-full">
-                  <Timer className="h-4 w-4 text-mint-600" />
-                  <span>{formatPrepTime(preparationTime)}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Время приготовления</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
       </div>
       
       <div className="bg-white border border-cream-100 rounded-xl p-5 mb-6 shadow-sm">
@@ -79,13 +69,33 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
           </p>
         )}
         
-        {preparationTime && processSteps.length > 0 && (
+        {category === 'semi-finished' && (
           <div className="mt-6 pt-4 border-t border-cream-100">
-            <div className="flex justify-between items-center text-sm text-gray-500 mb-1">
-              <span>Прогресс выполнения</span>
-              <span>100%</span>
+            <div className="grid grid-cols-2 gap-4">
+              {preparationTime && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <div className="p-1.5 rounded-full bg-mint-100">
+                    <Clock className="h-4 w-4 text-mint-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium">Время отпекания</div>
+                    <div>{formatPrepTime(preparationTime)}</div>
+                  </div>
+                </div>
+              )}
+              
+              {bakingTemperature && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <div className="p-1.5 rounded-full bg-amber-100">
+                    <Thermometer className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium">Температура</div>
+                    <div>{bakingTemperature}°C</div>
+                  </div>
+                </div>
+              )}
             </div>
-            <Progress className="h-2 bg-cream-100" value={100} indicatorClassName="bg-mint-500" />
           </div>
         )}
       </div>

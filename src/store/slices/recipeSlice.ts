@@ -29,7 +29,8 @@ export const createRecipeSlice: StateCreator<
       category: recipe.category || 'finished',
       items: recipe.items || [], // Ensure items is defined
       imageUrl: recipe.imageUrl || undefined, // Handle imageUrl
-      preparationTime: recipe.preparationTime || undefined // Handle preparationTime
+      preparationTime: recipe.preparationTime || undefined, // Handle preparationTime
+      bakingTemperature: recipe.bakingTemperature || undefined // Handle bakingTemperature
     }]
   })),
   
@@ -47,7 +48,9 @@ export const createRecipeSlice: StateCreator<
         // Handle imageUrl updating
         imageUrl: data.imageUrl !== undefined ? data.imageUrl : recipe.imageUrl,
         // Handle preparationTime updating
-        preparationTime: data.preparationTime !== undefined ? data.preparationTime : recipe.preparationTime
+        preparationTime: data.preparationTime !== undefined ? data.preparationTime : recipe.preparationTime,
+        // Handle bakingTemperature updating
+        bakingTemperature: data.bakingTemperature !== undefined ? data.bakingTemperature : recipe.bakingTemperature
       } : recipe
     )
   })),

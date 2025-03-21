@@ -23,6 +23,7 @@ interface RecipeDialogsProps {
     tags: RecipeTag[];
     imageUrl?: string;
     preparationTime?: number;
+    bakingTemperature?: number;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     name: string;
@@ -35,6 +36,7 @@ interface RecipeDialogsProps {
     tags: RecipeTag[];
     imageUrl?: string;
     preparationTime?: number;
+    bakingTemperature?: number;
   }>>;
   selectedRecipe: Recipe | null;
   handleCreateRecipe: () => void;

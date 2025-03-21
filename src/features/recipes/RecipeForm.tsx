@@ -23,6 +23,7 @@ interface RecipeFormProps {
     tags: RecipeTag[];
     imageUrl?: string;
     preparationTime?: number;
+    bakingTemperature?: number;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     name: string;
@@ -35,6 +36,7 @@ interface RecipeFormProps {
     tags: RecipeTag[];
     imageUrl?: string;
     preparationTime?: number;
+    bakingTemperature?: number;
   }>>;
   onSubmit: () => void;
   ingredients: Ingredient[];
@@ -100,6 +102,14 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       preparationTime: time
     }));
   };
+  
+  // Handle baking temperature change
+  const handleBakingTemperatureChange = (temp: number) => {
+    setFormData(prev => ({
+      ...prev,
+      bakingTemperature: temp
+    }));
+  };
 
   // Get only the main items (no packaging)
   const mainItems = formData.items.filter(item => !item.isPackaging);
@@ -116,11 +126,14 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           tags={formData.tags}
           imageUrl={formData.imageUrl}
           preparationTime={formData.preparationTime}
+          bakingTemperature={formData.bakingTemperature}
+          category={formData.category}
           onNameChange={(value) => setFormData({ ...formData, name: value })}
           onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
           onTagsChange={handleTagsChange}
           onImageChange={handleImageChange}
           onPreparationTimeChange={handlePreparationTimeChange}
+          onBakingTemperatureChange={handleBakingTemperatureChange}
         />
         
         <RecipeOutputFields 

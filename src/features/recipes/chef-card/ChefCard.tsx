@@ -71,6 +71,8 @@ const ChefCard: React.FC<ChefCardProps> = ({
             <RecipeProcess 
               processSteps={processSteps} 
               preparationTime={recipe.preparationTime}
+              category={recipe.category}
+              bakingTemperature={recipe.bakingTemperature}
             />
           </div>
         </div>

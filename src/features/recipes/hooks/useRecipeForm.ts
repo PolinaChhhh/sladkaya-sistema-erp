@@ -24,6 +24,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     tags: RecipeTag[];
     imageUrl?: string;
     preparationTime?: number;
+    bakingTemperature?: number;
   }>({
     name: '',
     description: '',
@@ -35,6 +36,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     tags: [],
     imageUrl: undefined,
     preparationTime: 0,
+    bakingTemperature: 0,
   });
   
   const initCreateForm = () => {
@@ -49,6 +51,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       tags: [],
       imageUrl: undefined,
       preparationTime: 0,
+      bakingTemperature: 0,
     });
     setIsCreateDialogOpen(true);
   };
@@ -66,6 +69,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       tags: recipe.tags || [],
       imageUrl: recipe.imageUrl,
       preparationTime: recipe.preparationTime || 0,
+      bakingTemperature: recipe.bakingTemperature || 0,
     });
     setIsEditDialogOpen(true);
   };
@@ -88,6 +92,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       tags: formData.tags,
       imageUrl: formData.imageUrl,
       preparationTime: formData.preparationTime,
+      bakingTemperature: formData.bakingTemperature,
     });
     
     toast.success(formData.category === 'finished' 
@@ -115,6 +120,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       tags: formData.tags,
       imageUrl: formData.imageUrl,
       preparationTime: formData.preparationTime,
+      bakingTemperature: formData.bakingTemperature,
     });
     
     toast.success(formData.category === 'finished' 
