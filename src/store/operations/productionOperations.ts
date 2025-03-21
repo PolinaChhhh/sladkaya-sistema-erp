@@ -1,5 +1,5 @@
 
-import { ProductionBatch, Recipe, Ingredient, Receipt } from '../types';
+import { ProductionBatch, Recipe, Ingredient, Receipt, ReceiptItem } from '../types';
 import { 
   checkIngredientsAvailability, 
   consumeIngredientsWithFifo, 
