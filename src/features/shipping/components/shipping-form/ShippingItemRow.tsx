@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShippingDocument } from '@/store/recipeStore';
 import { vatRateOptions } from '../../hooks/useShippingForm';
 import { calculatePriceWithVat } from '../../hooks/useShipmentsList';
+import { getProductName, getProductUnit } from '../../utils/shippingUtils';
 
 interface ShippingItemRowProps {
   item: {
@@ -42,16 +43,14 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   const amount = item.quantity * priceWithVat;
 
   return (
-    <div className="grid grid-cols-16 gap-2 p-3 text-sm border-t border-gray-100 items-center">
+    <div className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center">
       <div className="col-span-3">
         <Select 
           value={item.productionBatchId} 
           onValueChange={(value) => updateShippingItem(idx, 'productionBatchId', value)}
         >
           <SelectTrigger>
-            <SelectValue 
-              placeholder="Выберите товар" 
-            />
+            <SelectValue placeholder="Выберите товар" />
           </SelectTrigger>
           <SelectContent>
             {productions.map((prod) => {
@@ -65,6 +64,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
               }, 0);
               
               const available = prod.quantity - shippedQuantity;
+              const productName = recipe?.name || 'Неизвестно';
               
               return (
                 <SelectItem 
@@ -72,7 +72,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
                   value={prod.id}
                   disabled={available <= 0}
                 >
-                  {recipe?.name || 'Неизвестно'} ({available} {recipe?.outputUnit || 'шт'} доступно)
+                  {productName}
                 </SelectItem>
               );
             })}
@@ -80,13 +80,13 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
         </Select>
       </div>
       
-      <div className="col-span-2 text-center">
-        <div className="bg-gray-50 px-3 py-2 rounded border border-gray-200 text-gray-700">
-          {availableQuantity} {productUnit}
-        </div>
+      <div className="col-span-1 text-center text-gray-600 text-xs">
+        <span className="block mb-1">В наличии</span>
+        <span className="font-medium">{availableQuantity} {productUnit}</span>
       </div>
       
-      <div className="col-span-2">
+      <div className="col-span-1">
+        <span className="block mb-1 text-center text-gray-600 text-xs">Кол-во</span>
         <Input
           type="number"
           min="1"
@@ -98,6 +98,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
       </div>
       
       <div className="col-span-2">
+        <span className="block mb-1 text-center text-gray-600 text-xs">Цена (без НДС)</span>
         <Input
           type="number"
           min="0"
@@ -108,7 +109,8 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
         />
       </div>
       
-      <div className="col-span-2">
+      <div className="col-span-1">
+        <span className="block mb-1 text-center text-gray-600 text-xs">НДС %</span>
         <Select
           value={String(item.vatRate)}
           onValueChange={(value) => updateShippingItem(idx, 'vatRate', Number(value))}
@@ -126,12 +128,18 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
         </Select>
       </div>
       
-      <div className="col-span-2 text-center font-medium">
-        {priceWithVat.toFixed(2)} ₽
+      <div className="col-span-2">
+        <span className="block mb-1 text-center text-gray-600 text-xs">Цена (с НДС)</span>
+        <div className="bg-gray-50 px-3 py-2 rounded border border-gray-200 text-center font-medium">
+          {priceWithVat.toFixed(2)} ₽
+        </div>
       </div>
       
-      <div className="col-span-2 text-right font-medium">
-        {amount.toFixed(2)} ₽
+      <div className="col-span-1">
+        <span className="block mb-1 text-center text-gray-600 text-xs">Сумма</span>
+        <div className="bg-gray-50 px-3 py-2 rounded border border-gray-200 text-center font-medium">
+          {amount.toFixed(2)} ₽
+        </div>
       </div>
       
       <div className="col-span-1 text-right">
