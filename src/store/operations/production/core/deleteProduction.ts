@@ -44,7 +44,8 @@ export const handleDeleteProduction = (
     ingredients,
     receipts,
     updateIngredient,
-    updateReceiptItem
+    updateReceiptItem,
+    production.consumptionDetails // Pass consumption details for precise restoration
   );
   
   // If this is a semi-finished product, we want to decompose it to ingredients
