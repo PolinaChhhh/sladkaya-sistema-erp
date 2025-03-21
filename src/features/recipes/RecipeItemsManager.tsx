@@ -44,6 +44,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     }
       
     const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
+    
+    // Always create ingredient-type items
     const newItem: RecipeItem = { 
       type: 'ingredient', 
       ingredientId: defaultId, 
@@ -73,7 +75,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   };
 
   // For finished products, only ingredients are allowed
-  const allowRecipeItems = category === 'semi-finished';
+  // For semi-finished products, also only ingredients are allowed now
+  const allowRecipeItems = false;
 
   // Open semi-finished portion dialog
   const openSemiFinishedDialog = (recipe: Recipe) => {
@@ -148,7 +151,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               item={item}
               index={index}
               ingredients={ingredients}
-              recipes={allowRecipeItems ? recipes.filter(r => r.id !== currentRecipeId) : []}
+              recipes={[]} // Empty array since we don't allow recipe items anymore for semi-finished
               getIngredientName={getIngredientName}
               getIngredientUnit={getIngredientUnit}
               getRecipeName={getRecipeName}
@@ -157,7 +160,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               onRemove={removeRecipeItem}
               allowRecipeItems={allowRecipeItems}
               forceRecipeItems={false}
-              forcedType={category === 'finished' ? 'ingredient' : undefined}
+              forcedType="ingredient" // Force all items to be ingredients
             />
           ))}
         </div>

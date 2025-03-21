@@ -99,7 +99,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   return (
     <div className={`p-3 rounded-md ${isFromSemiFinished ? 'bg-blue-50' : 'bg-gray-50'}`}>
       <div className="space-y-2">
-        {/* Only show type selector if recipe items are allowed and not forced */}
+        {/* Only show type selector if both recipe items are allowed AND not forced to a specific type */}
         {allowRecipeItems && !forcedType && (
           <div className="flex items-center gap-2 mb-2">
             <Select
