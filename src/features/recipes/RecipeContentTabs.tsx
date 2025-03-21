@@ -46,16 +46,11 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
 }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-      <TabsList className="mb-4">
-        <TabsTrigger value="all">Все рецепты</TabsTrigger>
-        <TabsTrigger value="in-stock">На складе</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="all">
-        <RecipeCategoryFilter 
-          categoryFilter={categoryFilter} 
-          onCategoryChange={setCategoryFilter} 
-        />
+      <div className="flex justify-between items-start mb-4">
+        <TabsList>
+          <TabsTrigger value="all">Все рецепты</TabsTrigger>
+          <TabsTrigger value="in-stock">На складе</TabsTrigger>
+        </TabsList>
         
         {allTags.length > 0 && (
           <RecipeTagFilter 
@@ -64,6 +59,13 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
             onTagToggle={onTagToggle}
           />
         )}
+      </div>
+      
+      <TabsContent value="all">
+        <RecipeCategoryFilter 
+          categoryFilter={categoryFilter} 
+          onCategoryChange={setCategoryFilter} 
+        />
         
         <RecipesList 
           recipes={filteredRecipes} 
@@ -81,14 +83,6 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
           categoryFilter={categoryFilter} 
           onCategoryChange={setCategoryFilter} 
         />
-        
-        {allTags.length > 0 && (
-          <RecipeTagFilter 
-            allTags={allTags} 
-            selectedTags={selectedTags}
-            onTagToggle={onTagToggle}
-          />
-        )}
         
         <InStockRecipes 
           recipes={recipes.filter(r => {

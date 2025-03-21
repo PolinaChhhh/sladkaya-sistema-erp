@@ -19,12 +19,12 @@ const RecipeTagFilter: React.FC<RecipeTagFilterProps> = ({
   }
 
   return (
-    <div className="mb-4">
+    <div className="flex flex-col items-end">
       <div className="flex items-center gap-2 mb-2">
         <Tag size={16} className="text-gray-500" />
         <span className="text-sm font-medium">Фильтр по тегам:</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-end max-w-xs">
         {allTags.map(tag => {
           const isSelected = selectedTags.includes(tag.id);
           return (
