@@ -47,22 +47,33 @@ export const restoreIngredientsToReceipts = (
           
           // Restore to each receipt item based on recorded consumption
           consumedItems.forEach(consumed => {
-            console.log(`Precisely restoring ${consumed.amount} of ${ingredient.name} to receipt ${consumed.receiptId}, item ${consumed.itemId}`);
+            // Convert IDs to strings to ensure consistent comparison
+            const receiptIdStr = String(consumed.receiptId);
+            const itemIdStr = String(consumed.itemId);
+            
+            console.log(`Precisely restoring ${consumed.amount} of ${ingredient.name} to receipt ${receiptIdStr}, item ${itemIdStr}`);
             
             // Find the current remaining quantity of the receipt item
-            const receiptItem = receipts
-              .flatMap(r => r.items)
-              .find(ri => ri.id === consumed.itemId && ri.receiptId === consumed.receiptId);
+            const receipt = receipts.find(r => String(r.id) === receiptIdStr);
+            
+            if (!receipt) {
+              console.error(`Receipt not found: receiptId=${receiptIdStr}`);
+              return; // Skip this item but continue with others
+            }
+            
+            const receiptItem = receipt.items.find(ri => String(ri.id) === itemIdStr);
             
             if (receiptItem) {
               const newRemainingQuantity = receiptItem.remainingQuantity + consumed.amount;
-              console.log(`Updating receipt item ${consumed.itemId} remaining quantity: ${receiptItem.remainingQuantity} + ${consumed.amount} = ${newRemainingQuantity}`);
+              console.log(`Updating receipt item ${itemIdStr} remaining quantity: ${receiptItem.remainingQuantity} + ${consumed.amount} = ${newRemainingQuantity}`);
               
-              updateReceiptItem(consumed.receiptId, consumed.itemId, {
+              // Make sure we're passing string IDs to updateReceiptItem
+              updateReceiptItem(receiptIdStr, itemIdStr, {
                 remainingQuantity: newRemainingQuantity
               });
+              console.log(`Called updateReceiptItem with receiptId=${receiptIdStr}, itemId=${itemIdStr}, new quantity=${newRemainingQuantity}`);
             } else {
-              console.error(`Receipt item not found: receiptId=${consumed.receiptId}, itemId=${consumed.itemId}`);
+              console.error(`Receipt item not found: receiptId=${receiptIdStr}, itemId=${itemIdStr}`);
             }
           });
         } else {
@@ -98,9 +109,14 @@ export const restoreIngredientsToReceipts = (
               console.log(`Ratio-based: Restoring ${restoreAmount} of ${ingredient.name} to receipt ${receiptItem.receiptId}, item ${receiptItem.id}`);
               console.log(`Receipt item details: original=${originalTotal}, remaining=${currentRemaining}, consumed=${consumed}`);
               
-              updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
+              // Make sure we're passing string IDs
+              const receiptIdStr = String(receiptItem.receiptId);
+              const itemIdStr = String(receiptItem.id);
+              
+              updateReceiptItem(receiptIdStr, itemIdStr, {
                 remainingQuantity: currentRemaining + restoreAmount
               });
+              console.log(`Called updateReceiptItem with receiptId=${receiptIdStr}, itemId=${itemIdStr}, new quantity=${currentRemaining + restoreAmount}`);
               
               remainingToRestore -= restoreAmount;
             }
@@ -116,4 +132,3 @@ export const restoreIngredientsToReceipts = (
     }
   });
 };
-

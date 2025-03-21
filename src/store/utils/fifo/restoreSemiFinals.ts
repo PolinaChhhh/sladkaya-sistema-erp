@@ -42,24 +42,28 @@ export const restoreSemiFinalProductsWithFifo = (
         
         // Process each production that was consumed
         usedProductions.forEach(usedProduction => {
-          const { productionId, amount } = usedProduction;
+          // Ensure productionId is a string
+          const productionIdStr = String(usedProduction.productionId);
+          const amount = usedProduction.amount;
+          
+          console.log(`Processing semi-final production ${productionIdStr}, amount: ${amount}`);
           
           // Find the production that was used
-          const semiFinalProduction = productions.find(p => p.id === productionId);
+          const semiFinalProduction = productions.find(p => String(p.id) === productionIdStr);
           
           if (!semiFinalProduction) {
-            console.warn(`Production ${productionId} not found - it may have been already deleted. Skipping restoration.`);
+            console.warn(`Production ${productionIdStr} not found - it may have been already deleted. Skipping restoration.`);
             return; // Skip this production but continue with others
           }
           
           // Update the quantity of the semi-final production
           // We're using the 'quantity' property which exists in ProductionBatch
           // instead of 'availableQuantity' which doesn't exist
-          updateProduction(productionId, {
+          updateProduction(productionIdStr, {
             quantity: semiFinalProduction.quantity + amount
           });
           
-          console.log(`Restored ${amount} to semi-final production ${productionId}`);
+          console.log(`Restored ${amount} to semi-final production ${productionIdStr}, new quantity: ${semiFinalProduction.quantity + amount}`);
           
           // If we should decompose, we need to restore the ingredients of the semi-final
           if (shouldDecompose) {
@@ -92,4 +96,3 @@ export const restoreSemiFinalProductsWithFifo = (
       }
     });
 };
-

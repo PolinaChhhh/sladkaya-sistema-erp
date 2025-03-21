@@ -1,4 +1,3 @@
-
 import { StateCreator } from 'zustand';
 import { Receipt, ReceiptItem } from '../types';
 import { IngredientSlice } from './ingredientSlice';
@@ -134,20 +133,42 @@ export const createReceiptSlice: StateCreator<
     };
   }),
   
-  updateReceiptItem: (receiptId, itemId, data) => set((state) => ({
-    receipts: state.receipts.map(receipt => 
-      receipt.id === receiptId
-        ? {
+  updateReceiptItem: (receiptId, itemId, data) => {
+    // Convert both IDs to strings to ensure consistent comparison
+    const receiptIdStr = String(receiptId);
+    const itemIdStr = String(itemId);
+    
+    console.log(`Updating receipt item: receiptId=${receiptIdStr}, itemId=${itemIdStr}, data=`, data);
+    
+    set((state) => {
+      // Create a new receipts array to trigger a state update
+      const updatedReceipts = state.receipts.map(receipt => {
+        if (String(receipt.id) === receiptIdStr) {
+          return {
             ...receipt,
             items: receipt.items.map(item => 
-              item.id === itemId
+              String(item.id) === itemIdStr
                 ? { ...item, ...data }
                 : item
             )
-          }
-        : receipt
-    )
-  })),
+          };
+        }
+        return receipt;
+      });
+      
+      // Log the before and after state for debugging
+      const beforeReceipt = state.receipts.find(r => String(r.id) === receiptIdStr);
+      const beforeItem = beforeReceipt?.items.find(i => String(i.id) === itemIdStr);
+      
+      const afterReceipt = updatedReceipts.find(r => String(r.id) === receiptIdStr);
+      const afterItem = afterReceipt?.items.find(i => String(i.id) === itemIdStr);
+      
+      console.log(`Before update: ${beforeItem ? JSON.stringify(beforeItem) : 'item not found'}`);
+      console.log(`After update: ${afterItem ? JSON.stringify(afterItem) : 'item not found'}`);
+      
+      return { receipts: updatedReceipts };
+    });
+  },
   
   deleteReceiptItem: (receiptId, itemId) => set((state) => ({
     receipts: state.receipts.map(receipt => 
