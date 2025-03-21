@@ -53,6 +53,7 @@ const IngredientsUsageSection: React.FC<IngredientsUsageSectionProps> = ({
         <div className="space-y-2">
           {ingredientUsageDetails.map((usage) => {
             const isExpanded = expandedItems[usage.ingredientId] || false;
+            const hasFifoDetails = usage.fifoDetails && usage.fifoDetails.length > 0;
             
             return (
               <div key={usage.ingredientId} className="border border-gray-200 rounded-md overflow-hidden">
@@ -80,7 +81,7 @@ const IngredientsUsageSection: React.FC<IngredientsUsageSectionProps> = ({
                       Расход по партиям (FIFO):
                     </div>
                     <div className="space-y-2">
-                      {usage.fifoDetails.length > 0 ? (
+                      {hasFifoDetails ? (
                         <table className="w-full text-sm border-collapse">
                           <thead>
                             <tr className="text-xs text-gray-500">
