@@ -80,6 +80,11 @@ export const consumeIngredientsWithFifo = (
           remainingToConsume -= consumeAmount;
         }
         
+        // Log a warning if we couldn't consume all that was needed
+        if (remainingToConsume > 0) {
+          console.warn(`Not enough of ingredient ${ingredient.name} to consume. Missing: ${remainingToConsume}`);
+        }
+        
         // Add the cost of this ingredient to the total cost
         totalCost += ingredientCost;
         
