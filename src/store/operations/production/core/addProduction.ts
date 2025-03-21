@@ -70,6 +70,10 @@ export const handleAddProduction = (
       updateReceiptItem
     );
     
+    console.log(`Ingredient consumption details for ${recipe.name}:`, Object.keys(consumptionDetails).map(key => 
+      `${key}: ${consumptionDetails[key].length} items`
+    ).join(', '));
+    
     // Handle semi-finished products in recipe using FIFO
     const { totalCost: semiFinalCost, consumptionDetails: semiFinalConsumptionDetails } = 
       consumeSemiFinalProductsWithFifo(
@@ -83,14 +87,25 @@ export const handleAddProduction = (
     // Add semi-final cost to total cost
     const totalCost = ingredientCost + semiFinalCost;
     
+    // Merge both consumption details
+    const mergedConsumptionDetails = { ...consumptionDetails };
+    
+    // Add semi-final consumption details
+    Object.entries(semiFinalConsumptionDetails).forEach(([key, value]) => {
+      mergedConsumptionDetails[key] = value as any[];
+    });
+    
+    console.log(`Final consumption details for ${recipe.name}:`, Object.keys(mergedConsumptionDetails).map(key => 
+      `${key}: ${mergedConsumptionDetails[key].length} items`
+    ).join(', '));
+    
     // Create new production with calculated cost and consumption details
     const newProduction = {
       ...production,
       id: crypto.randomUUID(),
       cost: totalCost,
       date: new Date().toISOString(),
-      consumptionDetails, // Store the ingredient consumption details
-      semiFinalConsumptionDetails // Store the semi-final consumption details
+      consumptionDetails: mergedConsumptionDetails // Store both ingredient and semi-final consumption details
     };
     
     // Update the lastProduced date for the recipe

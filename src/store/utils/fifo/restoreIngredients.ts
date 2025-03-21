@@ -14,6 +14,12 @@ export const restoreIngredientsToReceipts = (
   updateReceiptItem: (receiptId: string, itemId: string, data: Partial<ReceiptItem>) => void,
   consumptionDetails?: Record<string, ConsumedReceiptItem[]>
 ): void => {
+  console.log(`Restoring ingredients for recipe ${recipe.name}, quantity: ${quantity}`);
+  console.log(`Consumption details available: ${!!consumptionDetails}`);
+  if (consumptionDetails) {
+    console.log(`Consumption details keys: ${Object.keys(consumptionDetails).join(', ')}`);
+  }
+  
   const ratio = quantity / recipe.output;
   
   recipe.items.forEach(item => {
@@ -22,25 +28,38 @@ export const restoreIngredientsToReceipts = (
       
       if (ingredient) {
         const amountToRestore = item.amount * ratio;
+        console.log(`Need to restore ${amountToRestore} of ${ingredient.name} (id: ${ingredient.id})`);
         
         // Restore the ingredient quantity
         updateIngredient(ingredient.id, {
           quantity: ingredient.quantity + amountToRestore
         });
+        console.log(`Updated ingredient quantity: ${ingredient.quantity} + ${amountToRestore} = ${ingredient.quantity + amountToRestore}`);
         
         // If we have consumption details, use them for precise restoration
         if (consumptionDetails && consumptionDetails[item.ingredientId]) {
           const consumedItems = consumptionDetails[item.ingredientId];
+          console.log(`Found ${consumedItems.length} consumed receipt items for ${ingredient.name}`);
           
           // Restore to each receipt item based on recorded consumption
           consumedItems.forEach(consumed => {
             console.log(`Precisely restoring ${consumed.amount} of ${ingredient.name} to receipt ${consumed.receiptId}, item ${consumed.itemId}`);
             
-            updateReceiptItem(consumed.receiptId, consumed.itemId, {
-              remainingQuantity: receipts
-                .flatMap(r => r.items)
-                .find(ri => ri.id === consumed.itemId && ri.receiptId === consumed.receiptId)?.remainingQuantity + consumed.amount || 0
-            });
+            // Find the current remaining quantity of the receipt item
+            const receiptItem = receipts
+              .flatMap(r => r.items)
+              .find(ri => ri.id === consumed.itemId && ri.receiptId === consumed.receiptId);
+            
+            if (receiptItem) {
+              const newRemainingQuantity = receiptItem.remainingQuantity + consumed.amount;
+              console.log(`Updating receipt item ${consumed.itemId} remaining quantity: ${receiptItem.remainingQuantity} + ${consumed.amount} = ${newRemainingQuantity}`);
+              
+              updateReceiptItem(consumed.receiptId, consumed.itemId, {
+                remainingQuantity: newRemainingQuantity
+              });
+            } else {
+              console.error(`Receipt item not found: receiptId=${consumed.receiptId}, itemId=${consumed.itemId}`);
+            }
           });
         } else {
           // Fallback to the original method when consumption details aren't available
@@ -58,6 +77,8 @@ export const restoreIngredientsToReceipts = (
             )
             .sort((a, b) => new Date(b.receiptDate).getTime() - new Date(a.receiptDate).getTime());
           
+          console.log(`Found ${receiptItems.length} receipt items for ratio-based restoration of ${ingredient.name}`);
+          
           let remainingToRestore = amountToRestore;
           for (const receiptItem of receiptItems) {
             if (remainingToRestore <= 0) break;
@@ -70,7 +91,8 @@ export const restoreIngredientsToReceipts = (
             const restoreAmount = Math.min(remainingToRestore, consumed);
             
             if (restoreAmount > 0) {
-              console.log(`Ratio-based: Restoring ${restoreAmount} of ${ingredient.name} to receipt ${receiptItem.receiptId}`);
+              console.log(`Ratio-based: Restoring ${restoreAmount} of ${ingredient.name} to receipt ${receiptItem.receiptId}, item ${receiptItem.id}`);
+              console.log(`Receipt item details: original=${originalTotal}, remaining=${currentRemaining}, consumed=${consumed}`);
               
               updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
                 remainingQuantity: currentRemaining + restoreAmount
@@ -79,7 +101,13 @@ export const restoreIngredientsToReceipts = (
               remainingToRestore -= restoreAmount;
             }
           }
+          
+          if (remainingToRestore > 0) {
+            console.warn(`Could not fully restore ${remainingToRestore} of ${ingredient.name} - no matching receipt items found`);
+          }
         }
+      } else {
+        console.error(`Ingredient not found: ${item.ingredientId}`);
       }
     }
   });

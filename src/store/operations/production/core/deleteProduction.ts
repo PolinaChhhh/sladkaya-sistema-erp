@@ -31,6 +31,10 @@ export const handleDeleteProduction = (
   }
   
   console.log(`Deleting production ${id} of recipe ${recipe.name} (category: ${recipe.category})`);
+  console.log(`Production has consumptionDetails: ${!!production.consumptionDetails}`);
+  if (production.consumptionDetails) {
+    console.log(`Consumption details keys: ${Object.keys(production.consumptionDetails).join(', ')}`);
+  }
   
   // Check if this is a semi-finished or a finished product
   const isSemiFinished = recipe.category === 'semi-finished';
