@@ -1,6 +1,6 @@
 
 import { Recipe, ProductionBatch, Ingredient, Receipt, ReceiptItem } from '@/store/types';
-import { performFifoConsumption } from './fifoCalculator';
+import { performFifoConsumption, simulateFifoConsumption } from './fifoCalculator';
 
 /**
  * Create a production while properly accounting for ingredients with FIFO method
@@ -81,14 +81,32 @@ export const createProduction = (
             totalCost += semiFinalResult.cost;
           }
         } else {
-          // Need to check if we have enough semi-finished product available
-          // For now, this is stubbed as we don't track semi-finished product inventory
-          // In a real system, this would check semi-finished product inventory
+          // If not auto-producing, we need to calculate the cost from existing semi-finished products
+          // For now, we'll estimate based on recipe costs
           const semiFinalRecipe = recipes.find(r => r.id === semiFinalId);
           if (semiFinalRecipe) {
-            // Check inventories for semi-finished products here...
-            // For now just add a placeholder cost
-            totalCost += amountNeeded * 100; // Placeholder cost
+            // Simulate the cost by calculating what ingredients would be used
+            let semiFinalCost = 0;
+            
+            // Calculate raw ingredient costs for this semi-final
+            semiFinalRecipe.items
+              .filter(sfItem => sfItem.type === 'ingredient' && sfItem.ingredientId)
+              .forEach(sfItem => {
+                const ingredientId = sfItem.ingredientId as string;
+                const sfAmount = sfItem.amount * (amountNeeded / semiFinalRecipe.output);
+                
+                // Simulate FIFO consumption to get accurate costs
+                const simulatedCost = simulateFifoConsumption(
+                  ingredientId,
+                  sfAmount,
+                  receipts
+                );
+                
+                semiFinalCost += simulatedCost.totalCost;
+              });
+            
+            totalCost += semiFinalCost;
+            console.log(`Estimated semi-final ${semiFinalRecipe.name} cost: ${semiFinalCost}`);
           }
         }
       }
@@ -113,19 +131,16 @@ export const createProduction = (
     const ingredient = ingredients.find(i => i.id === ingredientId);
     if (!ingredient) continue;
     
-    // Consume ingredients using FIFO
-    const consumptionResult = performFifoConsumption(
+    // First simulate to check if we have enough
+    const simulation = simulateFifoConsumption(
       ingredientId,
       amountNeeded,
-      receipts,
-      updateIngredient,
-      updateReceiptItem,
-      ingredients
+      receipts
     );
     
-    if (!consumptionResult.success) {
+    if (simulation.insufficientAmount) {
       // Not enough of this ingredient
-      const totalAvailable = consumptionResult.breakdown.reduce(
+      const totalAvailable = simulation.breakdown.reduce(
         (sum, item) => sum + item.amountUsed, 
         0
       );
@@ -137,11 +152,18 @@ export const createProduction = (
         unit: ingredient.unit
       });
       
+      console.log(`Insufficient ingredient: ${ingredient.name}, need ${amountNeeded}, have ${totalAvailable}`);
       continue;
     }
     
-    // Add to total cost
-    totalCost += consumptionResult.totalCost;
+    // Add simulated cost to total
+    totalCost += simulation.totalCost;
+    
+    // Log the breakdown of receipt costs for this ingredient
+    console.log(`Ingredient ${ingredient.name} cost breakdown:`);
+    simulation.breakdown.forEach(b => {
+      console.log(`  From receipt ${b.receiptReference || b.receiptId}: ${b.amountUsed} @ ${b.unitPrice} = ${b.totalPrice}`);
+    });
   }
   
   // If we have insufficient items and this is a required check
@@ -151,6 +173,22 @@ export const createProduction = (
       errorMessage: 'Insufficient ingredients',
       insufficientItems
     };
+  }
+  
+  // After calculating the cost, now perform the actual consumption
+  for (const item of ingredientItems) {
+    const ingredientId = item.ingredientId as string;
+    const amountNeeded = item.amount * productionRatio;
+    
+    // Consume ingredients using FIFO
+    performFifoConsumption(
+      ingredientId,
+      amountNeeded,
+      receipts,
+      updateIngredient,
+      updateReceiptItem,
+      ingredients
+    );
   }
   
   // Create the production with calculated cost

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ interface ProductionDialogProps {
   onSubmit: () => void;
   calculateCost: (recipeId: string, quantity: number) => number;
   getRecipeOutput: (recipeId: string) => string;
+  getIngredientCostBreakdown?: (recipeId: string, quantity: number) => any[];
 }
 
 const ProductionDialog: React.FC<ProductionDialogProps> = ({
@@ -36,9 +37,12 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   setFormData,
   onSubmit,
   calculateCost,
-  getRecipeOutput
+  getRecipeOutput,
+  getIngredientCostBreakdown
 }) => {
   const { recipes } = useStore();
+  const [showDetailedCosts, setShowDetailedCosts] = useState(false);
+  const [costBreakdown, setCostBreakdown] = useState<any[]>([]);
   
   // Filter recipes to show by category
   const filteredRecipes = recipes.filter(recipe => 
@@ -63,6 +67,16 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   const unitCost = formData.quantity > 0 
     ? estimatedCost / formData.quantity 
     : 0;
+    
+  // Update cost breakdown when recipe or quantity changes
+  useEffect(() => {
+    if (getIngredientCostBreakdown && formData.recipeId && formData.quantity > 0) {
+      const breakdown = getIngredientCostBreakdown(formData.recipeId, formData.quantity);
+      setCostBreakdown(breakdown);
+    } else {
+      setCostBreakdown([]);
+    }
+  }, [formData.recipeId, formData.quantity, getIngredientCostBreakdown]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -168,6 +182,29 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
                   {unitCost.toFixed(2)} ₽/{outputUnit}
                 </span>
               </p>
+              
+              {getIngredientCostBreakdown && costBreakdown.length > 0 && (
+                <div className="mt-2">
+                  <button 
+                    type="button"
+                    className="text-xs text-mint-600 hover:text-mint-800"
+                    onClick={() => setShowDetailedCosts(!showDetailedCosts)}
+                  >
+                    {showDetailedCosts ? 'Скрыть детали' : 'Показать детали'}
+                  </button>
+                  
+                  {showDetailedCosts && (
+                    <div className="mt-2 text-xs space-y-1 max-h-40 overflow-y-auto">
+                      {costBreakdown.map((item, idx) => (
+                        <div key={idx} className="border-t border-mint-100 pt-1">
+                          <p className="font-medium">{item.name}: {item.amount.toFixed(2)} {item.unit}</p>
+                          <p className="text-gray-500">Стоимость: {item.totalCost.toFixed(2)} ₽</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

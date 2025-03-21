@@ -25,8 +25,8 @@ export const useProductionPage = () => {
   // Use recipe utility hooks
   const recipeUtils = useProductionRecipeUtils(recipes);
   
-  // Use cost calculation hook
-  const { calculateCost } = useProductionCostCalculation(recipes, ingredients);
+  // Use cost calculation hook - now with receipts
+  const { calculateCost, getIngredientCostBreakdown } = useProductionCostCalculation(recipes, ingredients, receipts);
   
   // Use ingredient utility hooks
   const ingredientUtils = useProductionIngredientUtils(ingredients, recipes);
@@ -103,6 +103,7 @@ export const useProductionPage = () => {
     handleEditProduction,
     handleDeleteProduction,
     calculateCost,
+    getIngredientCostBreakdown,
     getSelectedRecipe
   };
 };
