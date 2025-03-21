@@ -1,89 +1,108 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import { Package } from 'lucide-react';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { IngredientUsageDetail } from '../../hooks/useProductionDetails';
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
+interface IngredientUsageDetail {
+  ingredientId: string;
+  name: string;
+  amount: number;
+  unit: string;
+  cost: number;
+  fifoDetails: {
+    receiptDate: string;
+    amount: number;
+    unitPrice: number;
+    totalCost: number;
+    reference: string;
+  }[];
+}
 
 interface IngredientsUsageSectionProps {
   ingredientUsageDetails: IngredientUsageDetail[];
 }
 
-const IngredientsUsageSection: React.FC<IngredientsUsageSectionProps> = ({ 
-  ingredientUsageDetails 
+const IngredientsUsageSection: React.FC<IngredientsUsageSectionProps> = ({
+  ingredientUsageDetails
 }) => {
-  const formatDate = (dateString: string): string => {
-    try {
-      return format(new Date(dateString), 'dd.MM.yyyy');
-    } catch {
-      return 'Неизвестная дата';
-    }
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (ingredientId: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [ingredientId]: !prev[ingredientId]
+    }));
   };
 
-  const totalIngredientsCost = ingredientUsageDetails.reduce(
-    (sum, detail) => sum + detail.totalCost, 
+  const totalIngredientCost = ingredientUsageDetails.reduce(
+    (total, item) => total + item.cost,
     0
   );
 
   return (
-    <div className="mt-4">
-      <h3 className="text-md font-semibold mb-2">Расход ингредиентов</h3>
-      
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-md font-semibold">Расход ингредиентов (метод FIFO)</h3>
+        <span className="text-sm font-medium">
+          Стоимость ингредиентов: {totalIngredientCost.toFixed(2)} ₽
+        </span>
+      </div>
+
       {ingredientUsageDetails.length === 0 ? (
-        <p className="text-gray-500 italic">Нет данных о расходе ингредиентов</p>
+        <p className="text-gray-500 italic">Нет использованных ингредиентов</p>
       ) : (
-        <Accordion type="single" collapsible className="w-full">
-          {ingredientUsageDetails.map((detail, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="py-3">
-                <div className="flex justify-between items-center w-full pr-4">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4 text-gray-500" />
-                    <span>{detail.ingredientName}</span>
+        <div className="space-y-2">
+          {ingredientUsageDetails.map((usage) => {
+            const isExpanded = expandedItems[usage.ingredientId] || false;
+            
+            return (
+              <div key={usage.ingredientId} className="border border-gray-200 rounded-md overflow-hidden">
+                <div 
+                  className="p-3 bg-gray-50 flex justify-between items-center cursor-pointer"
+                  onClick={() => toggleExpand(usage.ingredientId)}
+                >
+                  <div>
+                    <span className="font-medium">{usage.name}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span>{detail.totalAmount.toFixed(2)} {detail.unit}</span>
-                    <span className="font-medium">{detail.totalCost.toFixed(2)} ₽</span>
+                    <span>{usage.amount.toFixed(2)} {usage.unit}</span>
+                    <span>{usage.cost.toFixed(2)} ₽</span>
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    )}
                   </div>
                 </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="pl-6 space-y-2">
-                  {detail.usageBreakdown.map((usage, idx) => (
-                    <div key={idx} className="grid grid-cols-3 gap-2 text-sm border-b border-gray-100 pb-2">
-                      <div>
-                        <span className="text-gray-500">Приход от:</span>
-                        <div>{formatDate(usage.receiptDate)}</div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Количество:</span>
-                        <div>{usage.amount.toFixed(2)} {detail.unit}</div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Стоимость:</span>
-                        <div>{usage.totalCost.toFixed(2)} ₽ ({usage.unitPrice.toFixed(2)} ₽/{detail.unit})</div>
-                      </div>
+                
+                {isExpanded && (
+                  <div className="p-3 bg-white">
+                    <div className="text-xs text-gray-500 mb-2">
+                      Расход по партиям (FIFO):
                     </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      )}
-      
-      {/* Summary of costs - ingredients only */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Стоимость ингредиентов:</span>
-          <span>{totalIngredientsCost.toFixed(2)} ₽</span>
+                    <div className="space-y-2">
+                      {usage.fifoDetails.map((detail, idx) => (
+                        <div key={idx} className="flex justify-between text-sm border-b pb-1 last:border-b-0">
+                          <div>
+                            <span className="text-gray-600">
+                              {detail.receiptDate}
+                              {detail.reference && ` (${detail.reference})`}
+                            </span>
+                          </div>
+                          <div className="flex gap-6">
+                            <span>{detail.amount.toFixed(2)} {usage.unit}</span>
+                            <span>× {detail.unitPrice.toFixed(2)} ₽</span>
+                            <span className="font-medium">{detail.totalCost.toFixed(2)} ₽</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 };
