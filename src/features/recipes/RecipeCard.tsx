@@ -10,6 +10,8 @@ interface RecipeCardProps {
   onDelete: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
+  getRecipeName: (id: string) => string;
+  getRecipeUnit: (id: string) => string;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ 
@@ -17,7 +19,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   onEdit, 
   onDelete,
   getIngredientName,
-  getIngredientUnit
+  getIngredientUnit,
+  getRecipeName,
+  getRecipeUnit
 }) => {
   return (
     <div className="glass p-5 rounded-xl">
@@ -48,12 +52,25 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         <div className="mt-4">
           <h4 className="text-sm font-medium text-gray-600 mb-2">Состав:</h4>
           <div className="space-y-1">
-            {recipe.items.map((item, idx) => (
-              <div key={idx} className="text-sm flex justify-between">
-                <span>{getIngredientName(item.ingredientId)}</span>
-                <span>{item.amount} {getIngredientUnit(item.ingredientId)}</span>
-              </div>
-            ))}
+            {recipe.items.map((item, idx) => {
+              let name = 'Неизвестный элемент';
+              let unit = '';
+              
+              if (item.type === 'ingredient' && item.ingredientId) {
+                name = getIngredientName(item.ingredientId);
+                unit = getIngredientUnit(item.ingredientId);
+              } else if (item.type === 'recipe' && item.recipeId) {
+                name = `🍲 ${getRecipeName(item.recipeId)}`;
+                unit = getRecipeUnit(item.recipeId);
+              }
+              
+              return (
+                <div key={idx} className="text-sm flex justify-between">
+                  <span>{name}</span>
+                  <span>{item.amount} {unit}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

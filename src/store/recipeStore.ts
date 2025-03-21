@@ -12,7 +12,9 @@ export type Ingredient = {
 };
 
 export type RecipeItem = {
-  ingredientId: string;
+  type?: 'ingredient' | 'recipe';
+  ingredientId?: string;
+  recipeId?: string;
   amount: number;
 };
 

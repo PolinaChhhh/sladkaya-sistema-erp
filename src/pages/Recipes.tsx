@@ -26,7 +26,9 @@ const Recipes = () => {
     outputUnit: string;
     lossPercentage: number;
     items: {
-      ingredientId: string;
+      type?: 'ingredient' | 'recipe';
+      ingredientId?: string;
+      recipeId?: string;
       amount: number;
     }[];
   }>({
@@ -62,7 +64,16 @@ const Recipes = () => {
       output: recipe.output,
       outputUnit: recipe.outputUnit,
       lossPercentage: recipe.lossPercentage || 0,
-      items: [...recipe.items],
+      items: recipe.items.map(item => {
+        // Ensure backward compatibility for old recipe items
+        if (!item.type) {
+          return { 
+            ...item, 
+            type: 'ingredient' 
+          };
+        }
+        return { ...item };
+      }),
     });
     setIsEditDialogOpen(true);
   };
@@ -131,6 +142,16 @@ const Recipes = () => {
     return ingredient ? ingredient.unit : '';
   };
 
+  const getRecipeName = (id: string) => {
+    const recipe = recipes.find(r => r.id === id);
+    return recipe ? recipe.name : 'Неизвестный рецепт';
+  };
+  
+  const getRecipeUnit = (id: string) => {
+    const recipe = recipes.find(r => r.id === id);
+    return recipe ? recipe.outputUnit : '';
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       <RecipeHeader onAddNew={initCreateForm} />
@@ -146,6 +167,8 @@ const Recipes = () => {
         onDelete={initDeleteConfirm}
         getIngredientName={getIngredientName}
         getIngredientUnit={getIngredientUnit}
+        getRecipeName={getRecipeName}
+        getRecipeUnit={getRecipeUnit}
       />
       
       {/* Create Recipe Dialog */}
@@ -158,8 +181,11 @@ const Recipes = () => {
           setFormData={setFormData}
           onSubmit={handleCreateRecipe}
           ingredients={ingredients}
+          recipes={recipes}
           getIngredientName={getIngredientName}
           getIngredientUnit={getIngredientUnit}
+          getRecipeName={getRecipeName}
+          getRecipeUnit={getRecipeUnit}
         />
       </Dialog>
       
@@ -173,8 +199,12 @@ const Recipes = () => {
           setFormData={setFormData}
           onSubmit={handleUpdateRecipe}
           ingredients={ingredients}
+          recipes={recipes}
+          currentRecipeId={selectedRecipe?.id}
           getIngredientName={getIngredientName}
           getIngredientUnit={getIngredientUnit}
+          getRecipeName={getRecipeName}
+          getRecipeUnit={getRecipeUnit}
         />
       </Dialog>
       

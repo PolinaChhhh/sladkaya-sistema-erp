@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Ingredient, RecipeItem } from '@/store/recipeStore';
+import { Ingredient, RecipeItem, Recipe } from '@/store/recipeStore';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
 import RecipeOutputFields from './RecipeOutputFields';
@@ -33,8 +33,12 @@ interface RecipeFormProps {
   }>>;
   onSubmit: () => void;
   ingredients: Ingredient[];
+  recipes: Recipe[];
+  currentRecipeId?: string;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
+  getRecipeName: (id: string) => string;
+  getRecipeUnit: (id: string) => string;
 }
 
 const RecipeForm: React.FC<RecipeFormProps> = ({
@@ -45,18 +49,26 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   setFormData,
   onSubmit,
   ingredients,
+  recipes,
+  currentRecipeId,
   getIngredientName,
   getIngredientUnit,
+  getRecipeName,
+  getRecipeUnit,
 }) => {
+  // Filter out the current recipe from the list of available recipes
+  // to prevent circular references
+  const availableRecipes = recipes.filter(recipe => recipe.id !== currentRecipeId);
+  
   const addRecipeItem = () => {
-    if (ingredients.length === 0) {
-      toast.error('Сначала добавьте ингредиенты');
+    if (ingredients.length === 0 && availableRecipes.length === 0) {
+      toast.error('Сначала добавьте ингредиенты или рецепты');
       return;
     }
     
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { ingredientId: "", amount: 0 }],
+      items: [...prev.items, { type: 'ingredient', ingredientId: "", amount: 0 }],
     }));
   };
   
@@ -73,16 +85,29 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 
   // Calculate total ingredients weight and loss percentage
   const { totalIngredientsWeight, calculatedLossPercentage } = useMemo(() => {
-    // Sum up the weights of all ingredients (assuming all are in kg or convertible to kg)
+    // Sum up the weights of all ingredients and recipes (assuming all are in kg or convertible to kg)
     const total = formData.items.reduce((sum, item) => {
-      if (!item.ingredientId || !item.amount) return sum;
+      if (!item.amount) return sum;
       
-      const unit = getIngredientUnit(item.ingredientId);
       let weightInKg = item.amount;
       
-      // Convert to kg if needed (simplified conversion)
-      if (unit === 'г') {
-        weightInKg = item.amount / 1000;
+      if (item.type === 'ingredient' && item.ingredientId) {
+        const unit = getIngredientUnit(item.ingredientId);
+        
+        // Convert to kg if needed (simplified conversion)
+        if (unit === 'г') {
+          weightInKg = item.amount / 1000;
+        }
+      } else if (item.type === 'recipe' && item.recipeId) {
+        const unit = getRecipeUnit(item.recipeId);
+        
+        // Convert to kg if needed (simplified conversion)
+        if (unit === 'г') {
+          weightInKg = item.amount / 1000;
+        }
+      } else {
+        // Skip items with incomplete data
+        return sum;
       }
       
       return sum + weightInKg;
@@ -99,7 +124,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       totalIngredientsWeight: total, 
       calculatedLossPercentage: lossPercentage 
     };
-  }, [formData.items, formData.output, formData.outputUnit, getIngredientUnit]);
+  }, [formData.items, formData.output, formData.outputUnit, getIngredientUnit, getRecipeUnit]);
 
   // Update lossPercentage in formData whenever it's calculated
   React.useEffect(() => {
@@ -146,7 +171,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         
         <div className="space-y-3 mt-2">
           <div className="flex justify-between items-center">
-            <Label>Ингредиенты</Label>
+            <Label>Ингредиенты и рецепты</Label>
             <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
               <Plus className="h-3 w-3 mr-1" /> Добавить
             </Button>
@@ -160,8 +185,11 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
                   item={item}
                   index={index}
                   ingredients={ingredients}
+                  recipes={availableRecipes}
                   getIngredientName={getIngredientName}
                   getIngredientUnit={getIngredientUnit}
+                  getRecipeName={getRecipeName}
+                  getRecipeUnit={getRecipeUnit}
                   onUpdate={updateRecipeItem}
                   onRemove={removeRecipeItem}
                 />

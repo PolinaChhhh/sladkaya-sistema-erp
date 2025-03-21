@@ -10,6 +10,8 @@ interface RecipesListProps {
   onDelete: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
+  getRecipeName: (id: string) => string;
+  getRecipeUnit: (id: string) => string;
 }
 
 const RecipesList: React.FC<RecipesListProps> = ({ 
@@ -17,7 +19,9 @@ const RecipesList: React.FC<RecipesListProps> = ({
   onEdit, 
   onDelete,
   getIngredientName,
-  getIngredientUnit
+  getIngredientUnit,
+  getRecipeName,
+  getRecipeUnit
 }) => {
   if (recipes.length === 0) {
     return <EmptyState />;
@@ -33,6 +37,8 @@ const RecipesList: React.FC<RecipesListProps> = ({
           onDelete={onDelete} 
           getIngredientName={getIngredientName}
           getIngredientUnit={getIngredientUnit}
+          getRecipeName={getRecipeName}
+          getRecipeUnit={getRecipeUnit}
         />
       ))}
     </div>
