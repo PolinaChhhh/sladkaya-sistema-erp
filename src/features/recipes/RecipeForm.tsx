@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/recipeStore';
+import { Ingredient, RecipeItem, Recipe, RecipeCategory, RecipeTag } from '@/store/recipeStore';
 import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
@@ -21,6 +21,7 @@ interface RecipeFormProps {
     lossPercentage: number;
     items: RecipeItem[];
     category: RecipeCategory;
+    tags: RecipeTag[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     name: string;
@@ -30,6 +31,7 @@ interface RecipeFormProps {
     lossPercentage: number;
     items: RecipeItem[];
     category: RecipeCategory;
+    tags: RecipeTag[];
   }>>;
   onSubmit: () => void;
   ingredients: Ingredient[];
@@ -104,8 +106,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   };
 
-  // Debug logging for form data
-  console.log('RecipeForm - formData:', formData);
+  // Handle tags change
+  const handleTagsChange = (tags: RecipeTag[]) => {
+    setFormData(prev => ({
+      ...prev,
+      tags
+    }));
+  };
 
   return (
     <DialogContent className="sm:max-w-lg">
@@ -117,9 +124,11 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           name={formData.name}
           description={formData.description}
           category={formData.category}
+          tags={formData.tags}
           onNameChange={(value) => setFormData({ ...formData, name: value })}
           onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
           onCategoryChange={handleCategoryChange}
+          onTagsChange={handleTagsChange}
         />
         
         <RecipeOutputFields 

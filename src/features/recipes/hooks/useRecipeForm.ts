@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Recipe, RecipeItem, RecipeCategory } from '@/store/recipeStore';
+import { Recipe, RecipeItem, RecipeCategory, RecipeTag } from '@/store/recipeStore';
 import { toast } from 'sonner';
 
 interface UseRecipeFormProps {
@@ -21,6 +21,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     lossPercentage: number;
     items: RecipeItem[];
     category: RecipeCategory;
+    tags: RecipeTag[];
   }>({
     name: '',
     description: '',
@@ -29,6 +30,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     lossPercentage: 0,
     items: [],
     category: 'semi-finished',
+    tags: [],
   });
   
   const initCreateForm = () => {
@@ -40,6 +42,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: 0,
       items: [],
       category: 'semi-finished',
+      tags: [],
     });
     setIsCreateDialogOpen(true);
   };
@@ -63,6 +66,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
         return { ...item };
       }),
       category: recipe.category || 'semi-finished', // Default for backward compatibility
+      tags: recipe.tags || [], // Handle recipes without tags
     });
     setIsEditDialogOpen(true);
   };
@@ -82,6 +86,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       lossPercentage: formData.lossPercentage,
       lastProduced: null,
       category: formData.category,
+      tags: formData.tags,
     });
     
     toast.success('Рецепт успешно создан');
@@ -104,6 +109,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: formData.outputUnit,
       lossPercentage: formData.lossPercentage,
       category: formData.category,
+      tags: formData.tags,
     });
     
     toast.success('Рецепт успешно обновлен');

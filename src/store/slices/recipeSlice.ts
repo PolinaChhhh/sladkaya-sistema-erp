@@ -33,12 +33,21 @@ export const createRecipeSlice: StateCreator<
   productions: [],
   
   addRecipe: (recipe) => set((state) => ({
-    recipes: [...state.recipes, { ...recipe, id: crypto.randomUUID() }]
+    recipes: [...state.recipes, { 
+      ...recipe, 
+      id: crypto.randomUUID(),
+      tags: recipe.tags || [] // Ensure tags is defined
+    }]
   })),
   
   updateRecipe: (id, data) => set((state) => ({
     recipes: state.recipes.map((recipe) => 
-      recipe.id === id ? { ...recipe, ...data } : recipe
+      recipe.id === id ? { 
+        ...recipe, 
+        ...data,
+        // Ensure tags is defined when updating
+        tags: data.tags !== undefined ? data.tags : recipe.tags || []
+      } : recipe
     )
   })),
   

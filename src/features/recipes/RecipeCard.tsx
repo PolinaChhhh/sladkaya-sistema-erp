@@ -50,6 +50,24 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Display tags if present */}
+      {recipe.tags && recipe.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3">
+          {recipe.tags.map(tag => (
+            <div 
+              key={tag.id}
+              className="rounded-full w-6 h-6 flex items-center justify-center"
+              style={{ backgroundColor: tag.color }}
+              title={tag.name}
+            >
+              <span className="text-white text-xs uppercase font-bold">
+                {tag.name.charAt(0)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

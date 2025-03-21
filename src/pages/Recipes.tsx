@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
@@ -9,16 +9,19 @@ import RecipeSearch from '@/features/recipes/RecipeSearch';
 import RecipesList from '@/features/recipes/RecipesList';
 import RecipeDialogs from '@/features/recipes/RecipeDialogs';
 import InStockRecipes from '@/features/recipes/InStockRecipes';
+import RecipeTagFilter from '@/features/recipes/RecipeTagFilter';
 
 // Import custom hooks
 import { useRecipeForm } from '@/features/recipes/hooks/useRecipeForm';
 import { useRecipeDelete } from '@/features/recipes/hooks/useRecipeDelete';
+import { RecipeTag } from '@/store/types';
 
 const Recipes = () => {
   const { recipes, ingredients, productions, addRecipe, updateRecipe, deleteRecipe } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all'); // 'all', 'semi-finished', 'finished'
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   // Use custom hooks
   const { 
@@ -43,11 +46,46 @@ const Recipes = () => {
     handleDeleteRecipe
   } = useRecipeDelete({ deleteRecipe });
   
-  // Filter recipes by search query and category
+  // Collect all unique tags from recipes
+  const allTags = useMemo(() => {
+    const tagMap = new Map<string, RecipeTag>();
+    
+    recipes.forEach(recipe => {
+      if (recipe.tags) {
+        recipe.tags.forEach(tag => {
+          if (!tagMap.has(tag.id)) {
+            tagMap.set(tag.id, tag);
+          }
+        });
+      }
+    });
+    
+    return Array.from(tagMap.values());
+  }, [recipes]);
+
+  // Handle tag filtering
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTags(prev => {
+      if (prev.includes(tagId)) {
+        return prev.filter(id => id !== tagId);
+      } else {
+        return [...prev, tagId];
+      }
+    });
+  };
+  
+  // Filter recipes by search query, category, and tags
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || recipe.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    
+    // Tag filtering
+    const matchesTags = selectedTags.length === 0 || 
+      (recipe.tags && selectedTags.every(tagId => 
+        recipe.tags.some(tag => tag.id === tagId)
+      ));
+    
+    return matchesSearch && matchesCategory && matchesTags;
   });
   
   const getIngredientName = (id: string) => {
@@ -97,6 +135,14 @@ const Recipes = () => {
             </TabsList>
           </Tabs>
           
+          {allTags.length > 0 && (
+            <RecipeTagFilter 
+              allTags={allTags} 
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+            />
+          )}
+          
           <RecipesList 
             recipes={filteredRecipes} 
             onEdit={initEditForm}
@@ -117,8 +163,23 @@ const Recipes = () => {
             </TabsList>
           </Tabs>
           
+          {allTags.length > 0 && (
+            <RecipeTagFilter 
+              allTags={allTags} 
+              selectedTags={selectedTags}
+              onTagToggle={handleTagToggle}
+            />
+          )}
+          
           <InStockRecipes 
-            recipes={recipes.filter(r => categoryFilter === 'all' || r.category === categoryFilter)}
+            recipes={recipes.filter(r => {
+              const matchesCategory = categoryFilter === 'all' || r.category === categoryFilter;
+              const matchesTags = selectedTags.length === 0 || 
+                (r.tags && selectedTags.every(tagId => 
+                  r.tags.some(tag => tag.id === tagId)
+                ));
+              return matchesCategory && matchesTags;
+            })}
             productions={productions}
             getRecipeUnit={getRecipeUnit}
           />

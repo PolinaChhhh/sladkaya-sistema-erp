@@ -4,24 +4,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RecipeCategory } from '@/store/types';
+import { RecipeCategory, RecipeTag } from '@/store/types';
+import RecipeTagManager from './RecipeTagManager';
 
 interface RecipeBasicFieldsProps {
   name: string;
   description: string;
   category: RecipeCategory;
+  tags: RecipeTag[];
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onCategoryChange: (value: RecipeCategory) => void;
+  onTagsChange: (tags: RecipeTag[]) => void;
 }
 
 const RecipeBasicFields: React.FC<RecipeBasicFieldsProps> = ({
   name,
   description,
   category,
+  tags,
   onNameChange,
   onDescriptionChange,
   onCategoryChange,
+  onTagsChange,
 }) => {
   return (
     <>
@@ -58,6 +63,14 @@ const RecipeBasicFields: React.FC<RecipeBasicFieldsProps> = ({
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           placeholder="Описание рецепта (опционально)"
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="tags">Теги</Label>
+        <RecipeTagManager 
+          tags={tags}
+          onUpdateTags={onTagsChange}
         />
       </div>
     </>
