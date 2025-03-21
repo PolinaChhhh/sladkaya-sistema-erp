@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { X, Info } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecipeItem, Recipe, Ingredient } from '@/store/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import TypeSelector from './components/recipeItem/TypeSelector';
+import IngredientSelector from './components/recipeItem/IngredientSelector';
+import RecipeSelector from './components/recipeItem/RecipeSelector';
+import AmountInput from './components/recipeItem/AmountInput';
 
 interface RecipeItemRowProps {
   item: RecipeItem;
@@ -84,6 +85,10 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
     onUpdate(index, 'recipeId', id);
   };
   
+  const handleAmountChange = (amount: number) => {
+    onUpdate(index, 'amount', amount);
+  };
+  
   const getDisplayUnit = () => {
     if (item.ingredientId) {
       return getIngredientUnit(item.ingredientId);
@@ -101,95 +106,37 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
       <div className="space-y-2">
         {/* Only show type selector if both recipe items are allowed AND not forced to a specific type */}
         {allowRecipeItems && !forcedType && (
-          <div className="flex items-center gap-2 mb-2">
-            <Select
-              value={effectiveType}
-              onValueChange={(value) => handleTypeChange(value as 'ingredient' | 'recipe')}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Выберите тип" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ingredient">Ингредиент</SelectItem>
-                <SelectItem value="recipe">Полуфабрикат</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <TypeSelector 
+            type={effectiveType}
+            onTypeChange={handleTypeChange}
+          />
         )}
         
         <div className="flex items-center gap-2">
           <div className="flex-grow">
             {effectiveType === 'ingredient' ? (
-              <div className="flex items-center gap-2">
-                <Select
-                  value={item.ingredientId || ''}
-                  onValueChange={handleIngredientChange}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Выберите ингредиент" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ingredients.map((ingredient) => (
-                      <SelectItem key={ingredient.id} value={ingredient.id}>
-                        {ingredient.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {isFromSemiFinished && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-blue-500">
-                          <Info size={16} />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Из полуфабриката: {item.fromSemiFinished.recipeName}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
+              <IngredientSelector 
+                ingredientId={item.ingredientId || ''}
+                ingredients={ingredients}
+                onIngredientChange={handleIngredientChange}
+                fromSemiFinished={item.fromSemiFinished}
+              />
             ) : (
               allowRecipeItems && (
-                <Select
-                  value={item.recipeId || ''}
-                  onValueChange={handleRecipeChange}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Выберите полуфабрикат" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {recipes
-                      .filter(recipe => recipe.category === 'semi-finished')
-                      .map((recipe) => (
-                        <SelectItem key={recipe.id} value={recipe.id}>
-                          {recipe.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <RecipeSelector
+                  recipeId={item.recipeId || ''}
+                  recipes={recipes}
+                  onRecipeChange={handleRecipeChange}
+                />
               )
             )}
           </div>
           
-          <div className="flex items-center gap-1 min-w-[120px]">
-            <Input 
-              type="number"
-              min="0.01"
-              step="0.01"
-              className="w-20"
-              value={item.amount || ''}
-              onChange={(e) => onUpdate(index, 'amount', parseFloat(e.target.value) || 0)}
-              placeholder="Кол-во"
-            />
-            
-            <span className="text-sm text-gray-500 w-8">
-              {getDisplayUnit()}
-            </span>
-          </div>
+          <AmountInput 
+            amount={item.amount}
+            unit={getDisplayUnit()}
+            onAmountChange={handleAmountChange}
+          />
           
           <Button 
             type="button" 
