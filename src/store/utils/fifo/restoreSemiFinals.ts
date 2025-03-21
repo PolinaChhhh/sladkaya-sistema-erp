@@ -20,6 +20,8 @@ export const restoreSemiFinalProductsWithFifo = (
   updateReceiptItem?: (receiptId: string, itemId: string, data: Partial<any>) => void,
   shouldDecompose: boolean = false
 ): void => {
+  console.log(`Restoring semi-finals for recipe ${recipe.name}, shouldDecompose=${shouldDecompose}`);
+
   // If we have consumption details, use them for precise restoration
   if (consumptionDetails) {
     // Restore each consumed semi-final item
@@ -30,6 +32,8 @@ export const restoreSemiFinalProductsWithFifo = (
       const hasSemiFinalFormat = items.length > 0 && 'productionId' in items[0];
       
       if (hasSemiFinalFormat) {
+        console.log(`Found semi-final consumption details for recipe ${semiFinalRecipeId}`);
+        
         // Cast to ConsumedSemiFinalItem[] since we confirmed it has the right structure
         const semiFinalItems = items as unknown as ConsumedSemiFinalItem[];
         
