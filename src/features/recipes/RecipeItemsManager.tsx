@@ -30,42 +30,21 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   getRecipeUnit,
   onUpdateItems,
 }) => {
-  // Filter out the current recipe from the list of available recipes
-  // to prevent circular references
-  const availableRecipes = recipes.filter(recipe => recipe.id !== currentRecipeId);
-
+  // For now, we'll only allow ingredients (disabled recipes temporarily)
   const addRecipeItem = () => {
-    if (ingredients.length === 0 && availableRecipes.length === 0) {
-      toast.error('Сначала добавьте ингредиенты или рецепты');
+    if (ingredients.length === 0) {
+      toast.error('Сначала добавьте ингредиенты');
       return;
     }
     
-    // Default type based on what's available
-    const defaultType = ingredients.length > 0 ? 'ingredient' : 'recipe';
-    let defaultId = '';
+    const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
     
-    if (defaultType === 'ingredient' && ingredients.length > 0) {
-      defaultId = ingredients[0].id;
-    } else if (defaultType === 'recipe' && availableRecipes.length > 0) {
-      defaultId = availableRecipes[0].id;
-    }
-    
-    // Create a properly typed new item
-    let newItem: RecipeItem;
-    
-    if (defaultType === 'ingredient') {
-      newItem = { 
-        type: 'ingredient', 
-        ingredientId: defaultId, 
-        amount: 0 
-      };
-    } else {
-      newItem = { 
-        type: 'recipe', 
-        recipeId: defaultId, 
-        amount: 0 
-      };
-    }
+    // Create a new ingredient item
+    const newItem: RecipeItem = { 
+      type: 'ingredient', 
+      ingredientId: defaultId, 
+      amount: 0 
+    };
     
     console.log('Added new recipe item:', newItem);
     onUpdateItems([...items, newItem]);
@@ -91,7 +70,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   return (
     <div className="space-y-3 mt-2">
       <div className="flex justify-between items-center">
-        <Label>Ингредиенты и рецепты</Label>
+        <Label>Ингредиенты</Label>
         <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
           <Plus className="h-3 w-3 mr-1" /> Добавить
         </Button>
@@ -105,7 +84,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               item={item}
               index={index}
               ingredients={ingredients}
-              recipes={availableRecipes}
+              recipes={[]} // Temporarily passing empty array
               getIngredientName={getIngredientName}
               getIngredientUnit={getIngredientUnit}
               getRecipeName={getRecipeName}

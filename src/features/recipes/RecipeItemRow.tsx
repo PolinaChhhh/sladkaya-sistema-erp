@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RecipeItem, Recipe, Ingredient } from '@/store/recipeStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RecipeItemRowProps {
   item: RecipeItem;
@@ -32,118 +31,51 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   onUpdate,
   onRemove,
 }) => {
-  const selectedType = item.type || 'ingredient';
-  const selectedId = selectedType === 'ingredient' ? item.ingredientId || '' : item.recipeId || '';
-  
-  // Set a default ID when switching between types if none is selected
+  // Force all items to be ingredients for now
   useEffect(() => {
-    if (selectedType === 'ingredient' && !item.ingredientId && ingredients.length > 0) {
-      onUpdate(index, 'ingredientId', ingredients[0].id);
-    } else if (selectedType === 'recipe' && !item.recipeId && recipes.length > 0) {
-      onUpdate(index, 'recipeId', recipes[0].id);
-    }
-  }, [selectedType, item.ingredientId, item.recipeId, ingredients, recipes, index, onUpdate]);
-  
-  const handleTypeChange = (type: string) => {
-    console.log('Changing type to:', type);
-    
-    if (type === 'ingredient') {
-      // First clear recipe related fields
-      onUpdate(index, 'recipeId', undefined);
-      // Then set type and default ingredient
+    if (item.type !== 'ingredient') {
       onUpdate(index, 'type', 'ingredient');
       
-      // Set default ingredient if available
-      if (ingredients.length > 0) {
+      if (ingredients.length > 0 && !item.ingredientId) {
         onUpdate(index, 'ingredientId', ingredients[0].id);
-      } else {
-        onUpdate(index, 'ingredientId', '');
       }
-    } else if (type === 'recipe') {
-      // First clear ingredient related fields
-      onUpdate(index, 'ingredientId', undefined);
-      // Then set type and default recipe
-      onUpdate(index, 'type', 'recipe');
       
-      // Set default recipe if available
-      if (recipes.length > 0) {
-        onUpdate(index, 'recipeId', recipes[0].id);
-      } else {
-        onUpdate(index, 'recipeId', '');
+      // Clear any recipe ID
+      if (item.recipeId) {
+        onUpdate(index, 'recipeId', undefined);
       }
     }
-  };
+  }, [item, ingredients, index, onUpdate]);
   
-  const handleIdChange = (id: string) => {
-    console.log('Changing ID to:', id, 'for type:', selectedType);
-    
-    if (selectedType === 'ingredient') {
-      onUpdate(index, 'ingredientId', id);
-    } else {
-      onUpdate(index, 'recipeId', id);
-    }
+  const handleIngredientChange = (id: string) => {
+    onUpdate(index, 'ingredientId', id);
   };
   
   const getDisplayUnit = () => {
-    if (selectedType === 'ingredient' && item.ingredientId) {
+    if (item.ingredientId) {
       return getIngredientUnit(item.ingredientId);
-    } else if (selectedType === 'recipe' && item.recipeId) {
-      return getRecipeUnit(item.recipeId);
     }
     return '';
   };
 
-  // Debug logs to see what's happening
-  console.log(`RecipeItemRow - item:`, item);
-  console.log(`RecipeItemRow - selectedType:`, selectedType);
-  console.log(`RecipeItemRow - selectedId:`, selectedId);
-  console.log(`RecipeItemRow - recipes available:`, recipes);
-
   return (
     <div className="bg-gray-50 p-3 rounded-md">
       <div className="space-y-2">
-        <Tabs defaultValue={selectedType} value={selectedType} onValueChange={handleTypeChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ingredient">Ингредиент</TabsTrigger>
-            <TabsTrigger value="recipe">Рецепт</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="ingredient" className="mt-2">
-            <Select
-              value={item.ingredientId || ''}
-              onValueChange={handleIdChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Выберите ингредиент" />
-              </SelectTrigger>
-              <SelectContent>
-                {ingredients.map((ingredient) => (
-                  <SelectItem key={ingredient.id} value={ingredient.id}>
-                    {ingredient.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </TabsContent>
-          
-          <TabsContent value="recipe" className="mt-2">
-            <Select
-              value={item.recipeId || ''}
-              onValueChange={handleIdChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Выберите рецепт" />
-              </SelectTrigger>
-              <SelectContent>
-                {recipes.map((recipe) => (
-                  <SelectItem key={recipe.id} value={recipe.id}>
-                    {recipe.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </TabsContent>
-        </Tabs>
+        <Select
+          value={item.ingredientId || ''}
+          onValueChange={handleIngredientChange}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Выберите ингредиент" />
+          </SelectTrigger>
+          <SelectContent>
+            {ingredients.map((ingredient) => (
+              <SelectItem key={ingredient.id} value={ingredient.id}>
+                {ingredient.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         
         <div className="flex items-center gap-1 mt-2">
           <Input 
