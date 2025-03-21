@@ -12,6 +12,10 @@ interface SupplierFormData {
   phone: string;
   email: string;
   address: string;
+  tin: string; // Tax Identification Number
+  legalAddress: string;
+  physicalAddress: string;
+  bankDetails: string;
 }
 
 interface SupplierFormProps {
@@ -40,12 +44,12 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-md">
+    <DialogContent className="sm:max-w-lg">
       <form onSubmit={handleSubmit}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto">
           <div className="grid gap-2">
             <Label htmlFor="name">Название поставщика *</Label>
             <Input 
@@ -54,6 +58,16 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Введите название поставщика"
               required
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="tin">ИНН</Label>
+            <Input 
+              id="tin" 
+              value={formData.tin}
+              onChange={(e) => setFormData({ ...formData, tin: e.target.value })}
+              placeholder="Введите ИНН поставщика"
             />
           </div>
           
@@ -90,12 +104,45 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
           </div>
           
           <div className="grid gap-2">
+            <Label htmlFor="legalAddress">Юридический адрес</Label>
+            <Textarea 
+              id="legalAddress" 
+              value={formData.legalAddress}
+              onChange={(e) => setFormData({ ...formData, legalAddress: e.target.value })}
+              placeholder="Юридический адрес поставщика"
+              rows={2}
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="physicalAddress">Фактический адрес</Label>
+            <Textarea 
+              id="physicalAddress" 
+              value={formData.physicalAddress}
+              onChange={(e) => setFormData({ ...formData, physicalAddress: e.target.value })}
+              placeholder="Фактический адрес поставщика"
+              rows={2}
+            />
+          </div>
+          
+          <div className="grid gap-2">
             <Label htmlFor="address">Адрес</Label>
             <Textarea 
               id="address" 
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               placeholder="Адрес поставщика"
+              rows={2}
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="bankDetails">Банковские реквизиты</Label>
+            <Textarea 
+              id="bankDetails" 
+              value={formData.bankDetails}
+              onChange={(e) => setFormData({ ...formData, bankDetails: e.target.value })}
+              placeholder="Банковские реквизиты поставщика"
               rows={3}
             />
           </div>

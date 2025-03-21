@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -44,6 +45,10 @@ export type Supplier = {
   phone?: string;
   email?: string;
   address?: string;
+  tin?: string; // Tax Identification Number
+  legalAddress?: string;
+  physicalAddress?: string;
+  bankDetails?: string;
 };
 
 export type Receipt = {

@@ -23,12 +23,20 @@ const SuppliersList = () => {
     phone: string;
     email: string;
     address: string;
+    tin: string;
+    legalAddress: string;
+    physicalAddress: string;
+    bankDetails: string;
   }>({
     name: '',
     contactPerson: '',
     phone: '',
     email: '',
     address: '',
+    tin: '',
+    legalAddress: '',
+    physicalAddress: '',
+    bankDetails: '',
   });
   
   const filteredSuppliers = suppliers.filter(supplier => 
@@ -43,6 +51,10 @@ const SuppliersList = () => {
       phone: '',
       email: '',
       address: '',
+      tin: '',
+      legalAddress: '',
+      physicalAddress: '',
+      bankDetails: '',
     });
     setIsCreateDialogOpen(true);
   };
@@ -55,6 +67,10 @@ const SuppliersList = () => {
       phone: supplier.phone || '',
       email: supplier.email || '',
       address: supplier.address || '',
+      tin: supplier.tin || '',
+      legalAddress: supplier.legalAddress || '',
+      physicalAddress: supplier.physicalAddress || '',
+      bankDetails: supplier.bankDetails || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -66,6 +82,10 @@ const SuppliersList = () => {
       phone: formData.phone || undefined,
       email: formData.email || undefined,
       address: formData.address || undefined,
+      tin: formData.tin || undefined,
+      legalAddress: formData.legalAddress || undefined,
+      physicalAddress: formData.physicalAddress || undefined,
+      bankDetails: formData.bankDetails || undefined,
     });
     setIsCreateDialogOpen(false);
   };
@@ -79,6 +99,10 @@ const SuppliersList = () => {
       phone: formData.phone || undefined,
       email: formData.email || undefined,
       address: formData.address || undefined,
+      tin: formData.tin || undefined,
+      legalAddress: formData.legalAddress || undefined,
+      physicalAddress: formData.physicalAddress || undefined,
+      bankDetails: formData.bankDetails || undefined,
     });
     setIsEditDialogOpen(false);
   };
@@ -118,6 +142,7 @@ const SuppliersList = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Название</TableHead>
+                <TableHead>ИНН</TableHead>
                 <TableHead>Контактное лицо</TableHead>
                 <TableHead>Телефон</TableHead>
                 <TableHead>Email</TableHead>
@@ -128,6 +153,7 @@ const SuppliersList = () => {
               {filteredSuppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
                   <TableCell className="font-medium">{supplier.name}</TableCell>
+                  <TableCell>{supplier.tin || "-"}</TableCell>
                   <TableCell>{supplier.contactPerson || "-"}</TableCell>
                   <TableCell>{supplier.phone || "-"}</TableCell>
                   <TableCell>{supplier.email || "-"}</TableCell>
