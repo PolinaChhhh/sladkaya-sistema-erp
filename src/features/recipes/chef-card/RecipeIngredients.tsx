@@ -25,7 +25,7 @@ const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
 }) => {
   return (
     <div>
-      <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-rose-700">
+      <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-confection-700">
         <UtensilsCrossed className="h-5 w-5 text-mint-600" />
         Ингредиенты
       </h2>

@@ -12,7 +12,7 @@ interface RecipeOutputProps {
 const RecipeOutput: React.FC<RecipeOutputProps> = ({ output, outputUnit, lossPercentage }) => {
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-rose-700">
+      <h2 className="text-lg font-medium flex items-center gap-2 mb-3 text-confection-700">
         <Scale className="h-5 w-5 text-mint-600" />
         Выход продукта
       </h2>

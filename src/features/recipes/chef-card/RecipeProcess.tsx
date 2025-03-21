@@ -16,7 +16,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
     
     return keyWords.reduce((result, word) => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
-      return result.replace(regex, `<span class="text-rose-500 font-medium">${word}</span>`);
+      return result.replace(regex, `<span class="text-confection-500 font-medium">${word}</span>`);
     }, text);
   };
   
@@ -34,7 +34,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-lg font-medium flex items-center gap-2 text-rose-700">
+        <h2 className="text-lg font-medium flex items-center gap-2 text-confection-700">
           <Clock className="h-5 w-5 text-mint-600" />
           Технологический процесс
         </h2>
@@ -61,7 +61,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
           <ol className="space-y-4">
             {processSteps.map((step, index) => (
               <li key={index} className="flex gap-3">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cream-100 text-rose-600 flex items-center justify-center font-medium text-sm">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cream-100 text-confection-600 flex items-center justify-center font-medium text-sm">
                   {index + 1}
                 </div>
                 <div 
@@ -92,7 +92,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({ processSteps, preparation
       
       <div className="text-right">
         <Button 
-          className="bg-rose-600 hover:bg-rose-700 text-white"
+          className="bg-confection-600 hover:bg-confection-700 text-white"
         >
           Добавить в производство
           <ArrowRight className="ml-2 h-4 w-4" />

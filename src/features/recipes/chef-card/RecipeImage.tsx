@@ -19,7 +19,7 @@ const RecipeImage: React.FC<RecipeImageProps> = ({ name, imageUrl }) => {
           alt={name} 
           className="object-cover"
         />
-        <AvatarFallback className="text-3xl font-playfair text-rose-500 bg-rose-50">
+        <AvatarFallback className="text-3xl font-playfair text-confection-500 bg-confection-50">
           {name.substring(0, 2)}
         </AvatarFallback>
       </Avatar>
