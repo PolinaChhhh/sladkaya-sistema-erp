@@ -5,7 +5,7 @@ import { ProductionBatch, Recipe } from '@/store/types';
 import { useProductionForm, ProductionFormData } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionFilter } from './useProductionFilter';
-import { getIngredientDetails, calculateTotalCost } from '../utils/productionCalculations';
+import { getIngredientDetails, calculateTotalCost } from '../utils/calculations';
 import { 
   getIngredientUsageDetails, 
   getSemiFinalBreakdown 
