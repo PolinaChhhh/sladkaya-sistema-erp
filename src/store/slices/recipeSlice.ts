@@ -69,26 +69,76 @@ export const createRecipeSlice: StateCreator<
         return { productions: state.productions }; // Don't add production if insufficient ingredients
       }
       
-      // Reduce ingredient quantities based on recipe items
+      // Calculate total cost using FIFO method
+      let totalCost = 0;
+      
+      // Reduce ingredient quantities based on recipe items using FIFO
       recipe.items.forEach(item => {
         if (item.type === 'ingredient' && item.ingredientId) {
           const ingredient = state.ingredients.find(i => i.id === item.ingredientId);
           
           if (ingredient) {
-            const amountUsed = item.amount * productionRatio;
-            const newQuantity = Math.max(0, ingredient.quantity - amountUsed);
+            const amountNeeded = item.amount * productionRatio;
+            let remainingToConsume = amountNeeded;
+            let ingredientCost = 0;
             
+            // Get all receipt items for this ingredient, sorted by date (oldest first)
+            const { receipts } = get();
+            
+            // Flatten all receipt items for this ingredient and sort by date
+            const allReceiptItems = receipts
+              .flatMap(receipt => receipt.items
+                .filter(item => item.ingredientId === ingredient.id && item.remainingQuantity > 0)
+                .map(item => ({
+                  ...item,
+                  receiptDate: receipt.date
+                }))
+              )
+              .sort((a, b) => new Date(a.receiptDate).getTime() - new Date(b.receiptDate).getTime());
+            
+            // Consume from oldest receipt items first (FIFO)
+            for (const receiptItem of allReceiptItems) {
+              if (remainingToConsume <= 0) break;
+              
+              const consumeAmount = Math.min(remainingToConsume, receiptItem.remainingQuantity);
+              
+              // Calculate the cost for this portion using the receipt's unit price
+              ingredientCost += consumeAmount * receiptItem.unitPrice;
+              
+              // Reduce the remaining amount from this receipt item
+              get().updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
+                remainingQuantity: receiptItem.remainingQuantity - consumeAmount
+              });
+              
+              remainingToConsume -= consumeAmount;
+            }
+            
+            // Add the cost of this ingredient to the total cost
+            totalCost += ingredientCost;
+            
+            // Update the ingredient quantity
             get().updateIngredient(ingredient.id, {
-              quantity: newQuantity
+              quantity: Math.max(0, ingredient.quantity - amountNeeded)
             });
           }
         }
       });
       
+      // Update the cost with the calculated FIFO cost
+      const newProduction = {
+        ...production,
+        cost: totalCost,
+        id: crypto.randomUUID()
+      };
+      
       // Update the last produced date for the recipe
       get().updateRecipe(recipe.id, {
         lastProduced: new Date().toISOString()
       });
+      
+      return {
+        productions: [...state.productions, newProduction]
+      };
     }
     
     return {
@@ -109,6 +159,8 @@ export const createRecipeSlice: StateCreator<
       
       if (recipe) {
         // First, restore the ingredients used in the original production
+        // This is more complex with FIFO, as we don't know exactly which receipt items were used
+        // For simplicity, we'll restore the ingredients to the latest receipts
         const originalRatio = originalProduction.quantity / recipe.output;
         
         recipe.items.forEach(item => {
@@ -117,10 +169,37 @@ export const createRecipeSlice: StateCreator<
             
             if (ingredient) {
               const originalAmountUsed = item.amount * originalRatio;
-              // Restore the original amount
+              
+              // Restore the original amount to the ingredient
               get().updateIngredient(ingredient.id, {
                 quantity: ingredient.quantity + originalAmountUsed
               });
+              
+              // Find the most recent receipt items for this ingredient
+              const { receipts } = get();
+              const receiptItems = receipts
+                .flatMap(receipt => receipt.items
+                  .filter(item => item.ingredientId === ingredient.id)
+                  .map(item => ({
+                    ...item,
+                    receiptDate: receipt.date
+                  }))
+                )
+                .sort((a, b) => new Date(b.receiptDate).getTime() - new Date(a.receiptDate).getTime());
+              
+              // Restore the amount to the most recent receipts
+              let remainingToRestore = originalAmountUsed;
+              for (const receiptItem of receiptItems) {
+                if (remainingToRestore <= 0) break;
+                
+                const restoreAmount = Math.min(remainingToRestore, receiptItem.quantity);
+                
+                get().updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
+                  remainingQuantity: receiptItem.remainingQuantity + restoreAmount
+                });
+                
+                remainingToRestore -= restoreAmount;
+              }
             }
           }
         });
@@ -165,36 +244,63 @@ export const createRecipeSlice: StateCreator<
           return { productions: state.productions };
         }
         
-        // Now consume the ingredients for the new quantity
+        // Calculate new cost using FIFO
+        let totalCost = 0;
+        
+        // Now consume the ingredients for the new quantity using FIFO
         recipe.items.forEach(item => {
           if (item.type === 'ingredient' && item.ingredientId) {
             const ingredient = state.ingredients.find(i => i.id === item.ingredientId);
             
             if (ingredient) {
-              const newAmountUsed = item.amount * newRatio;
-              const newQuantity = Math.max(0, ingredient.quantity - newAmountUsed);
+              const amountNeeded = item.amount * newRatio;
+              let remainingToConsume = amountNeeded;
+              let ingredientCost = 0;
               
+              // Get all receipt items for this ingredient, sorted by date (oldest first)
+              const { receipts } = get();
+              
+              // Flatten all receipt items for this ingredient and sort by date
+              const allReceiptItems = receipts
+                .flatMap(receipt => receipt.items
+                  .filter(item => item.ingredientId === ingredient.id && item.remainingQuantity > 0)
+                  .map(item => ({
+                    ...item,
+                    receiptDate: receipt.date
+                  }))
+                )
+                .sort((a, b) => new Date(a.receiptDate).getTime() - new Date(b.receiptDate).getTime());
+              
+              // Consume from oldest receipt items first (FIFO)
+              for (const receiptItem of allReceiptItems) {
+                if (remainingToConsume <= 0) break;
+                
+                const consumeAmount = Math.min(remainingToConsume, receiptItem.remainingQuantity);
+                
+                // Calculate the cost for this portion using the receipt's unit price
+                ingredientCost += consumeAmount * receiptItem.unitPrice;
+                
+                // Reduce the remaining amount from this receipt item
+                get().updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
+                  remainingQuantity: receiptItem.remainingQuantity - consumeAmount
+                });
+                
+                remainingToConsume -= consumeAmount;
+              }
+              
+              // Add the cost of this ingredient to the total cost
+              totalCost += ingredientCost;
+              
+              // Update the ingredient quantity
               get().updateIngredient(ingredient.id, {
-                quantity: newQuantity
+                quantity: Math.max(0, ingredient.quantity - amountNeeded)
               });
             }
           }
         });
 
-        // Calculate new cost based on the updated quantity
-        if (data.cost === undefined) {
-          const totalCost = recipe.items.reduce((sum, item) => {
-            if (item.type === 'ingredient' && item.ingredientId) {
-              const ingredient = state.ingredients.find(i => i.id === item.ingredientId);
-              if (ingredient) {
-                return sum + (ingredient.cost * item.amount * newRatio);
-              }
-            }
-            return sum;
-          }, 0);
-          
-          data.cost = totalCost;
-        }
+        // Update the cost with our calculated FIFO cost
+        data.cost = totalCost;
       }
     }
 
@@ -225,9 +331,43 @@ export const createRecipeSlice: StateCreator<
             if (ingredient) {
               const amountToRestore = item.amount * ratio;
               
+              // Restore the ingredient quantity
               get().updateIngredient(ingredient.id, {
                 quantity: ingredient.quantity + amountToRestore
               });
+              
+              // For deleted productions, we'll restore to the newest receipt items
+              // This is a simplification, as we can't know exactly which receipt items were used
+              const { receipts } = get();
+              const receiptItems = receipts
+                .flatMap(receipt => receipt.items
+                  .filter(item => item.ingredientId === ingredient.id)
+                  .map(item => ({
+                    ...item,
+                    receiptDate: receipt.date
+                  }))
+                )
+                .sort((a, b) => new Date(b.receiptDate).getTime() - new Date(a.receiptDate).getTime());
+              
+              let remainingToRestore = amountToRestore;
+              for (const receiptItem of receiptItems) {
+                if (remainingToRestore <= 0) break;
+                
+                // We can't restore more than was originally in the receipt
+                const originalTotal = receiptItem.quantity;
+                const currentRemaining = receiptItem.remainingQuantity;
+                const consumed = originalTotal - currentRemaining;
+                
+                const restoreAmount = Math.min(remainingToRestore, consumed);
+                
+                if (restoreAmount > 0) {
+                  get().updateReceiptItem(receiptItem.receiptId, receiptItem.id, {
+                    remainingQuantity: currentRemaining + restoreAmount
+                  });
+                  
+                  remainingToRestore -= restoreAmount;
+                }
+              }
             }
           }
         });

@@ -41,6 +41,8 @@ export const useProductionState = () => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
   
+  // This function will be used only for estimation during form entry
+  // Actual FIFO calculation happens in the store slices
   const calculateCost = (recipeId: string, quantity: number): number => {
     const recipe = recipes.find(r => r.id === recipeId);
     if (!recipe) return 0;
@@ -48,21 +50,51 @@ export const useProductionState = () => {
     const recipeItems = recipe.items;
     let totalCost = 0;
     
+    // Calculate production ratio
+    const productionRatio = quantity / recipe.output;
+    
     recipeItems.forEach(item => {
-      // Calculate based on ingredient or sub-recipe
       if (item.type === 'ingredient' && item.ingredientId) {
         const ingredient = ingredients.find(i => i.id === item.ingredientId);
-        if (ingredient) {
-          totalCost += (ingredient.cost * item.amount);
+        if (!ingredient) return;
+        
+        const amountNeeded = item.amount * productionRatio;
+        
+        // For the estimate, we'll use a weighted average price from receipts with remaining quantities
+        const { receipts } = useStore.getState();
+        
+        const allReceiptItems = receipts
+          .flatMap(receipt => receipt.items
+            .filter(ri => ri.ingredientId === item.ingredientId && ri.remainingQuantity > 0)
+            .map(ri => ({
+              ...ri,
+              receiptDate: receipt.date
+            }))
+          )
+          .sort((a, b) => new Date(a.receiptDate).getTime() - new Date(b.receiptDate).getTime());
+        
+        let costForIngredient = 0;
+        let remainingToConsume = amountNeeded;
+        
+        // Simulate FIFO consumption for cost estimation
+        for (const receiptItem of allReceiptItems) {
+          if (remainingToConsume <= 0) break;
+          
+          const consumeAmount = Math.min(remainingToConsume, receiptItem.remainingQuantity);
+          costForIngredient += consumeAmount * receiptItem.unitPrice;
+          remainingToConsume -= consumeAmount;
         }
+        
+        // If we couldn't find enough in receipts, use the current ingredient cost for the rest
+        if (remainingToConsume > 0) {
+          costForIngredient += remainingToConsume * ingredient.cost;
+        }
+        
+        totalCost += costForIngredient;
       }
     });
     
-    // Calculate cost per output unit of recipe
-    const costPerUnit = totalCost / recipe.output;
-    
-    // Calculate total cost for the production
-    return costPerUnit * quantity;
+    return totalCost;
   };
   
   const handleCreateProduction = () => {
@@ -109,18 +141,15 @@ export const useProductionState = () => {
       }
     }
     
-    const cost = calculateCost(formData.recipeId, formData.quantity);
+    // The cost will be calculated in the store using FIFO
+    // This is just an estimate for display
+    const estimatedCost = calculateCost(formData.recipeId, formData.quantity);
     
     addProduction({
       recipeId: formData.recipeId,
       quantity: formData.quantity,
       date: formData.date,
-      cost,
-    });
-    
-    // Update the lastProduced date on the recipe
-    updateRecipe(formData.recipeId, {
-      lastProduced: formData.date,
+      cost: estimatedCost, // The actual cost will be recalculated in the store using FIFO
     });
     
     toast.success('Запись о производстве добавлена');
@@ -135,12 +164,14 @@ export const useProductionState = () => {
       return;
     }
     
-    const cost = calculateCost(selectedProduction.recipeId, editFormData.quantity);
+    // The cost will be recalculated in the store based on FIFO
+    // This is just an estimate for display
+    const estimatedCost = calculateCost(selectedProduction.recipeId, editFormData.quantity);
     
     updateProduction(selectedProduction.id, {
       quantity: editFormData.quantity,
       date: editFormData.date,
-      cost,
+      cost: estimatedCost, // The actual cost will be recalculated in the store using FIFO
     });
     
     toast.success('Запись о производстве обновлена');
