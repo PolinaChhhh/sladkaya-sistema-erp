@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch } from '@/store/types';
 import { useProductionForm } from './useProductionForm';
@@ -24,7 +24,7 @@ export const useProductionState = () => {
   });
   
   // Cost calculation function using both FIFO utility and semi-finished products cost
-  const calculateCost = (recipeId: string, quantity: number): number => {
+  const calculateCost = useCallback((recipeId: string, quantity: number): number => {
     return calculateTotalProductionCost(
       recipeId, 
       quantity, 
@@ -33,7 +33,7 @@ export const useProductionState = () => {
       receipts, 
       productions
     );
-  };
+  }, [recipes, ingredients, receipts, productions]);
   
   // Hook for recipe utilities
   const { 
@@ -74,29 +74,39 @@ export const useProductionState = () => {
   } = useProductionDialogs();
   
   // Handle delete production
-  const handleDeleteProduction = () => {
+  const handleDeleteProduction = useCallback(() => {
     if (!selectedProduction) return;
     
     deleteProduction(selectedProduction.id);
     
     toast.success('Запись о производстве удалена');
     setIsDeleteDialogOpen(false);
-  };
+  }, [selectedProduction, deleteProduction, setIsDeleteDialogOpen]);
   
   // Submit handlers that use the form handling functions
-  const onCreateProduction = () => {
+  const onCreateProduction = useCallback(() => {
     const success = handleCreateProduction();
     if (success) {
       setIsCreateDialogOpen(false);
     }
-  };
+  }, [handleCreateProduction, setIsCreateDialogOpen]);
   
-  const onEditProduction = () => {
+  const onEditProduction = useCallback(() => {
     const success = handleEditProduction(selectedProduction);
     if (success) {
       setIsEditDialogOpen(false);
     }
-  };
+  }, [handleEditProduction, selectedProduction, setIsEditDialogOpen]);
+
+  // Persistence effect for edit form data when selectedProduction changes
+  useEffect(() => {
+    if (selectedProduction) {
+      setEditFormData({
+        quantity: selectedProduction.quantity,
+        date: selectedProduction.date.split('T')[0], // Format date for input
+      });
+    }
+  }, [selectedProduction, setEditFormData]);
 
   return {
     searchQuery,
