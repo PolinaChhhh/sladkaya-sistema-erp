@@ -1,101 +1,64 @@
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch } from '@/store/types';
 import { useProductionForm } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionUtils } from './useProductionUtils';
-import { calculateTotalProductionCost, calculateSemiFinishedCostBreakdown } from '../utils/productionCalculator';
-import { toast } from 'sonner';
-
-// Ключи для localStorage
-const SEARCH_QUERY_KEY = 'production_search_query';
-const FORM_DATA_KEY = 'production_form_data';
-const EDIT_FORM_DATA_KEY = 'production_edit_form_data';
+import { useProductionSearch } from './useProductionSearch';
+import { useProductionStorage } from './useProductionStorage';
+import { useProductionFilters } from './useProductionFilters';
+import { useProductionCost } from './useProductionCost';
+import { useProductionActions } from './useProductionActions';
 
 export const useProductionState = () => {
   const { recipes, ingredients, productions, addProduction, updateProduction, deleteProduction, receipts } = useStore();
   
-  // Загружаем сохраненные данные из localStorage
-  const getInitialSearchQuery = () => {
-    try {
-      const saved = localStorage.getItem(SEARCH_QUERY_KEY);
-      return saved || '';
-    } catch (e) {
-      return '';
-    }
-  };
+  // Use search hook
+  const { searchQuery, setSearchQuery } = useProductionSearch();
   
-  const [searchQuery, setSearchQuery] = useState(getInitialSearchQuery);
+  // Use storage hook
+  const { 
+    getInitialFormData, 
+    getInitialEditFormData, 
+    saveFormData,
+    saveEditFormData
+  } = useProductionStorage();
   
-  // Persist search query to localStorage
-  const updateSearchQuery = useCallback((query: string) => {
-    setSearchQuery(query);
-    try {
-      localStorage.setItem(SEARCH_QUERY_KEY, query);
-    } catch (e) {
-      console.error('Failed to save search query to localStorage', e);
-    }
-  }, []);
-  
-  // Filter and sort productions - useMemo для оптимизации
-  const filteredProductions = useMemo(() => {
-    return productions.filter(production => {
-      const recipe = recipes.find(r => r.id === production.recipeId);
-      return recipe?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-  }, [productions, recipes, searchQuery]);
-  
-  // Sort productions by date (newest first)
-  const sortedProductions = useMemo(() => {
-    return [...filteredProductions].sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-  }, [filteredProductions]);
-  
-  // Cost calculation function using both FIFO utility and semi-finished products cost
-  const calculateCost = useCallback((recipeId: string, quantity: number): number => {
-    return calculateTotalProductionCost(
-      recipeId, 
-      quantity, 
-      recipes, 
-      ingredients, 
-      receipts, 
-      productions
-    );
-  }, [recipes, ingredients, receipts, productions]);
-  
-  // Hook for recipe utilities
+  // Use production utilities
   const { 
     getRecipeName, 
     getRecipeOutput, 
     checkSemiFinalAvailability 
   } = useProductionUtils(recipes, productions);
   
-  // Загружаем начальные данные формы из localStorage
-  const getInitialFormData = () => {
-    try {
-      const saved = localStorage.getItem(FORM_DATA_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error('Failed to load form data from localStorage', e);
-    }
-    return null; // Если ничего не найдено, вернем null и будут использованы дефолтные значения
-  };
+  // Use cost calculation hooks
+  const { calculateCost, calculateSemiFinishedCosts } = useProductionCost(
+    recipes, 
+    ingredients, 
+    receipts, 
+    productions
+  );
   
-  const getInitialEditFormData = () => {
-    try {
-      const saved = localStorage.getItem(EDIT_FORM_DATA_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error('Failed to load edit form data from localStorage', e);
-    }
-    return null;
-  };
+  // Use production filters
+  const { sortedProductions } = useProductionFilters(
+    productions,
+    recipes,
+    searchQuery
+  );
+  
+  // Hook for dialog state
+  const { 
+    isCreateDialogOpen, 
+    setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    selectedProduction,
+    openEditDialog,
+    openDeleteDialog
+  } = useProductionDialogs();
   
   // Hook for form state and handling
   const { 
@@ -117,80 +80,35 @@ export const useProductionState = () => {
     initialEditFormData: getInitialEditFormData()
   });
   
-  // Calculate semi-finished cost breakdown
-  const calculateSemiFinishedCosts = useCallback((production: ProductionBatch) => {
-    return calculateSemiFinishedCostBreakdown(
-      production.recipeId,
-      production.quantity,
-      recipes,
-      productions
-    );
-  }, [recipes, productions]);
-  
-  // Оборачиваем setFormData чтобы сохранять в localStorage
+  // Wrap setFormData to save to localStorage
   const setFormData = useCallback((data: any) => {
     originalSetFormData(data);
-    try {
-      localStorage.setItem(FORM_DATA_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.error('Failed to save form data to localStorage', e);
-    }
-  }, [originalSetFormData]);
+    saveFormData(data);
+  }, [originalSetFormData, saveFormData]);
   
-  // Оборачиваем setEditFormData чтобы сохранять в localStorage
+  // Wrap setEditFormData to save to localStorage
   const setEditFormData = useCallback((data: any) => {
     originalSetEditFormData(data);
-    try {
-      localStorage.setItem(EDIT_FORM_DATA_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.error('Failed to save edit form data to localStorage', e);
-    }
-  }, [originalSetEditFormData]);
+    saveEditFormData(data);
+  }, [originalSetEditFormData, saveEditFormData]);
   
-  // Hook for dialog state
+  // Use actions hook
   const { 
-    isCreateDialogOpen, 
+    onCreateProduction,
+    onEditProduction,
+    onDeleteProduction
+  } = useProductionActions(
+    handleCreateProduction,
+    handleEditProduction,
+    deleteProduction,
     setIsCreateDialogOpen,
-    isEditDialogOpen,
     setIsEditDialogOpen,
-    isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     selectedProduction,
-    openEditDialog,
-    openDeleteDialog
-  } = useProductionDialogs();
+    formData,
+    editFormData
+  );
   
-  // Handle delete production
-  const handleDeleteProduction = useCallback(() => {
-    if (!selectedProduction) return;
-    
-    deleteProduction(selectedProduction.id);
-    
-    toast.success('Запись о производстве удалена');
-    setIsDeleteDialogOpen(false);
-  }, [selectedProduction, deleteProduction, setIsDeleteDialogOpen]);
-  
-  // Submit handlers that use the form handling functions
-  const onCreateProduction = useCallback(() => {
-    console.log("Attempting to create production with data:", formData);
-    const success = handleCreateProduction();
-    if (success) {
-      setIsCreateDialogOpen(false);
-      // Clear form data in localStorage after successful creation
-      localStorage.removeItem(FORM_DATA_KEY);
-    }
-  }, [handleCreateProduction, setIsCreateDialogOpen, formData]);
-  
-  const onEditProduction = useCallback(() => {
-    console.log("Attempting to edit production with data:", editFormData);
-    const success = handleEditProduction(selectedProduction);
-    if (success) {
-      setIsEditDialogOpen(false);
-      // Clear edit form data in localStorage after successful edit
-      localStorage.removeItem(EDIT_FORM_DATA_KEY);
-    }
-  }, [handleEditProduction, selectedProduction, setIsEditDialogOpen, editFormData]);
-
   // Persistence effect for edit form data when selectedProduction changes
   useEffect(() => {
     if (selectedProduction) {
@@ -205,7 +123,7 @@ export const useProductionState = () => {
 
   return {
     searchQuery,
-    setSearchQuery: updateSearchQuery,
+    setSearchQuery,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
     isEditDialogOpen,
@@ -220,7 +138,7 @@ export const useProductionState = () => {
     sortedProductions,
     handleCreateProduction: onCreateProduction,
     handleEditProduction: onEditProduction,
-    handleDeleteProduction,
+    handleDeleteProduction: onDeleteProduction,
     openEditDialog,
     openDeleteDialog,
     calculateCost,
