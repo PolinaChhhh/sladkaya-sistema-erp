@@ -53,6 +53,7 @@ export const handleDeleteProduction = (
       updateReceiptItem,
       true // Set to true to decompose semi-finals into ingredients
     );
+    
+    console.log(`Production ${id} has been deleted and all ingredients have been restored`);
   }
 };
-

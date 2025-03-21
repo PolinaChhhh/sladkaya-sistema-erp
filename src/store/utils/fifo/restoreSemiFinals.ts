@@ -35,23 +35,32 @@ export const restoreSemiFinalProductsWithFifo = (
           if (shouldDecompose && semiFinalRecipe && recipes && ingredients && receipts && updateIngredient && updateReceiptItem) {
             console.log(`Decomposing semi-final ${item.name} into original ingredients`);
             
-            // Restore the ingredients used to create this semi-final
-            restoreIngredientsToReceipts(
-              semiFinalRecipe,
-              item.amount,
-              ingredients,
-              receipts,
-              updateIngredient,
-              updateReceiptItem
-            );
-            
-            // We don't actually restore the semi-final production if we're decomposing it
+            // Find the recipe for this semi-final
+            const semiFinalRecipeObj = recipes.find(r => r.id === semiFinalRecipeId);
+            if (semiFinalRecipeObj) {
+              // Restore the ingredients used to create this semi-final
+              restoreIngredientsToReceipts(
+                semiFinalRecipeObj,
+                item.amount,
+                ingredients,
+                receipts,
+                updateIngredient,
+                updateReceiptItem
+              );
+              
+              console.log(`Ingredients from semi-final ${item.name} have been restored to inventory`);
+            } else {
+              console.error(`Could not find recipe for semi-final ${semiFinalRecipeId}`);
+            }
           } else {
             // Just restore the production quantity if not decomposing
+            console.log(`Not decomposing semi-final, just restoring production quantity ${item.amount} to ${production.id}`);
             updateProduction(item.productionId, {
               quantity: production.quantity + item.amount
             });
           }
+        } else {
+          console.error(`Could not find production ${item.productionId} to restore semi-final`);
         }
       });
     });
@@ -83,6 +92,8 @@ export const restoreSemiFinalProductsWithFifo = (
             updateIngredient,
             updateReceiptItem
           );
+          
+          console.log(`Ingredients from semi-final ${semiFinalId} have been restored to inventory`);
           
           // We don't actually restore the semi-final production if we're decomposing it
           return;
@@ -119,4 +130,3 @@ export const restoreSemiFinalProductsWithFifo = (
       });
   }
 };
-

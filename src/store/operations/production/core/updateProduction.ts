@@ -84,9 +84,10 @@ export const handleUpdateProduction = (
       data.cost = totalCost;
       data.consumptionDetails = consumptionDetails;
       data.semiFinalConsumptionDetails = semiFinalConsumptionDetails;
+      
+      console.log(`Production ${id} updated with new cost: ${totalCost}`);
     }
   }
   
   return data;
 };
-
