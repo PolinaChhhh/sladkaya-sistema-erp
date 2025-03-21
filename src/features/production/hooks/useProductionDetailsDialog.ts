@@ -12,7 +12,8 @@ export const useProductionDetailsDialog = () => {
     selectedRecipe,
     getIngredientDetails,
     getRecipeName,
-    getIngredientUsageDetails
+    getIngredientUsageDetails,
+    getSemiFinalBreakdown
   } = useProductionDetails();
 
   return {
@@ -23,6 +24,7 @@ export const useProductionDetailsDialog = () => {
     selectedRecipe,
     getIngredientDetails,
     getRecipeName,
-    getIngredientUsageDetails
+    getIngredientUsageDetails,
+    getSemiFinalBreakdown
   };
 };

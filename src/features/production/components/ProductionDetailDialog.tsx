@@ -25,6 +25,7 @@ interface ProductionDetailDialogProps {
   getIngredientDetails: (ingredientId: string) => Ingredient | undefined;
   getRecipeName: (recipeId: string) => string;
   getIngredientUsageDetails: (production: ProductionBatch) => IngredientUsageDetail[];
+  getSemiFinalBreakdown: (production: ProductionBatch) => { recipeId: string, amount: number, cost: number }[];
 }
 
 export interface IngredientUsageDetail {
@@ -48,7 +49,8 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
   recipe,
   getIngredientDetails,
   getRecipeName,
-  getIngredientUsageDetails
+  getIngredientUsageDetails,
+  getSemiFinalBreakdown
 }) => {
   if (!production || !recipe) return null;
 
@@ -61,10 +63,17 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
   };
 
   const ingredientUsageDetails = getIngredientUsageDetails(production);
+  const semiFinalsBreakdown = getSemiFinalBreakdown(production);
 
   // Calculate total cost for all ingredients
   const totalIngredientsCost = ingredientUsageDetails.reduce(
     (sum, detail) => sum + detail.totalCost, 
+    0
+  );
+  
+  // Calculate total cost for all semi-finished products
+  const totalSemiFinalsCost = semiFinalsBreakdown.reduce(
+    (sum, semiFinal) => sum + semiFinal.cost,
     0
   );
 
@@ -165,28 +174,22 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                 <p className="text-gray-500 italic">Нет использованных полуфабрикатов</p>
               ) : (
                 <div className="space-y-2">
-                  {recipe.items
-                    .filter(item => item.type === 'recipe' && item.recipeId)
-                    .map((item, index) => {
-                      const semiFinalAmount = item.amount * production.quantity / recipe.output;
-                      // Calculate the cost percentage this semifinal contributes to total
-                      const semiFinalCostEstimate = (production.cost * 0.7 / recipe.items.filter(i => i.type === 'recipe').length).toFixed(2);
-                      
-                      return (
-                        <div key={index} className="p-3 border border-gray-200 rounded-md">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <ArrowDown className="h-4 w-4 text-gray-500" />
-                              <span>{getRecipeName(item.recipeId || '')}</span>
-                            </div>
-                            <div className="flex gap-4">
-                              <span>{semiFinalAmount.toFixed(2)} ед.</span>
-                              <span className="font-medium">{semiFinalCostEstimate} ₽</span>
-                            </div>
+                  {semiFinalsBreakdown.map((semiFinal, index) => {
+                    return (
+                      <div key={index} className="p-3 border border-gray-200 rounded-md">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <ArrowDown className="h-4 w-4 text-gray-500" />
+                            <span>{getRecipeName(semiFinal.recipeId)}</span>
+                          </div>
+                          <div className="flex gap-4">
+                            <span>{semiFinal.amount.toFixed(2)} ед.</span>
+                            <span className="font-medium">{semiFinal.cost.toFixed(2)} ₽</span>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               
@@ -198,7 +201,7 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <span className="font-medium">Стоимость полуфабрикатов:</span>
-                  <span>{(production.cost - totalIngredientsCost).toFixed(2)} ₽</span>
+                  <span>{totalSemiFinalsCount.toFixed(2)} ₽</span>
                 </div>
                 <div className="flex justify-between items-center mt-2 text-lg">
                   <span className="font-bold">Общая себестоимость:</span>

@@ -1,12 +1,12 @@
-
 import { useState, useMemo } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch, Recipe, Ingredient, Receipt } from '@/store/types';
 import { IngredientUsageDetail } from '../components/ProductionDetailDialog';
 import { getFifoReceiptItems } from '@/store/utils/fifoCalculator';
+import { calculateSemiFinishedCostBreakdown } from '../utils/productionCalculator';
 
 export const useProductionDetails = () => {
-  const { recipes, ingredients, receipts } = useStore();
+  const { recipes, ingredients, receipts, productions } = useStore();
   const [selectedProduction, setSelectedProduction] = useState<ProductionBatch | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
@@ -70,6 +70,18 @@ export const useProductionDetails = () => {
     });
     
     return result;
+  };
+
+  // Get semi-finished products breakdown with accurate costs
+  const getSemiFinalBreakdown = (production: ProductionBatch) => {
+    if (!production) return [];
+    
+    return calculateSemiFinishedCostBreakdown(
+      production.recipeId,
+      production.quantity,
+      recipes,
+      productions
+    );
   };
 
   // Simulate ingredient usage by analyzing recipe and production, including ingredients from semi-finished products
@@ -152,6 +164,7 @@ export const useProductionDetails = () => {
     closeDetailDialog,
     getIngredientDetails,
     getRecipeName,
-    getIngredientUsageDetails
+    getIngredientUsageDetails,
+    getSemiFinalBreakdown
   };
 };
