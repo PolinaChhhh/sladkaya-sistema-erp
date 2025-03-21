@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DialogContent, 
   DialogHeader, 
@@ -33,7 +33,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
   onCancel
 }) => {
   // Track form steps
-  const [currentStep, setCurrentStep] = useState<'select-recipe' | 'select-semifinals' | 'quantity'>('select-recipe');
+  const [currentStep, setCurrentStep] = useState<'select-recipe' | 'enter-quantity' | 'select-semifinals'>('select-recipe');
   
   // Find the selected recipe to get its unit and required semi-finals
   const selectedRecipe = recipes.find(r => r.id === formData.recipeId);
@@ -52,7 +52,10 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
             id: item.recipeId as string,
             name: semiFinalRecipe ? semiFinalRecipe.name : 'Unknown',
             required: true,
-            amount: item.amount
+            // Calculate the amount based on the selected quantity
+            amount: formData.quantity > 0 
+              ? (item.amount * formData.quantity / selectedRecipe.output) 
+              : item.amount
           };
         })
     : [];
@@ -60,8 +63,24 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
   // Check if the selected recipe has semi-finals
   const hasSemiFinals = requiredSemiFinals.length > 0;
   
+  // Effect to update the semi-finals to produce when quantity changes
+  useEffect(() => {
+    if (selectedRecipe && hasSemiFinals && formData.quantity > 0) {
+      // Initialize the selected semi-finals in formData with updated amounts
+      const semiFinalsToProduce = requiredSemiFinals.map(sf => sf.id);
+      onFormDataChange({ 
+        semiFinalsToProduce,
+        // Always enable auto-production if there are semi-finals
+        autoProduceSemiFinals: true
+      });
+    }
+  }, [formData.quantity, selectedRecipe?.id]);
+  
   const handleNextStep = () => {
     if (currentStep === 'select-recipe') {
+      // After selecting recipe, go straight to quantity step
+      setCurrentStep('enter-quantity');
+    } else if (currentStep === 'enter-quantity') {
       if (hasSemiFinals) {
         // If recipe requires semi-finals, move to selecting which ones to produce
         setCurrentStep('select-semifinals');
@@ -74,29 +93,23 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
           autoProduceSemiFinals: true
         });
       } else {
-        // If no semi-finals required, skip to quantity step
-        setCurrentStep('quantity');
+        // If no semi-finals required, submit the form
+        onSubmit();
       }
-    } else if (currentStep === 'select-semifinals') {
-      setCurrentStep('quantity');
     }
   };
   
   const handlePrevStep = () => {
-    if (currentStep === 'quantity') {
-      if (hasSemiFinals) {
-        setCurrentStep('select-semifinals');
-      } else {
-        setCurrentStep('select-recipe');
-      }
-    } else if (currentStep === 'select-semifinals') {
+    if (currentStep === 'enter-quantity') {
       setCurrentStep('select-recipe');
+    } else if (currentStep === 'select-semifinals') {
+      setCurrentStep('enter-quantity');
     }
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentStep === 'quantity') {
+    if (currentStep === 'select-semifinals') {
       onSubmit();
     } else {
       handleNextStep();
@@ -141,41 +154,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
             </div>
           )}
           
-          {currentStep === 'select-semifinals' && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Выберите полуфабрикаты для производства</h3>
-              
-              {requiredSemiFinals.length > 0 ? (
-                <div className="space-y-2 border rounded-md p-3">
-                  {requiredSemiFinals.map((semiFinal) => (
-                    <div key={semiFinal.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`semi-final-${semiFinal.id}`}
-                        checked={formData.semiFinalsToProduce?.includes(semiFinal.id) ?? true}
-                        onCheckedChange={() => toggleSemiFinal(semiFinal.id)}
-                      />
-                      <Label htmlFor={`semi-final-${semiFinal.id}`} className="text-sm font-normal">
-                        {semiFinal.name} (требуется {semiFinal.amount})
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center p-3 text-sm text-amber-600 bg-amber-50 rounded-md">
-                  <AlertCircle className="h-4 w-4 mr-2" />
-                  <span>У данного продукта нет полуфабрикатов</span>
-                </div>
-              )}
-              
-              <div className="pt-2">
-                <p className="text-xs text-gray-500">
-                  Выбранные полуфабрикаты будут произведены автоматически перед основным продуктом
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {currentStep === 'quantity' && (
+          {currentStep === 'enter-quantity' && (
             <>
               <div>
                 <Label htmlFor="quantity">Количество</Label>
@@ -203,6 +182,40 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
               </div>
             </>
           )}
+          
+          {currentStep === 'select-semifinals' && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Требуемые полуфабрикаты</h3>
+              
+              {requiredSemiFinals.length > 0 ? (
+                <div className="space-y-2 border rounded-md p-3">
+                  {requiredSemiFinals.map((semiFinal) => (
+                    <div key={semiFinal.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`semi-final-${semiFinal.id}`}
+                        checked={formData.semiFinalsToProduce?.includes(semiFinal.id) ?? true}
+                        onCheckedChange={() => toggleSemiFinal(semiFinal.id)}
+                      />
+                      <Label htmlFor={`semi-final-${semiFinal.id}`} className="text-sm font-normal">
+                        {semiFinal.name} (требуется {semiFinal.amount.toFixed(2)})
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center p-3 text-sm text-amber-600 bg-amber-50 rounded-md">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  <span>У данного продукта нет полуфабрикатов</span>
+                </div>
+              )}
+              
+              <div className="pt-2">
+                <p className="text-xs text-gray-500">
+                  Выбранные полуфабрикаты будут произведены автоматически перед основным продуктом
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         
         <DialogFooter>
@@ -217,7 +230,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({
           </Button>
           
           <Button type="submit" className="bg-cream-600 hover:bg-cream-700">
-            {currentStep === 'quantity' ? 'Сохранить' : 'Далее'}
+            {currentStep === 'select-semifinals' ? 'Сохранить' : 'Далее'}
           </Button>
         </DialogFooter>
       </form>
