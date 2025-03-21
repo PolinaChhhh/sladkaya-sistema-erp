@@ -20,6 +20,7 @@ interface RecipeItemRowProps {
   onUpdate: (index: number, field: keyof RecipeItem, value: any) => void;
   onRemove: (index: number) => void;
   allowRecipeItems?: boolean;
+  forceRecipeItems?: boolean;
 }
 
 const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
@@ -34,8 +35,24 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   onUpdate,
   onRemove,
   allowRecipeItems = false,
+  forceRecipeItems = false,
 }) => {
+  React.useEffect(() => {
+    // If we're forcing recipe items, make sure the type is set to recipe
+    if (forceRecipeItems && item.type !== 'recipe') {
+      onUpdate(index, 'type', 'recipe');
+      if (recipes.length > 0) {
+        onUpdate(index, 'recipeId', recipes[0].id);
+      }
+      onUpdate(index, 'ingredientId', undefined);
+    }
+  }, [forceRecipeItems, item.type, recipes, index, onUpdate]);
+
   const handleTypeChange = (type: 'ingredient' | 'recipe') => {
+    if (forceRecipeItems && type !== 'recipe') {
+      return; // Don't allow changing from recipe type if forced
+    }
+    
     onUpdate(index, 'type', type);
     
     // Clear the current selection
@@ -72,7 +89,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   return (
     <div className="bg-gray-50 p-3 rounded-md">
       <div className="space-y-2">
-        {allowRecipeItems && (
+        {allowRecipeItems && !forceRecipeItems && (
           <ToggleGroup type="single" value={item.type} 
             onValueChange={(value) => {
               if (value) handleTypeChange(value as 'ingredient' | 'recipe');
@@ -90,7 +107,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           </ToggleGroup>
         )}
         
-        {(item.type === 'ingredient' || !item.type) && (
+        {!forceRecipeItems && (item.type === 'ingredient' || !item.type) && (
           <Select
             value={item.ingredientId || ''}
             onValueChange={handleIngredientChange}
@@ -108,7 +125,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           </Select>
         )}
         
-        {item.type === 'recipe' && (
+        {(item.type === 'recipe' || forceRecipeItems) && (
           <Select
             value={item.recipeId || ''}
             onValueChange={handleRecipeChange}

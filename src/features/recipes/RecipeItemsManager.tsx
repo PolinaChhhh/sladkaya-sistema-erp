@@ -38,7 +38,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   );
 
   const addRecipeItem = () => {
-    // For finished products, default to recipe type
+    // For finished products, only allow recipe type (semi-finished products)
     // For semi-finished products, default to ingredient type
     const defaultType = category === 'finished' ? 'recipe' : 'ingredient';
     
@@ -95,7 +95,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     <div className="space-y-3 mt-2">
       <div className="flex justify-between items-center">
         <Label>
-          {category === 'finished' ? 'Полуфабрикаты и ингредиенты' : 'Ингредиенты'}
+          {category === 'finished' ? 'Полуфабрикаты' : 'Ингредиенты'}
         </Label>
         <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
           <Plus className="h-3 w-3 mr-1" /> Добавить
@@ -117,14 +117,15 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               getRecipeUnit={getRecipeUnit}
               onUpdate={updateRecipeItem}
               onRemove={removeRecipeItem}
-              allowRecipeItems={category === 'finished'}
+              allowRecipeItems={category === 'finished' ? false : true}
+              forceRecipeItems={category === 'finished'}
             />
           ))}
         </div>
       ) : (
         <p className="text-sm text-gray-500 py-2">
           {category === 'finished' 
-            ? 'Нет добавленных полуфабрикатов или ингредиентов' 
+            ? 'Нет добавленных полуфабрикатов' 
             : 'Нет добавленных ингредиентов'}
         </p>
       )}

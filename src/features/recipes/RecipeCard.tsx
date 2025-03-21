@@ -60,7 +60,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       
       {recipe.items.length > 0 && (
         <div className="mt-4">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Состав:</h4>
+          <h4 className="text-sm font-medium text-gray-600 mb-2">
+            {recipe.category === 'finished' ? 'Состав (полуфабрикаты):' : 'Состав (ингредиенты):'}
+          </h4>
           <div className="space-y-1">
             {recipe.items.map((item, idx) => {
               let name = 'Неизвестный элемент';
