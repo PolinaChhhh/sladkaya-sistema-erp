@@ -59,9 +59,17 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
   // Calculate the ingredient cost and semi-finished cost separately for display
   const ingredientCost = ingredientDetails.reduce((sum, item) => sum + item.cost, 0);
   const semiFinalCost = semiFinalBreakdown.reduce((sum, item) => sum + item.cost, 0);
+  
+  // Calculate the total cost as the sum of ingredient and semi-finished costs
+  const totalIngredientCosts = ingredientCost + semiFinalCost;
+  
+  // Use the calculated total or fallback to the production.cost
   const totalCost = calculateTotalCost 
     ? calculateTotalCost(recipe.id, production.quantity)
-    : production.cost;
+    : totalIngredientCosts || production.cost;
+  
+  // Calculate unit cost
+  const unitCost = production.quantity > 0 ? totalCost / production.quantity : 0;
   
   return (
     <DialogContent className="sm:max-w-4xl">
@@ -84,7 +92,7 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
         </div>
         <div>
           <span className="text-sm text-gray-500">Себестоимость:</span>
-          <p className="font-medium">{production.cost.toFixed(2)} ₽</p>
+          <p className="font-medium">{totalCost.toFixed(2)} ₽</p>
         </div>
       </div>
       
@@ -129,12 +137,16 @@ const ProductionDetails: React.FC<ProductionDetailsProps> = ({
                   </TableRow>
                 )}
                 <TableRow>
+                  <TableCell className="font-medium">Общая стоимость сырья</TableCell>
+                  <TableCell>{totalIngredientCosts.toFixed(2)} ₽</TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell className="font-medium">Себестоимость единицы</TableCell>
-                  <TableCell>{(production.cost / production.quantity).toFixed(2)} ₽/{recipe.outputUnit}</TableCell>
+                  <TableCell>{unitCost.toFixed(2)} ₽/{recipe.outputUnit}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Общая себестоимость</TableCell>
-                  <TableCell>{production.cost.toFixed(2)} ₽</TableCell>
+                  <TableCell>{totalCost.toFixed(2)} ₽</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

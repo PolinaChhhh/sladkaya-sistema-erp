@@ -64,7 +64,7 @@ export const useStore = create<StoreState>()(
           suppliers: state.suppliers,
           receipts: state.receipts,
           productions: state.productions,
-          shipments: state.shipments,
+          shipments: state.shipments ? state.shipments : [], // Use optional chaining to avoid errors
           buyers: state.buyers,
           // Don't persist these states
           isLoading: false,
