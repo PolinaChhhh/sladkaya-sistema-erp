@@ -2,7 +2,9 @@
 import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Recipe, ProductionBatch } from '@/store/types';
-import { toast } from 'sonner';
+import { useProductionValidation } from './useProductionValidation';
+import { useResourceAvailability } from './useResourceAvailability';
+import { useProductionSubmission } from './useProductionSubmission';
 
 interface UseProductionFormProps {
   recipes: Recipe[];
@@ -38,6 +40,7 @@ export const useProductionForm = ({
   initialFormData = null,
   initialEditFormData = null
 }: UseProductionFormProps) => {
+  // Initialize form state
   const [formData, setFormData] = useState<{
     recipeId: string;
     quantity: number;
@@ -47,7 +50,7 @@ export const useProductionForm = ({
     recipeId: recipes.length > 0 ? recipes[0].id : '',
     quantity: 1,
     date: format(new Date(), 'yyyy-MM-dd'),
-    autoProduceSemiFinals: true, // Default to true for auto-production
+    autoProduceSemiFinals: true,
   });
   
   const [editFormData, setEditFormData] = useState<{
@@ -58,145 +61,86 @@ export const useProductionForm = ({
     date: format(new Date(), 'yyyy-MM-dd'),
   });
   
+  // Use validation hooks
+  const { validateCreateForm, validateEditForm } = useProductionValidation(recipes);
+  
+  // Use resource availability hooks
+  const { checkResourceAvailability, handleInsufficientResources } = useResourceAvailability({
+    recipes,
+    ingredients,
+    checkSemiFinalAvailability
+  });
+  
+  // Use submission hooks
+  const { submitCreateProduction, submitEditProduction } = useProductionSubmission({
+    addProduction,
+    updateProduction,
+    calculateCost
+  });
+  
+  // Handle production creation
   const handleCreateProduction = useCallback(() => {
     console.log("Creating production with data:", formData);
     
-    if (!formData.recipeId) {
-      toast.error('Выберите рецепт');
+    // Validate form data
+    if (!validateCreateForm(formData.recipeId, formData.quantity)) {
       return false;
     }
     
-    if (formData.quantity <= 0) {
-      toast.error('Количество должно быть больше 0');
-      return false;
-    }
-    
-    // Get the recipe
-    const recipe = recipes.find(r => r.id === formData.recipeId);
-    if (!recipe) {
-      toast.error('Рецепт не найден');
-      return false;
-    }
-    
-    const productionRatio = formData.quantity / recipe.output;
-    let insufficientResources = [];
-    
-    // Process differently based on recipe category
-    if (recipe.category === 'semi-finished') {
-      // For semi-finished products, check ingredient availability
-      for (const item of recipe.items) {
-        if (item.type === 'ingredient' && item.ingredientId) {
-          const ingredient = ingredients.find(i => i.id === item.ingredientId);
-          if (ingredient) {
-            const requiredAmount = item.amount * productionRatio;
-            if (ingredient.quantity < requiredAmount) {
-              insufficientResources.push({
-                name: ingredient.name,
-                required: requiredAmount,
-                available: ingredient.quantity,
-                unit: ingredient.unit
-              });
-            }
-          }
-        }
-      }
-    } else if (recipe.category === 'finished') {
-      // For finished products, check if we need to auto-produce semi-finished products
-      if (formData.autoProduceSemiFinals) {
-        // We'll handle auto-production in the store, so no need to check availability here
-      } else {
-        // If not auto-producing, check availability
-        const { canProduce, insufficientItems } = checkSemiFinalAvailability(formData.recipeId, formData.quantity);
-        if (!canProduce) {
-          insufficientResources = insufficientItems;
-        }
-        
-        // Also check if there are any raw ingredients needed
-        for (const item of recipe.items) {
-          if (item.type === 'ingredient' && item.ingredientId) {
-            const ingredient = ingredients.find(i => i.id === item.ingredientId);
-            if (ingredient) {
-              const requiredAmount = item.amount * productionRatio;
-              if (ingredient.quantity < requiredAmount) {
-                insufficientResources.push({
-                  name: ingredient.name,
-                  required: requiredAmount,
-                  available: ingredient.quantity,
-                  unit: ingredient.unit
-                });
-              }
-            }
-          }
-        }
+    // Check resource availability (only if not auto-producing)
+    if (!formData.autoProduceSemiFinals) {
+      const { hasEnoughResources, insufficientResources } = checkResourceAvailability(
+        formData.recipeId, 
+        formData.quantity, 
+        formData.autoProduceSemiFinals
+      );
+      
+      if (!hasEnoughResources) {
+        return handleInsufficientResources(insufficientResources);
       }
     }
     
-    // Only show warning if we're not auto-producing and there are insufficient resources
-    if (!formData.autoProduceSemiFinals && insufficientResources.length > 0) {
-      const warningMessage = insufficientResources.map(res => 
-        `${res.name}: требуется ${res.required.toFixed(2)} ${res.unit}, доступно ${res.available.toFixed(2)} ${res.unit}`
-      ).join('\n');
-      
-      toast.error(`Недостаточно ресурсов:\n${warningMessage}`);
-      return false;
+    // Submit the production
+    const success = submitCreateProduction(formData);
+    
+    if (success) {
+      // Reset form after successful submission
+      setFormData({
+        recipeId: recipes.length > 0 ? recipes[0].id : '',
+        quantity: 1,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        autoProduceSemiFinals: true,
+      });
     }
     
-    // The cost will be calculated in the store
-    const estimatedCost = calculateCost(formData.recipeId, formData.quantity);
-    
-    const result = addProduction({
-      recipeId: formData.recipeId,
-      quantity: formData.quantity,
-      date: formData.date,
-      cost: estimatedCost,
-      autoProduceSemiFinals: formData.autoProduceSemiFinals
-    });
-    
-    // Check if there was an error during production
-    if (result.error && result.insufficientItems) {
-      const warningMessage = result.insufficientItems.map(res => 
-        `${res.name}: требуется ${res.required.toFixed(2)} ${res.unit}, доступно ${res.available.toFixed(2)} ${res.unit}`
-      ).join('\n');
-      
-      toast.error(`Недостаточно ресурсов:\n${warningMessage}`);
-      return false;
-    }
-    
-    toast.success('Запись о производстве добавлена');
-    
-    // Reset form after successful submission
-    setFormData({
-      recipeId: recipes.length > 0 ? recipes[0].id : '',
-      quantity: 1,
-      date: format(new Date(), 'yyyy-MM-dd'),
-      autoProduceSemiFinals: true,
-    });
-    
-    return true;
-  }, [formData, recipes, ingredients, addProduction, calculateCost, checkSemiFinalAvailability]);
+    return success;
+  }, [
+    formData, 
+    recipes, 
+    validateCreateForm, 
+    checkResourceAvailability, 
+    handleInsufficientResources, 
+    submitCreateProduction
+  ]);
   
+  // Handle production edit
   const handleEditProduction = useCallback((selectedProduction: ProductionBatch | null) => {
     console.log("Editing production with data:", editFormData, "Selected production:", selectedProduction);
     
     if (!selectedProduction) return false;
     
-    if (editFormData.quantity <= 0) {
-      toast.error('Количество должно быть больше 0');
+    // Validate edit form data
+    if (!validateEditForm(editFormData.quantity)) {
       return false;
     }
     
-    // The cost will be recalculated in the store
-    const estimatedCost = calculateCost(selectedProduction.recipeId, editFormData.quantity);
-    
-    updateProduction(selectedProduction.id, {
-      quantity: editFormData.quantity,
-      date: editFormData.date,
-      cost: estimatedCost,
-    });
-    
-    toast.success('Запись о производстве обновлена');
-    return true;
-  }, [editFormData, updateProduction, calculateCost]);
+    // Submit the edit
+    return submitEditProduction(
+      selectedProduction.id,
+      editFormData,
+      selectedProduction.recipeId
+    );
+  }, [editFormData, validateEditForm, submitEditProduction]);
 
   return {
     formData,
