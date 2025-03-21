@@ -99,17 +99,15 @@ const ProductionDialogManager: React.FC<ProductionDialogManagerProps> = ({
         formData={editFormData}
         setFormData={setEditFormData}
         onSubmit={handleEditProduction}
-        getRecipeName={getRecipeName}
-        getRecipeOutput={getRecipeOutput}
+        recipeOutput={selectedProduction ? getRecipeOutput(selectedProduction.recipeId) : ''}
+        calculateCost={calculateCost}
       />
       
       {/* Delete Confirm Dialog */}
       <DeleteConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
+        recipeName={selectedProduction ? getRecipeName(selectedProduction.recipeId) : ''}
+        onCancel={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDeleteProduction}
-        production={selectedProduction}
-        getRecipeName={getRecipeName}
       />
       
       {/* Production Detail Dialog */}
@@ -117,12 +115,11 @@ const ProductionDialogManager: React.FC<ProductionDialogManagerProps> = ({
         isOpen={isDetailDialogOpen}
         onClose={() => setIsDetailDialogOpen(false)}
         production={selectedProduction}
-        getRecipeName={getRecipeName}
-        getRecipeOutput={getRecipeOutput}
+        recipe={getSelectedRecipe()}
         getIngredientDetails={getIngredientDetails}
+        getRecipeName={getRecipeName}
         getIngredientUsageDetails={getIngredientUsageDetails}
         getSemiFinalBreakdown={getSemiFinalBreakdown}
-        getSelectedRecipe={getSelectedRecipe}
       />
     </>
   );
