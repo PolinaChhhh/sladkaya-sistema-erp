@@ -6,6 +6,8 @@ export type RecipeItem = {
   amount: number;
 };
 
+export type RecipeCategory = 'semi-finished' | 'finished';
+
 export type Recipe = {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ export type Recipe = {
   outputUnit: string;
   lastProduced: string | null;
   lossPercentage?: number;
+  category: RecipeCategory;
 };
 
 export type ProductionBatch = {

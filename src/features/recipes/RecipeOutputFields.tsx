@@ -3,12 +3,14 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RecipeCategory } from '@/store/types';
 
 interface RecipeOutputFieldsProps {
   output: number;
   outputUnit: string;
   calculatedLossPercentage: number;
   totalIngredientsWeight: number;
+  category: RecipeCategory;
   onOutputChange: (value: number) => void;
   onOutputUnitChange: (value: string) => void;
 }
@@ -18,6 +20,7 @@ const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
   outputUnit,
   calculatedLossPercentage,
   totalIngredientsWeight,
+  category,
   onOutputChange,
   onOutputUnitChange,
 }) => {
@@ -40,14 +43,17 @@ const RecipeOutputFields: React.FC<RecipeOutputFieldsProps> = ({
           <Select 
             value={outputUnit}
             onValueChange={(value) => onOutputUnitChange(value)}
+            disabled={true} // Unit is now automatically set based on category
           >
             <SelectTrigger>
               <SelectValue placeholder="Выберите единицу" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="кг">кг</SelectItem>
-              <SelectItem value="л">л</SelectItem>
-              <SelectItem value="шт">шт</SelectItem>
+              {category === 'semi-finished' ? (
+                <SelectItem value="кг">кг</SelectItem>
+              ) : (
+                <SelectItem value="шт">шт</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>

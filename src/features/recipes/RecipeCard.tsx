@@ -3,6 +3,7 @@ import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Recipe } from '@/store/recipeStore';
+import { Badge } from '@/components/ui/badge';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -23,11 +24,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   getRecipeName,
   getRecipeUnit
 }) => {
+  const categoryText = recipe.category === 'semi-finished' ? 'Полуфабрикат' : 'Готовый продукт';
+  const categoryColor = recipe.category === 'semi-finished' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+
   return (
     <div className="glass p-5 rounded-xl">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-lg">{recipe.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-lg">{recipe.name}</h3>
+            <Badge className={`${categoryColor} hover:${categoryColor}`}>
+              {categoryText}
+            </Badge>
+          </div>
           <div className="flex gap-3 text-sm text-gray-500 mt-1">
             <p>Выход: {recipe.output} {recipe.outputUnit}</p>
             {recipe.lossPercentage > 0 && (

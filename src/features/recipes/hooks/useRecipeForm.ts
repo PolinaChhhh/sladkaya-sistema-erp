@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Recipe, RecipeItem } from '@/store/recipeStore';
+import { Recipe, RecipeItem, RecipeCategory } from '@/store/recipeStore';
 import { toast } from 'sonner';
 
 interface UseRecipeFormProps {
@@ -20,6 +20,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
+    category: RecipeCategory;
   }>({
     name: '',
     description: '',
@@ -27,6 +28,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     outputUnit: 'кг',
     lossPercentage: 0,
     items: [],
+    category: 'semi-finished',
   });
   
   const initCreateForm = () => {
@@ -37,6 +39,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: 'кг',
       lossPercentage: 0,
       items: [],
+      category: 'semi-finished',
     });
     setIsCreateDialogOpen(true);
   };
@@ -59,6 +62,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
         }
         return { ...item };
       }),
+      category: recipe.category || 'semi-finished', // Default for backward compatibility
     });
     setIsEditDialogOpen(true);
   };
@@ -77,6 +81,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: formData.outputUnit,
       lossPercentage: formData.lossPercentage,
       lastProduced: null,
+      category: formData.category,
     });
     
     toast.success('Рецепт успешно создан');
@@ -98,6 +103,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       output: formData.output,
       outputUnit: formData.outputUnit,
       lossPercentage: formData.lossPercentage,
+      category: formData.category,
     });
     
     toast.success('Рецепт успешно обновлен');

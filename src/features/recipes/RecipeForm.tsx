@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Ingredient, RecipeItem, Recipe } from '@/store/recipeStore';
+import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/recipeStore';
 import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
@@ -20,6 +20,7 @@ interface RecipeFormProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
+    category: RecipeCategory;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     name: string;
@@ -28,6 +29,7 @@ interface RecipeFormProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
+    category: RecipeCategory;
   }>>;
   onSubmit: () => void;
   ingredients: Ingredient[];
@@ -71,6 +73,30 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   }, [calculatedLossPercentage, setFormData]);
 
+  // Automatically set the output unit based on category
+  useEffect(() => {
+    if (formData.category === 'semi-finished' && formData.outputUnit !== 'кг') {
+      setFormData(prev => ({
+        ...prev,
+        outputUnit: 'кг'
+      }));
+    } else if (formData.category === 'finished' && formData.outputUnit !== 'шт') {
+      setFormData(prev => ({
+        ...prev,
+        outputUnit: 'шт'
+      }));
+    }
+  }, [formData.category, formData.outputUnit, setFormData]);
+
+  // Handle category change
+  const handleCategoryChange = (category: RecipeCategory) => {
+    setFormData({
+      ...formData,
+      category,
+      outputUnit: category === 'semi-finished' ? 'кг' : 'шт'
+    });
+  };
+
   // Debug logging for form data
   console.log('RecipeForm - formData:', formData);
 
@@ -83,8 +109,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         <RecipeBasicFields
           name={formData.name}
           description={formData.description}
+          category={formData.category}
           onNameChange={(value) => setFormData({ ...formData, name: value })}
           onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
+          onCategoryChange={handleCategoryChange}
         />
         
         <RecipeOutputFields 
@@ -92,6 +120,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           outputUnit={formData.outputUnit}
           calculatedLossPercentage={calculatedLossPercentage}
           totalIngredientsWeight={totalIngredientsWeight}
+          category={formData.category}
           onOutputChange={(value) => setFormData({ ...formData, output: value })}
           onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
         />

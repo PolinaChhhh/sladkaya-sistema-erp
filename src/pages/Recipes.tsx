@@ -18,6 +18,7 @@ const Recipes = () => {
   const { recipes, ingredients, productions, addRecipe, updateRecipe, deleteRecipe } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all'); // 'all', 'semi-finished', 'finished'
   
   // Use custom hooks
   const { 
@@ -42,9 +43,12 @@ const Recipes = () => {
     handleDeleteRecipe
   } = useRecipeDelete({ deleteRecipe });
   
-  const filteredRecipes = recipes.filter(recipe => 
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter recipes by search query and category
+  const filteredRecipes = recipes.filter(recipe => {
+    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || recipe.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
   
   const getIngredientName = (id: string) => {
     const ingredient = ingredients.find(i => i.id === id);
@@ -85,6 +89,14 @@ const Recipes = () => {
         </TabsList>
         
         <TabsContent value="all">
+          <Tabs value={categoryFilter} onValueChange={setCategoryFilter} className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">Все категории</TabsTrigger>
+              <TabsTrigger value="semi-finished">Полуфабрикаты</TabsTrigger>
+              <TabsTrigger value="finished">Готовые продукты</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
           <RecipesList 
             recipes={filteredRecipes} 
             onEdit={initEditForm}
@@ -97,8 +109,16 @@ const Recipes = () => {
         </TabsContent>
         
         <TabsContent value="in-stock">
+          <Tabs value={categoryFilter} onValueChange={setCategoryFilter} className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">Все категории</TabsTrigger>
+              <TabsTrigger value="semi-finished">Полуфабрикаты</TabsTrigger>
+              <TabsTrigger value="finished">Готовые продукты</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
           <InStockRecipes 
-            recipes={recipes}
+            recipes={recipes.filter(r => categoryFilter === 'all' || r.category === categoryFilter)}
             productions={productions}
             getRecipeUnit={getRecipeUnit}
           />

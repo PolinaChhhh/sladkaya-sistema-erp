@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductionBatch, Recipe } from '@/store/types';
 import EmptyState from './EmptyState';
+import { Badge } from '@/components/ui/badge';
 
 interface InStockRecipesProps {
   recipes: Recipe[];
@@ -25,6 +26,7 @@ interface StockItem {
   quantity: number;
   unit: string;
   lastProduced: string | null;
+  category: string;
 }
 
 const InStockRecipes: React.FC<InStockRecipesProps> = ({ 
@@ -43,7 +45,8 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
         recipeName: recipe.name,
         quantity: 0,
         unit: getRecipeUnit(recipe.id),
-        lastProduced: recipe.lastProduced
+        lastProduced: recipe.lastProduced,
+        category: recipe.category || 'semi-finished' // Default for backward compatibility
       };
     });
     
@@ -84,9 +87,10 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Название</TableHead>
-                <TableHead className="w-[20%]">Количество</TableHead>
-                <TableHead className="w-[20%]">Ед. изм.</TableHead>
+                <TableHead className="w-[35%]">Название</TableHead>
+                <TableHead className="w-[15%]">Категория</TableHead>
+                <TableHead className="w-[15%]">Количество</TableHead>
+                <TableHead className="w-[15%]">Ед. изм.</TableHead>
                 <TableHead className="w-[20%]">Посл. производство</TableHead>
               </TableRow>
             </TableHeader>
@@ -94,6 +98,14 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
               {inStockItems.map((item) => (
                 <TableRow key={item.recipeId}>
                   <TableCell className="font-medium">{item.recipeName}</TableCell>
+                  <TableCell>
+                    <Badge className={item.category === 'semi-finished' 
+                      ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' 
+                      : 'bg-green-100 text-green-800 hover:bg-green-100'
+                    }>
+                      {item.category === 'semi-finished' ? 'Полуфабрикат' : 'Готовый продукт'}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{item.unit}</TableCell>
                   <TableCell>
