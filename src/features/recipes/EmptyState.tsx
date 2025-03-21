@@ -1,13 +1,25 @@
 
 import React from 'react';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, LucideIcon } from 'lucide-react';
 
-const EmptyState: React.FC = () => {
+interface EmptyStateProps {
+  icon?: LucideIcon;
+  title?: string;
+  description?: string;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ 
+  icon: Icon = ChefHat,
+  title = "Нет рецептов",
+  description = "Создайте ваш первый рецепт, чтобы начать"
+}) => {
   return (
-    <div className="text-center py-12">
-      <ChefHat className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-lg font-medium text-gray-800 mb-1">Нет рецептов</h3>
-      <p className="text-gray-500">Создайте свой первый рецепт, нажав кнопку выше</p>
+    <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 text-center">
+      <div className="p-4 bg-confection-100 rounded-full mb-4">
+        <Icon className="h-8 w-8 text-confection-700" />
+      </div>
+      <h3 className="text-lg font-medium mb-1">{title}</h3>
+      <p className="text-sm text-gray-500 max-w-md">{description}</p>
     </div>
   );
 };

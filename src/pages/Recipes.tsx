@@ -1,20 +1,23 @@
 
 import React, { useState } from 'react';
 import { useStore } from '@/store/recipeStore';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Import refactored components
 import RecipeHeader from '@/features/recipes/RecipeHeader';
 import RecipeSearch from '@/features/recipes/RecipeSearch';
 import RecipesList from '@/features/recipes/RecipesList';
 import RecipeDialogs from '@/features/recipes/RecipeDialogs';
+import InStockRecipes from '@/features/recipes/InStockRecipes';
 
 // Import custom hooks
 import { useRecipeForm } from '@/features/recipes/hooks/useRecipeForm';
 import { useRecipeDelete } from '@/features/recipes/hooks/useRecipeDelete';
 
 const Recipes = () => {
-  const { recipes, ingredients, addRecipe, updateRecipe, deleteRecipe } = useStore();
+  const { recipes, ingredients, productions, addRecipe, updateRecipe, deleteRecipe } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   
   // Use custom hooks
   const { 
@@ -75,15 +78,32 @@ const Recipes = () => {
         onSearchChange={setSearchQuery} 
       />
       
-      <RecipesList 
-        recipes={filteredRecipes} 
-        onEdit={initEditForm}
-        onDelete={initDeleteConfirm}
-        getIngredientName={getIngredientName}
-        getIngredientUnit={getIngredientUnit}
-        getRecipeName={getRecipeName}
-        getRecipeUnit={getRecipeUnit}
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">Все рецепты</TabsTrigger>
+          <TabsTrigger value="in-stock">На складе</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <RecipesList 
+            recipes={filteredRecipes} 
+            onEdit={initEditForm}
+            onDelete={initDeleteConfirm}
+            getIngredientName={getIngredientName}
+            getIngredientUnit={getIngredientUnit}
+            getRecipeName={getRecipeName}
+            getRecipeUnit={getRecipeUnit}
+          />
+        </TabsContent>
+        
+        <TabsContent value="in-stock">
+          <InStockRecipes 
+            recipes={recipes}
+            productions={productions}
+            getRecipeUnit={getRecipeUnit}
+          />
+        </TabsContent>
+      </Tabs>
       
       {/* Use the RecipeDialogs component */}
       <RecipeDialogs
