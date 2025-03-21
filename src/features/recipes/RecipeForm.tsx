@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Ingredient, RecipeItem, Recipe, RecipeTag } from '@/store/types';
+import { Ingredient, RecipeItem, Recipe, RecipeTag, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
@@ -18,7 +18,8 @@ interface RecipeFormProps {
     output: number;
     outputUnit: string;
     items: RecipeItem[];
-    category: 'finished';
+    category: RecipeCategory;
+    lossPercentage: number;
     tags: RecipeTag[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -27,7 +28,8 @@ interface RecipeFormProps {
     output: number;
     outputUnit: string;
     items: RecipeItem[];
-    category: 'finished';
+    category: RecipeCategory;
+    lossPercentage: number;
     tags: RecipeTag[];
   }>>;
   onSubmit: () => void;
@@ -63,6 +65,22 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }));
   };
 
+  // Handle category change
+  const handleCategoryChange = (category: RecipeCategory) => {
+    setFormData(prev => ({
+      ...prev,
+      category
+    }));
+  };
+
+  // Handle loss percentage change
+  const handleLossPercentageChange = (value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      lossPercentage: value
+    }));
+  };
+
   // Get only the main items (no packaging)
   const mainItems = formData.items.filter(item => !item.isPackaging);
 
@@ -85,8 +103,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           output={formData.output}
           outputUnit={formData.outputUnit}
           category={formData.category}
+          items={mainItems}
+          lossPercentage={formData.lossPercentage}
           onOutputChange={(value) => setFormData({ ...formData, output: value })}
           onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
+          onCategoryChange={handleCategoryChange}
+          onLossPercentageChange={handleLossPercentageChange}
+          getIngredientUnit={getIngredientUnit}
         />
         
         <RecipeItemsManager

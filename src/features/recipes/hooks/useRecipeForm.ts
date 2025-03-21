@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Recipe, RecipeItem, RecipeTag } from '@/store/types';
+import { Recipe, RecipeItem, RecipeTag, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 
 interface UseRecipeFormProps {
@@ -19,7 +19,8 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     output: number;
     outputUnit: string;
     items: RecipeItem[];
-    category: 'finished';
+    category: RecipeCategory;
+    lossPercentage: number;
     tags: RecipeTag[];
   }>({
     name: '',
@@ -28,6 +29,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
     outputUnit: 'шт',
     items: [],
     category: 'finished',
+    lossPercentage: 0,
     tags: [],
   });
   
@@ -39,6 +41,7 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       outputUnit: 'шт',
       items: [],
       category: 'finished',
+      lossPercentage: 0,
       tags: [],
     });
     setIsCreateDialogOpen(true);
@@ -62,8 +65,9 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
           };
         }
         return { ...item, type: 'ingredient' as const };
-      }).filter(item => item.type === 'ingredient'), // Only keep ingredient items
-      category: 'finished', 
+      }).filter(item => !item.isPackaging), // Only keep non-packaging items
+      category: recipe.category || 'finished', 
+      lossPercentage: recipe.lossPercentage || 0,
       tags: recipe.tags || [], 
     });
     setIsEditDialogOpen(true);
@@ -82,11 +86,14 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       output: formData.output,
       outputUnit: formData.outputUnit,
       lastProduced: null,
-      category: 'finished',
+      category: formData.category,
+      lossPercentage: formData.lossPercentage,
       tags: formData.tags,
     });
     
-    toast.success('Рецепт успешно создан');
+    toast.success(formData.category === 'finished' 
+      ? 'Рецепт успешно создан' 
+      : 'Полуфабрикат успешно создан');
     setIsCreateDialogOpen(false);
   };
   
@@ -104,11 +111,14 @@ export const useRecipeForm = ({ addRecipe, updateRecipe }: UseRecipeFormProps) =
       items: formData.items,
       output: formData.output,
       outputUnit: formData.outputUnit,
-      category: 'finished',
+      category: formData.category,
+      lossPercentage: formData.lossPercentage,
       tags: formData.tags,
     });
     
-    toast.success('Рецепт успешно обновлен');
+    toast.success(formData.category === 'finished' 
+      ? 'Рецепт успешно обновлен' 
+      : 'Полуфабрикат успешно обновлен');
     setIsEditDialogOpen(false);
   };
 

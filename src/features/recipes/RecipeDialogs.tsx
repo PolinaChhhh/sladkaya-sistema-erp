@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Dialog } from '@/components/ui/dialog';
-import { Recipe, Ingredient, RecipeItem, RecipeTag } from '@/store/types';
+import { Recipe, Ingredient, RecipeItem, RecipeTag, RecipeCategory } from '@/store/types';
 import RecipeForm from '@/features/recipes/RecipeForm';
 import DeleteConfirmDialog from '@/features/recipes/DeleteConfirmDialog';
 
@@ -19,7 +19,7 @@ interface RecipeDialogsProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
-    category: 'finished';
+    category: RecipeCategory;
     tags: RecipeTag[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -29,7 +29,7 @@ interface RecipeDialogsProps {
     outputUnit: string;
     lossPercentage: number;
     items: RecipeItem[];
-    category: 'finished';
+    category: RecipeCategory;
     tags: RecipeTag[];
   }>>;
   selectedRecipe: Recipe | null;

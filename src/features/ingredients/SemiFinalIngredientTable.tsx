@@ -29,6 +29,7 @@ const SemiFinalIngredientTable: React.FC<SemiFinalIngredientTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Название</TableHead>
+            <TableHead>Тип</TableHead>
             <TableHead>Количество</TableHead>
             <TableHead className="text-right">Действия</TableHead>
           </TableRow>
@@ -37,6 +38,9 @@ const SemiFinalIngredientTable: React.FC<SemiFinalIngredientTableProps> = ({
           {ingredients.map((ingredient) => (
             <TableRow key={ingredient.id}>
               <TableCell className="font-medium">{ingredient.name}</TableCell>
+              <TableCell>
+                {ingredient.type || 'Ингредиент'}
+              </TableCell>
               <TableCell>
                 <span className={
                   ingredient.quantity <= 0 

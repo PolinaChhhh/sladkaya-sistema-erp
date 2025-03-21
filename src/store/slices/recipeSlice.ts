@@ -24,10 +24,13 @@ export const createRecipeSlice: StateCreator<
       ...recipe, 
       id: crypto.randomUUID(),
       tags: recipe.tags || [], // Ensure tags is defined
-      category: 'finished', // Always set category as finished
+      // Keep category as provided, defaulting to 'finished' if not specified
+      category: recipe.category || 'finished',
       items: recipe.items.filter(item => 
-        // Keep only ingredients and filter out packaging items
-        item.type === 'ingredient' && !item.isPackaging
+        // For finished products, only allow ingredients
+        recipe.category === 'finished' 
+          ? item.type === 'ingredient' && !item.isPackaging
+          : !item.isPackaging // For semi-finished, allow both ingredients and recipes
       ) 
     }]
   })),
@@ -39,11 +42,13 @@ export const createRecipeSlice: StateCreator<
         ...data,
         // Ensure tags is defined when updating
         tags: data.tags !== undefined ? data.tags : recipe.tags || [],
-        // Ensure category is always "finished"
-        category: 'finished',
-        // If updating items, filter out only valid ingredients (no packaging)
+        // Keep category as specified in the data or use the existing one
+        category: data.category || recipe.category,
+        // Filter items appropriately based on category
         items: data.items ? data.items.filter(item => 
-          item.type === 'ingredient' && !item.isPackaging
+          (recipe.category === 'finished' || data.category === 'finished')
+            ? item.type === 'ingredient' && !item.isPackaging
+            : !item.isPackaging // For semi-finished, allow both ingredients and recipes
         ) : recipe.items
       } : recipe
     )

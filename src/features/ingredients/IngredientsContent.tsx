@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Ingredient } from '@/store/recipeStore';
+import { Ingredient } from '@/store/types';
 import IngredientTable from './IngredientTable';
 import SemiFinalIngredientTable from './SemiFinalIngredientTable';
 import EmptyState from './EmptyState';

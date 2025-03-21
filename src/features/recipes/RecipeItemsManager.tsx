@@ -3,7 +3,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Ingredient, RecipeItem, Recipe } from '@/store/recipeStore';
+import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
 
@@ -17,7 +17,7 @@ interface RecipeItemsManagerProps {
   getRecipeName: (id: string) => string;
   getRecipeUnit: (id: string) => string;
   onUpdateItems: (items: RecipeItem[]) => void;
-  category: 'finished';
+  category: RecipeCategory;
 }
 
 const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
@@ -67,11 +67,14 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     onUpdateItems(newItems);
   };
 
+  // For finished products, only ingredients are allowed
+  const allowRecipeItems = category === 'semi-finished';
+
   return (
     <div className="space-y-3 mt-2">
       <div className="flex justify-between items-center">
         <Label>
-          Ингредиенты
+          {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
         </Label>
         <Button type="button" variant="outline" size="sm" onClick={addRecipeItem}>
           <Plus className="h-3 w-3 mr-1" /> Добавить
@@ -86,22 +89,24 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               item={item}
               index={index}
               ingredients={ingredients}
-              recipes={[]}
+              recipes={allowRecipeItems ? recipes.filter(r => r.id !== currentRecipeId) : []}
               getIngredientName={getIngredientName}
               getIngredientUnit={getIngredientUnit}
               getRecipeName={getRecipeName}
               getRecipeUnit={getRecipeUnit}
               onUpdate={updateRecipeItem}
               onRemove={removeRecipeItem}
-              allowRecipeItems={false}
+              allowRecipeItems={allowRecipeItems}
               forceRecipeItems={false}
-              forcedType="ingredient"
+              forcedType={category === 'finished' ? 'ingredient' : undefined}
             />
           ))}
         </div>
       ) : (
         <p className="text-sm text-gray-500 py-2">
-          Нет добавленных ингредиентов
+          {category === 'finished' 
+            ? 'Нет добавленных ингредиентов' 
+            : 'Нет добавленных компонентов'}
         </p>
       )}
     </div>

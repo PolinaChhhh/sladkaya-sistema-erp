@@ -7,8 +7,8 @@ export type RecipeItem = {
   isPackaging?: boolean;
 };
 
-// Changed from union type to single string literal type
-export type RecipeCategory = 'finished';
+// Changed from single string to union type to support semi-finished products
+export type RecipeCategory = 'finished' | 'semi-finished';
 
 export type RecipeTag = {
   id: string;
@@ -24,7 +24,7 @@ export type Recipe = {
   output: number;
   outputUnit: string;
   lastProduced: string | null;
-  lossPercentage?: number; // Keep as optional for backward compatibility
+  lossPercentage?: number; // Calculate automatically for semi-finished products
   category: RecipeCategory;
   tags: RecipeTag[];
 };
