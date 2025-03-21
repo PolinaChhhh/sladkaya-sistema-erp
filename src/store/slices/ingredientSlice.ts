@@ -45,6 +45,6 @@ export const createIngredientSlice: StateCreator<IngredientSlice> = (set) => ({
   },
   
   deleteIngredient: (id) => set((state) => ({
-    ingredients: state.ingredients.filter((item) => item.id !== id)
+    ingredients: state.ingredients.filter((item) => String(item.id) !== String(id))
   })),
 });

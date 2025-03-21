@@ -21,6 +21,12 @@ export const restoreSemiFinalProductsWithFifo = (
 ): void => {
   console.log(`Restoring semi-finals for recipe ${recipe.name}, shouldDecompose=${shouldDecompose}`);
   
+  // Если consumptionDetails не определены, выходим ранним возвратом
+  if (!consumptionDetails) {
+    console.log(`No consumption details found for recipe ${recipe.name}`);
+    return;
+  }
+  
   // Process only recipe items that are semi-finals
   recipe.items
     .filter(item => item.type === 'recipe')

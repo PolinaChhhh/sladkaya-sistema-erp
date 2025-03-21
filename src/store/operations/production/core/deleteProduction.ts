@@ -45,6 +45,8 @@ export const handleDeleteProduction = (
   // Always restore direct ingredients to receipts for any production containing ingredients
   // This handles both packaging materials for finished products and all ingredients for semi-finished products
   console.log(`Restoring direct ingredients for ${recipe.name} (semi-finished: ${isSemiFinished})`);
+  
+  // Важно: передаем actual quantity из production для точного восстановления
   restoreIngredientsToReceipts(
     recipe,
     production.quantity,
@@ -70,7 +72,7 @@ export const handleDeleteProduction = (
         production.quantity,
         productions,
         // Safe casting the consumption details to the expected type
-        production.consumptionDetails as unknown as Record<string, any[]>,
+        production.consumptionDetails || {}, // Provide empty object if undefined
         updateProduction,
         recipes,
         ingredients,
