@@ -54,10 +54,9 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
       return;
     }
     
-    const firstIngredient = ingredients[0];
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { ingredientId: firstIngredient.id, amount: 0 }],
+      items: [...prev.items, { ingredientId: "", amount: 0 }],
     }));
   };
   
