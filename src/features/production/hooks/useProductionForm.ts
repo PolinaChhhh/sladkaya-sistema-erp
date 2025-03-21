@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ProductionBatch } from '@/store/types';
 import { toast } from 'sonner';
-import { checkIngredientsAvailability } from '@/store/utils/fifoCalculator';
+import { checkIngredientsAvailability } from '@/store/utils/fifo/checkAvailability';
 
 export interface ProductionFormData {
   recipeId: string;
@@ -45,12 +45,43 @@ export const useProductionForm = () => {
       return false;
     }
     
-    // Auto-produce selected semi-finals first if any are selected
+    // First, check if there are enough ingredients for all required semi-finals
     if (createFormData.autoProduceSemiFinals && 
         createFormData.semiFinalsToProduce && 
         createFormData.semiFinalsToProduce.length > 0) {
       
-      // Create production for each selected semi-final
+      for (const semiFinalId of createFormData.semiFinalsToProduce) {
+        const semiFinalRecipe = recipes.find(r => r.id === semiFinalId);
+        if (!semiFinalRecipe) continue;
+        
+        // Find how much of this semi-final is needed
+        const semiFinalItem = recipe.items.find(item => 
+          item.type === 'recipe' && item.recipeId === semiFinalId
+        );
+        
+        if (!semiFinalItem) continue;
+        
+        // Calculate required amount based on production ratio
+        const ratio = createFormData.quantity / recipe.output;
+        const amountNeeded = semiFinalItem.amount * ratio;
+        
+        // Check if we have enough ingredients for this semi-final
+        const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
+          semiFinalRecipe,
+          amountNeeded,
+          ingredients,
+          recipes,
+          productions,
+          false // Don't skip semi-final checks for nested semi-finals
+        );
+        
+        if (!canProduce) {
+          toast.error(`Недостаточно ингредиентов для производства полуфабриката ${semiFinalRecipe.name}: ${insufficientIngredients.join(', ')}`);
+          return false;
+        }
+      }
+      
+      // Now produce the semi-finals
       createFormData.semiFinalsToProduce.forEach(semiFinalId => {
         const semiFinalRecipe = recipes.find(r => r.id === semiFinalId);
         if (!semiFinalRecipe) return;
@@ -79,21 +110,19 @@ export const useProductionForm = () => {
       });
     }
     
-    // Check if we have enough ingredients and semi-finished products
-    // We don't need to check if we're auto-producing the semi-finals
-    if (!createFormData.autoProduceSemiFinals) {
-      const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
-        recipe,
-        createFormData.quantity,
-        ingredients,
-        recipes,
-        productions
-      );
-      
-      if (!canProduce) {
-        toast.error(`Недостаточно ингредиентов: ${insufficientIngredients.join(', ')}`);
-        return false;
-      }
+    // Check if we have enough ingredients and semi-finished products for the main recipe
+    const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
+      recipe,
+      createFormData.quantity,
+      ingredients,
+      recipes,
+      productions,
+      createFormData.autoProduceSemiFinals // Skip semi-final checks if we're auto-producing
+    );
+    
+    if (!canProduce) {
+      toast.error(`Недостаточно ингредиентов: ${insufficientIngredients.join(', ')}`);
+      return false;
     }
     
     // Create the main production
@@ -125,8 +154,8 @@ export const useProductionForm = () => {
     }
     
     // Check if we have enough ingredients for updated quantity
-    // Only check if we're not auto-producing semi-finals
-    if (!editFormData.autoProduceSemiFinals && editFormData.quantity > selectedProduction.quantity) {
+    // Only check if we're not auto-producing semi-finals and if quantity increased
+    if (editFormData.quantity > selectedProduction.quantity) {
       const additionalQuantity = editFormData.quantity - selectedProduction.quantity;
       
       const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
@@ -134,7 +163,8 @@ export const useProductionForm = () => {
         additionalQuantity,
         ingredients,
         recipes,
-        productions
+        productions,
+        editFormData.autoProduceSemiFinals
       );
       
       if (!canProduce) {

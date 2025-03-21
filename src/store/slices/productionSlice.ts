@@ -12,7 +12,7 @@ import {
 
 export interface ProductionSlice {
   productions: ProductionBatch[];
-  addProduction: (production: Omit<ProductionBatch, 'id'>) => void;
+  addProduction: (production: Omit<ProductionBatch, 'id'>) => ProductionBatch | null;
   updateProduction: (id: string, data: Partial<ProductionBatch>) => void;
   deleteProduction: (id: string) => void;
 }
@@ -27,7 +27,7 @@ export const createProductionSlice: StateCreator<
 > = (set, get) => ({
   productions: [],
   
-  addProduction: (production) => set((state) => {
+  addProduction: (production) => {
     try {
       const { 
         recipes, 
@@ -52,14 +52,17 @@ export const createProductionSlice: StateCreator<
         updateRecipe
       );
       
-      return {
+      set((state) => ({
         productions: [...state.productions, newProduction]
-      };
+      }));
+      
+      return newProduction;
     } catch (error) {
       console.error('Error adding production:', error);
-      return { productions: state.productions };
+      // Instead of silently failing, re-throw the error to be handled by the caller
+      throw error;
     }
-  }),
+  },
   
   updateProduction: (id, data) => set((state) => {
     try {

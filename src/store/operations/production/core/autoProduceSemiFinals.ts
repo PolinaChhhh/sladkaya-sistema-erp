@@ -1,6 +1,7 @@
 
 import { ProductionBatch, Recipe } from '../../../types';
 import { handleAddProduction } from './addProduction';
+import { checkIngredientsAvailability } from '../../../utils/fifo/checkAvailability';
 
 /**
  * Auto-produces any required semi-final products
@@ -50,6 +51,21 @@ export const autoProduceSemiFinals = (
       if (availableQuantity < amountNeeded) {
         const amountToCreate = amountNeeded - availableQuantity;
         console.log(`Auto-producing ${amountToCreate} ${semiFinalRecipe.outputUnit} of ${semiFinalRecipe.name}`);
+        
+        // Check if we have enough ingredients for this semi-final
+        const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
+          semiFinalRecipe,
+          amountToCreate,
+          ingredients,
+          recipes,
+          productions,
+          false // Don't skip semi-final checks for nested semi-finals
+        );
+        
+        if (!canProduce) {
+          console.error(`Insufficient ingredients for auto-producing semi-final ${semiFinalRecipe.name}: ${insufficientIngredients.join(', ')}`);
+          throw new Error(`Недостаточно ингредиентов для производства полуфабриката ${semiFinalRecipe.name}: ${insufficientIngredients.join(', ')}`);
+        }
         
         // Create a new production of this semi-final product
         const semiFinalProduction: Omit<ProductionBatch, 'id'> = {

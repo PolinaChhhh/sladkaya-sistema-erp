@@ -41,7 +41,15 @@ export const checkIngredientsAvailability = (
         // Calculate available quantity of this semi-finished product
         const availableQuantity = productions
           .filter(p => p.recipeId === item.recipeId)
-          .reduce((total, p) => total + p.quantity, 0);
+          .reduce((total, p) => {
+            // Check if the production has been consumed
+            const hasBeenFullyConsumed = productions.some(otherP => 
+              otherP.semiFinalConsumptionDetails?.[item.recipeId]?.reduce((acc, detail) => 
+                acc + detail.amount, 0) === p.quantity
+            );
+            
+            return total + (hasBeenFullyConsumed ? 0 : p.quantity);
+          }, 0);
         
         if (availableQuantity < amountNeeded) {
           canProduce = false;
