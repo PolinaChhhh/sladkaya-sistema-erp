@@ -71,15 +71,15 @@ export const calculateTotalProductionCost = (
   const recipe = recipes.find(r => r.id === recipeId);
   if (!recipe) return 0;
   
-  // If this is a semi-finished product, use the existing FIFO calculation
-  if (recipe.category === 'semi-finished') {
-    return calculateRawIngredientsCost(recipeId, quantity, recipes, ingredients, receipts);
+  const rawIngredientCost = calculateRawIngredientsCost(recipeId, quantity, recipes, ingredients, receipts);
+  
+  // For finished products, add the cost of semi-finished products
+  let semiFinishedCost = 0;
+  if (recipe.category === 'finished') {
+    semiFinishedCost = calculateFinishedProductCost(recipeId, quantity, recipes, productions);
   }
   
-  // For finished products, combine raw ingredient cost with semi-finished product cost
-  const rawIngredientCost = calculateRawIngredientsCost(recipeId, quantity, recipes, ingredients, receipts);
-  const semiFinishedCost = calculateFinishedProductCost(recipeId, quantity, recipes, productions);
-  
+  // Return the combined cost
   return rawIngredientCost + semiFinishedCost;
 };
 
@@ -109,12 +109,13 @@ export const calculateRawIngredientsCost = (
       
       const amountNeeded = item.amount * productionRatio;
       
+      // Get receipt items for FIFO calculation (oldest first)
       const allReceiptItems = getFifoReceiptItems(item.ingredientId, receipts);
       
       let costForIngredient = 0;
       let remainingToConsume = amountNeeded;
       
-      // Simulate FIFO consumption for cost estimation
+      // Simulate FIFO consumption for cost calculation
       for (const receiptItem of allReceiptItems) {
         if (remainingToConsume <= 0) break;
         
@@ -128,7 +129,11 @@ export const calculateRawIngredientsCost = (
         costForIngredient += remainingToConsume * ingredient.cost;
       }
       
+      // Include cost for this ingredient (both regular and packaging materials)
       totalCost += costForIngredient;
+      
+      // Log for debugging
+      console.log(`Ingredient ${ingredient.name}: amount=${amountNeeded}, cost=${costForIngredient}, isPackaging=${item.isPackaging}`);
     }
   });
   

@@ -3,7 +3,7 @@ import React from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -53,11 +53,24 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
   const selectedRecipe = recipes.find(r => r.id === formData.recipeId);
   const isFinishedProduct = selectedRecipe?.category === 'finished';
 
+  // Calculate the estimated cost
+  const estimatedCost = (formData.recipeId && formData.quantity > 0) 
+    ? calculateCost(formData.recipeId, formData.quantity) 
+    : 0;
+
+  // Calculate unit cost
+  const unitCost = formData.quantity > 0 
+    ? estimatedCost / formData.quantity 
+    : 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Добавить производство</DialogTitle>
+          <DialogDescription>
+            Создайте новую партию продукции для учета в системе
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -147,11 +160,11 @@ const ProductionDialog: React.FC<ProductionDialogProps> = ({
                 Расчет себестоимости
               </div>
               <p className="text-sm text-gray-600 mb-2">
-                Общая себестоимость: <span className="font-medium">{calculateCost(formData.recipeId, formData.quantity).toFixed(2)} ₽</span>
+                Общая себестоимость: <span className="font-medium">{estimatedCost.toFixed(2)} ₽</span>
               </p>
               <p className="text-sm text-gray-600">
                 Себестоимость за единицу: <span className="font-medium">
-                  {(calculateCost(formData.recipeId, formData.quantity) / formData.quantity).toFixed(2)} ₽/{getRecipeOutput(formData.recipeId)}
+                  {unitCost.toFixed(2)} ₽/{getRecipeOutput(formData.recipeId)}
                 </span>
               </p>
             </div>

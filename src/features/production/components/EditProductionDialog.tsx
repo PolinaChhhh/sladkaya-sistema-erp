@@ -3,7 +3,7 @@ import React from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ProductionBatch } from '@/store/types';
 
@@ -36,11 +36,22 @@ const EditProductionDialog: React.FC<EditProductionDialogProps> = ({
 }) => {
   if (!production) return null;
 
+  // Calculate the estimated cost
+  const estimatedCost = calculateCost(production.recipeId, formData.quantity);
+  
+  // Calculate unit cost
+  const unitCost = formData.quantity > 0 
+    ? estimatedCost / formData.quantity 
+    : 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Редактировать производство</DialogTitle>
+          <DialogDescription>
+            Обновите информацию о производственной партии
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -74,11 +85,11 @@ const EditProductionDialog: React.FC<EditProductionDialogProps> = ({
               Расчет себестоимости
             </div>
             <p className="text-sm text-gray-600 mb-2">
-              Общая себестоимость: <span className="font-medium">{calculateCost(production.recipeId, formData.quantity).toFixed(2)} ₽</span>
+              Общая себестоимость: <span className="font-medium">{estimatedCost.toFixed(2)} ₽</span>
             </p>
             <p className="text-sm text-gray-600">
               Себестоимость за единицу: <span className="font-medium">
-                {(calculateCost(production.recipeId, formData.quantity) / formData.quantity).toFixed(2)} ₽/{recipeOutput}
+                {unitCost.toFixed(2)} ₽/{recipeOutput}
               </span>
             </p>
           </div>
