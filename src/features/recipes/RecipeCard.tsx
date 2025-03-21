@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Trash2, Clock } from 'lucide-react';
+import { Edit, Trash2, Clock, Package2, Component } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Recipe, ProductionBatch } from '@/store/types';
@@ -36,11 +36,25 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   // Count the number of productions for this recipe
   const productionCount = productions.filter(p => p.recipeId === recipe.id).length;
   
+  // Define styling for different categories
+  const getCategoryIcon = () => {
+    if (recipe.category === 'finished') {
+      return <Package2 className="h-5 w-5 text-green-600" />;
+    } else {
+      return <Component className="h-5 w-5 text-blue-600" />;
+    }
+  };
+  
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-base font-medium">{recipe.name}</CardTitle>
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            <div className={`p-1 rounded-full ${recipe.category === 'finished' ? 'bg-green-100' : 'bg-blue-100'}`}>
+              {getCategoryIcon()}
+            </div>
+            {recipe.name}
+          </CardTitle>
           <div className="flex space-x-1">
             <Button 
               variant="ghost" 
