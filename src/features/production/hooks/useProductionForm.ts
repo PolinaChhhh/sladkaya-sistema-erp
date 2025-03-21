@@ -19,14 +19,14 @@ export const useProductionForm = () => {
     recipeId: recipes.length > 0 ? recipes[0].id : '',
     quantity: 1,
     date: new Date().toISOString().split('T')[0],
-    autoProduceSemiFinals: false
+    autoProduceSemiFinals: true  // Default to true so semi-finals are auto-produced
   });
   
   const [editFormData, setEditFormData] = useState<ProductionFormData>({
     recipeId: '',
     quantity: 1,
     date: new Date().toISOString().split('T')[0],
-    autoProduceSemiFinals: false
+    autoProduceSemiFinals: true  // Default to true so semi-finals are auto-produced
   });
   
   const handleCreateProduction = () => {
@@ -43,17 +43,20 @@ export const useProductionForm = () => {
     }
     
     // Check if we have enough ingredients and semi-finished products
-    const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
-      recipe,
-      createFormData.quantity,
-      ingredients,
-      recipes,
-      productions
-    );
-    
-    if (!canProduce) {
-      toast.error(`Недостаточно ингредиентов: ${insufficientIngredients.join(', ')}`);
-      return;
+    // Only check if we're not auto-producing semi-finals
+    if (!createFormData.autoProduceSemiFinals) {
+      const { canProduce, insufficientIngredients } = checkIngredientsAvailability(
+        recipe,
+        createFormData.quantity,
+        ingredients,
+        recipes,
+        productions
+      );
+      
+      if (!canProduce) {
+        toast.error(`Недостаточно ингредиентов: ${insufficientIngredients.join(', ')}`);
+        return;
+      }
     }
     
     // Create production
@@ -85,7 +88,8 @@ export const useProductionForm = () => {
     }
     
     // Check if we have enough ingredients for updated quantity
-    if (editFormData.quantity > selectedProduction.quantity) {
+    // Only check if we're not auto-producing semi-finals
+    if (!editFormData.autoProduceSemiFinals && editFormData.quantity > selectedProduction.quantity) {
       const additionalQuantity = editFormData.quantity - selectedProduction.quantity;
       
       const { canProduce, insufficientIngredients } = checkIngredientsAvailability(

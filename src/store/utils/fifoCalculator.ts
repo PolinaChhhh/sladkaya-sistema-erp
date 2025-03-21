@@ -22,7 +22,8 @@ export const checkIngredientsAvailability = (
   quantity: number,
   ingredients: Ingredient[],
   recipes?: Recipe[],
-  productions?: any[]
+  productions?: any[],
+  autoProduceSemiFinals: boolean = false // Add parameter to skip semi-final checks
 ): { canProduce: boolean; insufficientIngredients: string[] } => {
   if (!recipe) {
     return { canProduce: false, insufficientIngredients: ['Recipe not found'] };
@@ -44,8 +45,8 @@ export const checkIngredientsAvailability = (
           insufficientIngredients.push(ingredient.name);
         }
       }
-    } else if (item.type === 'recipe' && item.recipeId && recipes && productions) {
-      // Check semi-finished products
+    } else if (item.type === 'recipe' && item.recipeId && recipes && productions && !autoProduceSemiFinals) {
+      // Check semi-finished products only if we're not auto-producing them
       const semiFinalRecipe = recipes.find(r => r.id === item.recipeId);
       if (semiFinalRecipe) {
         const amountNeeded = item.amount * productionRatio;
