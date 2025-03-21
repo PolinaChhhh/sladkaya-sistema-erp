@@ -1,17 +1,17 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RecipeItem } from '@/store/recipeStore';
+import { RecipeItem, Recipe, Ingredient } from '@/store/recipeStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RecipeItemRowProps {
   item: RecipeItem;
   index: number;
-  ingredients: any[];
-  recipes: any[];
+  ingredients: Ingredient[];
+  recipes: Recipe[];
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
   getRecipeName: (id: string) => string;
@@ -35,20 +35,58 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   const selectedType = item.type || 'ingredient';
   const selectedId = selectedType === 'ingredient' ? item.ingredientId || '' : item.recipeId || '';
   
+  // Set a default ID when switching between types if none is selected
+  useEffect(() => {
+    if (selectedType === 'ingredient' && !item.ingredientId && ingredients.length > 0) {
+      onUpdate(index, 'ingredientId', ingredients[0].id);
+    } else if (selectedType === 'recipe' && !item.recipeId && recipes.length > 0) {
+      onUpdate(index, 'recipeId', recipes[0].id);
+    }
+  }, [selectedType, item.ingredientId, item.recipeId, ingredients, recipes]);
+  
   const handleTypeChange = (type: string) => {
-    // Reset the ID when changing type
+    console.log('Changing type to:', type);
+    
     if (type === 'ingredient') {
+      const newItem = { 
+        ...item,
+        type: 'ingredient' as const,
+        recipeId: undefined 
+      };
+      
+      // Set default ingredient if available
+      if (ingredients.length > 0) {
+        newItem.ingredientId = ingredients[0].id;
+      } else {
+        newItem.ingredientId = '';
+      }
+      
       onUpdate(index, 'type', 'ingredient');
-      onUpdate(index, 'ingredientId', '');
+      onUpdate(index, 'ingredientId', newItem.ingredientId);
       onUpdate(index, 'recipeId', undefined);
     } else {
+      const newItem = { 
+        ...item,
+        type: 'recipe' as const,
+        ingredientId: undefined 
+      };
+      
+      // Set default recipe if available
+      if (recipes.length > 0) {
+        newItem.recipeId = recipes[0].id;
+      } else {
+        newItem.recipeId = '';
+      }
+      
       onUpdate(index, 'type', 'recipe');
-      onUpdate(index, 'recipeId', '');
+      onUpdate(index, 'recipeId', newItem.recipeId);
       onUpdate(index, 'ingredientId', undefined);
     }
   };
   
   const handleIdChange = (id: string) => {
+    console.log('Changing ID to:', id, 'for type:', selectedType);
+    
     if (selectedType === 'ingredient') {
       onUpdate(index, 'ingredientId', id);
     } else {
@@ -66,15 +104,15 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   };
 
   // Debug logs to see what's happening
-  console.log('RecipeItemRow - item:', item);
-  console.log('RecipeItemRow - selectedType:', selectedType);
-  console.log('RecipeItemRow - selectedId:', selectedId);
-  console.log('RecipeItemRow - recipes available:', recipes);
+  console.log(`RecipeItemRow - item:`, item);
+  console.log(`RecipeItemRow - selectedType:`, selectedType);
+  console.log(`RecipeItemRow - selectedId:`, selectedId);
+  console.log(`RecipeItemRow - recipes available:`, recipes);
 
   return (
     <div className="bg-gray-50 p-3 rounded-md">
       <div className="space-y-2">
-        <Tabs defaultValue={selectedType} onValueChange={handleTypeChange} className="w-full">
+        <Tabs defaultValue={selectedType} value={selectedType} onValueChange={handleTypeChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="ingredient">Ингредиент</TabsTrigger>
             <TabsTrigger value="recipe">Рецепт</TabsTrigger>
@@ -82,7 +120,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           
           <TabsContent value="ingredient" className="mt-2">
             <Select
-              value={selectedType === 'ingredient' ? selectedId : ''}
+              value={item.ingredientId || ''}
               onValueChange={handleIdChange}
             >
               <SelectTrigger className="w-full">
@@ -100,7 +138,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           
           <TabsContent value="recipe" className="mt-2">
             <Select
-              value={selectedType === 'recipe' ? selectedId : ''}
+              value={item.recipeId || ''}
               onValueChange={handleIdChange}
             >
               <SelectTrigger className="w-full">

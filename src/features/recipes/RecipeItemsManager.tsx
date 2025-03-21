@@ -42,9 +42,13 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     
     // Default type based on what's available
     const defaultType = ingredients.length > 0 ? 'ingredient' : 'recipe';
-    const defaultId = defaultType === 'ingredient' && ingredients.length > 0 ? 
-      ingredients[0].id : 
-      (defaultType === 'recipe' && availableRecipes.length > 0 ? availableRecipes[0].id : '');
+    let defaultId = '';
+    
+    if (defaultType === 'ingredient' && ingredients.length > 0) {
+      defaultId = ingredients[0].id;
+    } else if (defaultType === 'recipe' && availableRecipes.length > 0) {
+      defaultId = availableRecipes[0].id;
+    }
     
     // Create a properly typed new item
     const newItem: RecipeItem = defaultType === 'ingredient' 
@@ -58,10 +62,14 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
     const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    onUpdateItems(newItems);
     
-    console.log('Updated recipe item:', index, field, value, newItems[index]);
+    // Create a copy of the item to modify
+    newItems[index] = { ...newItems[index], [field]: value };
+    
+    // Log the update for debugging
+    console.log(`Updated recipe item: ${index} ${field} ${value}`, newItems[index]);
+    
+    onUpdateItems(newItems);
   };
   
   const removeRecipeItem = (index: number) => {
