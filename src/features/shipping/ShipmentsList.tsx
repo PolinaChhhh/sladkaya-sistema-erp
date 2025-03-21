@@ -14,6 +14,8 @@ const ShipmentsList = () => {
     sortedShippings,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
     isDeleteConfirmOpen,
     setIsDeleteConfirmOpen,
     selectedShipping,
@@ -24,9 +26,11 @@ const ShipmentsList = () => {
     recipes,
     shippings,
     initCreateForm,
+    initEditForm,
     initDeleteConfirm,
     handleDeleteConfirm,
     handleCreateShipping,
+    handleUpdateShipping,
     handleStatusUpdate,
     canCreateShipment
   } = useShipmentsList();
@@ -51,6 +55,7 @@ const ShipmentsList = () => {
               recipes={recipes}
               onStatusUpdate={handleStatusUpdate}
               onDeleteClick={initDeleteConfirm}
+              onEditClick={initEditForm}
             />
           ))}
         </div>
@@ -69,6 +74,20 @@ const ShipmentsList = () => {
         recipes={recipes}
         shippings={shippings}
         onSubmit={handleCreateShipping}
+      />
+      
+      {/* Edit Shipping Dialog */}
+      <CreateShippingDialog 
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        formData={formData}
+        setFormData={setFormData}
+        buyers={buyers}
+        productions={productions}
+        recipes={recipes}
+        shippings={shippings}
+        onSubmit={handleUpdateShipping}
+        isEditing={true}
       />
       
       {/* Delete Confirmation Dialog */}

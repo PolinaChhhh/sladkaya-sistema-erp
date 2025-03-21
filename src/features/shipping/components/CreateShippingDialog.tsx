@@ -1,16 +1,10 @@
 
 import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
-import { ShippingDocument } from '@/store/recipeStore';
-import { toast } from 'sonner';
 import { useShippingForm } from '../hooks/useShippingForm';
-import {
-  ShippingFormHeader,
-  ShippingFormBasicFields,
-  ShippingItemsHeader,
-  ShippingItemsTable
-} from './shipping-form';
+import { ShippingDocument } from '@/store/recipeStore';
+import { ShippingFormHeader, ShippingFormBasicFields, ShippingItemsTable } from './shipping-form';
 
 interface CreateShippingDialogProps {
   isOpen: boolean;
@@ -40,6 +34,7 @@ interface CreateShippingDialogProps {
   recipes: any[];
   shippings: ShippingDocument[];
   onSubmit: () => void;
+  isEditing?: boolean;
 }
 
 const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
@@ -51,62 +46,56 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
   productions,
   recipes,
   shippings,
-  onSubmit
+  onSubmit,
+  isEditing = false
 }) => {
-  const { addShippingItem, updateShippingItem, removeShippingItem } = useShippingForm(
-    formData,
-    setFormData,
-    productions,
-    shippings,
-    recipes
-  );
-
-  const handleAddItem = () => {
-    const result = addShippingItem();
-    if (result.error) {
-      toast.error(result.error);
-    }
-  };
-
-  const handleBuyerChange = (value: string) => {
-    setFormData({...formData, buyerId: value});
-  };
-
-  const handleDateChange = (value: string) => {
-    setFormData({...formData, date: value});
-  };
-
+  const { 
+    addShippingItem, 
+    updateShippingItem, 
+    removeShippingItem 
+  } = useShippingForm(formData, setFormData, productions, shippings, recipes);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px]">
-        <ShippingFormHeader />
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? 'Редактировать отгрузку' : 'Создать отгрузку'}</DialogTitle>
+        </DialogHeader>
         
-        <div className="grid gap-6 py-4">
-          <ShippingFormBasicFields 
-            buyerId={formData.buyerId}
-            date={formData.date}
-            buyers={buyers}
-            onBuyerChange={handleBuyerChange}
-            onDateChange={handleDateChange}
+        <div className="my-4 space-y-6">
+          <ShippingFormHeader
+            onAddItem={() => {
+              const result = addShippingItem();
+              if (result.error) {
+                // Could use toast here
+                alert(result.error);
+              }
+            }}
           />
           
-          <div className="space-y-4">
-            <ShippingItemsHeader onAddItem={handleAddItem} />
-            
-            <ShippingItemsTable 
-              items={formData.items}
-              productions={productions}
-              recipes={recipes}
-              shippings={shippings}
-              updateShippingItem={updateShippingItem}
-              removeShippingItem={removeShippingItem}
-            />
-          </div>
+          <ShippingFormBasicFields
+            buyers={buyers}
+            formData={formData}
+            setFormData={setFormData}
+          />
+          
+          <ShippingItemsTable
+            items={formData.items}
+            productions={productions}
+            recipes={recipes}
+            shippings={shippings}
+            updateShippingItem={updateShippingItem}
+            removeShippingItem={removeShippingItem}
+          />
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Отмена</Button>
-          <Button onClick={onSubmit}>Создать отгрузку</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Отмена
+          </Button>
+          <Button onClick={onSubmit}>
+            {isEditing ? 'Сохранить' : 'Создать'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -15,6 +15,7 @@ interface ShippingCardProps {
   recipes: any[];
   onStatusUpdate: (id: string, status: ShippingDocument['status']) => void;
   onDeleteClick: (shipping: ShippingDocument) => void;
+  onEditClick: (shipping: ShippingDocument) => void;
 }
 
 const ShippingCard: React.FC<ShippingCardProps> = ({
@@ -23,7 +24,8 @@ const ShippingCard: React.FC<ShippingCardProps> = ({
   productions,
   recipes,
   onStatusUpdate,
-  onDeleteClick
+  onDeleteClick,
+  onEditClick
 }) => {
   return (
     <GlassMorphicCard 
@@ -40,6 +42,7 @@ const ShippingCard: React.FC<ShippingCardProps> = ({
             shipping={shipping}
             onStatusUpdate={onStatusUpdate}
             onDeleteClick={onDeleteClick}
+            onEditClick={onEditClick}
           />
         </div>
         

@@ -1,14 +1,14 @@
-
 import { useState } from 'react';
 import { useStore, ShippingDocument } from '@/store/recipeStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 export const useShipmentsList = () => {
-  const { productions, shippings, recipes, buyers, addShipping, updateShippingStatus, deleteShipping } = useStore();
+  const { productions, shippings, recipes, buyers, addShipping, updateShipping, updateShippingStatus, deleteShipping } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingDocument | null>(null);
   
   const [formData, setFormData] = useState<{
@@ -44,6 +44,16 @@ export const useShipmentsList = () => {
       items: [],
     });
     setIsCreateDialogOpen(true);
+  };
+  
+  const initEditForm = (shipping: ShippingDocument) => {
+    setSelectedShipping(shipping);
+    setFormData({
+      buyerId: shipping.buyerId || '',
+      date: shipping.date,
+      items: [...shipping.items],
+    });
+    setIsEditDialogOpen(true);
   };
   
   const initDeleteConfirm = (shipping: ShippingDocument) => {
@@ -85,6 +95,38 @@ export const useShipmentsList = () => {
     setIsCreateDialogOpen(false);
   };
   
+  const handleUpdateShipping = () => {
+    if (!selectedShipping) return;
+    
+    if (formData.buyerId.trim() === '') {
+      toast.error('Выберите клиента');
+      return;
+    }
+    
+    if (formData.items.length === 0) {
+      toast.error('Добавьте товары для отгрузки');
+      return;
+    }
+    
+    // Find the selected buyer
+    const selectedBuyer = buyers.find(b => b.id === formData.buyerId);
+    
+    // Create updated shipping document
+    const updatedShipping: ShippingDocument = {
+      ...selectedShipping,
+      buyerId: formData.buyerId,
+      customer: selectedBuyer ? selectedBuyer.name : 'Неизвестный клиент',
+      date: formData.date,
+      items: formData.items,
+    };
+    
+    // Update shipping in store
+    updateShipping(updatedShipping);
+    
+    toast.success('Отгрузка обновлена');
+    setIsEditDialogOpen(false);
+  };
+  
   const handleStatusUpdate = (shippingId: string, newStatus: ShippingDocument['status']) => {
     updateShippingStatus(shippingId, newStatus);
     toast.success(`Статус отгрузки обновлен: ${getStatusText(newStatus)}`);
@@ -99,6 +141,8 @@ export const useShipmentsList = () => {
     sortedShippings,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
     isDeleteConfirmOpen,
     setIsDeleteConfirmOpen,
     selectedShipping,
@@ -109,9 +153,11 @@ export const useShipmentsList = () => {
     recipes,
     shippings,
     initCreateForm,
+    initEditForm,
     initDeleteConfirm,
     handleDeleteConfirm,
     handleCreateShipping,
+    handleUpdateShipping,
     handleStatusUpdate,
     canCreateShipment
   };
