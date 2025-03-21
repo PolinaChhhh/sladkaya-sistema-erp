@@ -10,6 +10,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Ingredient } from '@/store/types';
 import { format } from 'date-fns';
 
@@ -18,6 +19,18 @@ interface IngredientTableProps {
   onEdit: (ingredient: Ingredient) => void;
   onDelete: (ingredient: Ingredient) => void;
 }
+
+// Function to determine badge variant based on ingredient type
+const getTypeBadgeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
+  const typeMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    'Ингредиент': 'default',
+    'Молочные': 'secondary',
+    'Мука': 'outline',
+    'Упаковка': 'destructive',
+  };
+  
+  return typeMap[type] || 'default';
+};
 
 const IngredientTable: React.FC<IngredientTableProps> = ({ 
   ingredients, 
@@ -50,9 +63,9 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
             <TableRow key={ingredient.id}>
               <TableCell className="font-medium">{ingredient.name}</TableCell>
               <TableCell>
-                <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                <Badge variant={getTypeBadgeVariant(ingredient.type)}>
                   {ingredient.type || 'Ингредиент'}
-                </span>
+                </Badge>
               </TableCell>
               <TableCell>{ingredient.cost.toFixed(2)} ₽/{ingredient.unit}</TableCell>
               <TableCell>
