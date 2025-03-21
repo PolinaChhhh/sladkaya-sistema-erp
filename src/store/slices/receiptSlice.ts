@@ -1,6 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { Receipt, ReceiptItem } from '../types';
+import { IngredientSlice } from './ingredientSlice';
 
 export interface ReceiptSlice {
   receipts: Receipt[];
@@ -12,7 +13,14 @@ export interface ReceiptSlice {
   deleteReceiptItem: (receiptId: string, itemId: string) => void;
 }
 
-export const createReceiptSlice: StateCreator<ReceiptSlice> = (set) => ({
+type StoreWithIngredientSlice = IngredientSlice;
+
+export const createReceiptSlice: StateCreator<
+  ReceiptSlice & StoreWithIngredientSlice, 
+  [], 
+  [], 
+  ReceiptSlice
+> = (set, get) => ({
   receipts: [],
   
   addReceipt: (receipt) => set((state) => {
@@ -32,20 +40,80 @@ export const createReceiptSlice: StateCreator<ReceiptSlice> = (set) => ({
       receiptId: newReceipt.id
     }));
     
+    // Update ingredient quantities and prices based on receipt items
+    newReceipt.items.forEach(item => {
+      const { ingredientId, quantity, unitPrice } = item;
+      const existingIngredient = state.ingredients.find(ing => ing.id === ingredientId);
+      
+      if (existingIngredient) {
+        get().updateIngredient(ingredientId, {
+          quantity: existingIngredient.quantity + quantity,
+          cost: unitPrice, // Update to the latest price
+          lastPurchaseDate: new Date().toISOString()
+        });
+      }
+    });
+    
     return {
       receipts: [...state.receipts, newReceipt]
     };
   }),
   
-  updateReceipt: (id, data) => set((state) => ({
-    receipts: state.receipts.map((receipt) => 
-      receipt.id === id ? { ...receipt, ...data } : receipt
-    )
-  })),
+  updateReceipt: (id, data) => set((state) => {
+    const originalReceipt = state.receipts.find(receipt => receipt.id === id);
+    const updatedReceipt = { ...originalReceipt, ...data };
+    
+    // If items have changed, update ingredient quantities
+    if (data.items && originalReceipt) {
+      // Revert original receipt quantities
+      originalReceipt.items.forEach(item => {
+        const existingIngredient = state.ingredients.find(ing => ing.id === item.ingredientId);
+        if (existingIngredient) {
+          get().updateIngredient(item.ingredientId, {
+            quantity: Math.max(0, existingIngredient.quantity - item.quantity)
+          });
+        }
+      });
+      
+      // Apply new receipt quantities
+      data.items.forEach(item => {
+        const existingIngredient = state.ingredients.find(ing => ing.id === item.ingredientId);
+        if (existingIngredient) {
+          get().updateIngredient(item.ingredientId, {
+            quantity: existingIngredient.quantity + item.quantity,
+            cost: item.unitPrice, // Update to the latest price
+            lastPurchaseDate: new Date().toISOString()
+          });
+        }
+      });
+    }
+    
+    return {
+      receipts: state.receipts.map((receipt) => 
+        receipt.id === id ? { ...receipt, ...data } : receipt
+      )
+    };
+  }),
   
-  deleteReceipt: (id) => set((state) => ({
-    receipts: state.receipts.filter((receipt) => receipt.id !== id)
-  })),
+  deleteReceipt: (id) => set((state) => {
+    const receiptToDelete = state.receipts.find(receipt => receipt.id === id);
+    
+    // Revert ingredient quantities for deleted receipt
+    if (receiptToDelete) {
+      receiptToDelete.items.forEach(item => {
+        const existingIngredient = state.ingredients.find(ing => ing.id === item.ingredientId);
+        if (existingIngredient) {
+          get().updateIngredient(item.ingredientId, {
+            quantity: Math.max(0, existingIngredient.quantity - item.quantity)
+          });
+        }
+      });
+    }
+    
+    return {
+      receipts: state.receipts.filter((receipt) => receipt.id !== id)
+    };
+  }),
   
   addReceiptItem: (receiptId, item) => set((state) => {
     const newItem = {

@@ -61,7 +61,11 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
                 )}
               </TableCell>
               <TableCell>{ingredient.cost.toFixed(2)} ₽/{ingredient.unit}</TableCell>
-              <TableCell>{ingredient.quantity} {ingredient.unit}</TableCell>
+              <TableCell>
+                <span className={ingredient.quantity <= 0 ? "text-red-500 font-medium" : ""}>
+                  {ingredient.quantity} {ingredient.unit}
+                </span>
+              </TableCell>
               <TableCell>{formatDate(ingredient.lastPurchaseDate)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

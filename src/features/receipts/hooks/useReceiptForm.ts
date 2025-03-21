@@ -44,11 +44,6 @@ export const useReceiptForm = ({ isCreateMode, receipt, onCancel }: UseReceiptFo
     return formData.items.reduce((total, item) => total + item.totalPrice, 0);
   };
   
-  const updateIngredientQuantities = (items: ReceiptItem[]) => {
-    // This function would update ingredient quantities based on receipt items
-    // For the FIFO implementation, we track remainingQuantity separately
-  };
-  
   const addReceiptItem = () => {
     if (ingredients.length === 0) {
       toast.error('Сначала добавьте ингредиенты');
@@ -171,7 +166,6 @@ export const useReceiptForm = ({ isCreateMode, receipt, onCancel }: UseReceiptFo
       toast.success('Поступление успешно обновлено');
     }
     
-    updateIngredientQuantities(formData.items);
     onCancel();
   };
 

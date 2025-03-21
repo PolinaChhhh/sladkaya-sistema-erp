@@ -37,9 +37,12 @@ export const useProductionState = () => {
     let totalCost = 0;
     
     recipeItems.forEach(item => {
-      const ingredient = ingredients.find(i => i.id === item.ingredientId);
-      if (ingredient) {
-        totalCost += (ingredient.cost * item.amount);
+      // Calculate based on ingredient or sub-recipe
+      if (item.type === 'ingredient' && item.ingredientId) {
+        const ingredient = ingredients.find(i => i.id === item.ingredientId);
+        if (ingredient) {
+          totalCost += (ingredient.cost * item.amount);
+        }
       }
     });
     
@@ -59,6 +62,39 @@ export const useProductionState = () => {
     if (formData.quantity <= 0) {
       toast.error('Количество должно быть больше 0');
       return;
+    }
+    
+    // Check if we have enough ingredients for production
+    const recipe = recipes.find(r => r.id === formData.recipeId);
+    if (recipe) {
+      const productionRatio = formData.quantity / recipe.output;
+      let insufficientIngredients = [];
+      
+      for (const item of recipe.items) {
+        if (item.type === 'ingredient' && item.ingredientId) {
+          const ingredient = ingredients.find(i => i.id === item.ingredientId);
+          if (ingredient) {
+            const requiredAmount = item.amount * productionRatio;
+            if (ingredient.quantity < requiredAmount) {
+              insufficientIngredients.push({
+                name: ingredient.name,
+                required: requiredAmount,
+                available: ingredient.quantity,
+                unit: ingredient.unit
+              });
+            }
+          }
+        }
+      }
+      
+      if (insufficientIngredients.length > 0) {
+        const warningMessage = insufficientIngredients.map(ing => 
+          `${ing.name}: требуется ${ing.required.toFixed(2)} ${ing.unit}, доступно ${ing.available.toFixed(2)} ${ing.unit}`
+        ).join('\n');
+        
+        toast.error(`Недостаточно ингредиентов:\n${warningMessage}`);
+        return;
+      }
     }
     
     const cost = calculateCost(formData.recipeId, formData.quantity);
