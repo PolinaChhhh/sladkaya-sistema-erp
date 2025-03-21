@@ -70,12 +70,6 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
     (sum, detail) => sum + detail.totalCost, 
     0
   );
-  
-  // Calculate total cost for all semi-finished products
-  const totalSemiFinalsCost = semiFinalsBreakdown.reduce(
-    (sum, semiFinal) => sum + semiFinal.cost,
-    0
-  );
 
   // Calculate cost per unit
   const costPerUnit = production.quantity > 0 
@@ -182,9 +176,8 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                             <ArrowDown className="h-4 w-4 text-gray-500" />
                             <span>{getRecipeName(semiFinal.recipeId)}</span>
                           </div>
-                          <div className="flex gap-4">
+                          <div>
                             <span>{semiFinal.amount.toFixed(2)} ед.</span>
-                            <span className="font-medium">{semiFinal.cost.toFixed(2)} ₽</span>
                           </div>
                         </div>
                       </div>
@@ -198,10 +191,6 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Стоимость ингредиентов:</span>
                   <span>{totalIngredientsCost.toFixed(2)} ₽</span>
-                </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="font-medium">Стоимость полуфабрикатов:</span>
-                  <span>{totalSemiFinalsCost.toFixed(2)} ₽</span>
                 </div>
                 <div className="flex justify-between items-center mt-2 text-lg">
                   <span className="font-bold">Общая себестоимость:</span>
