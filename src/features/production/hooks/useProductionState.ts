@@ -5,7 +5,7 @@ import { ProductionBatch } from '@/store/types';
 import { useProductionForm } from './useProductionForm';
 import { useProductionDialogs } from './useProductionDialogs';
 import { useProductionUtils } from './useProductionUtils';
-import { calculateTotalProductionCost } from '../utils/productionCalculator';
+import { calculateTotalProductionCost, calculateSemiFinishedCostBreakdown } from '../utils/productionCalculator';
 import { toast } from 'sonner';
 
 // Ключи для localStorage
@@ -117,6 +117,16 @@ export const useProductionState = () => {
     initialEditFormData: getInitialEditFormData()
   });
   
+  // Calculate semi-finished cost breakdown
+  const calculateSemiFinishedCosts = useCallback((production: ProductionBatch) => {
+    return calculateSemiFinishedCostBreakdown(
+      production.recipeId,
+      production.quantity,
+      recipes,
+      productions
+    );
+  }, [recipes, productions]);
+  
   // Оборачиваем setFormData чтобы сохранять в localStorage
   const setFormData = useCallback((data: any) => {
     originalSetFormData(data);
@@ -214,6 +224,7 @@ export const useProductionState = () => {
     openEditDialog,
     openDeleteDialog,
     calculateCost,
+    calculateSemiFinishedCosts,
     getRecipeName,
     getRecipeOutput,
     checkSemiFinalAvailability

@@ -62,6 +62,17 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
 
   const ingredientUsageDetails = getIngredientUsageDetails(production);
 
+  // Calculate total cost for all ingredients
+  const totalIngredientsCost = ingredientUsageDetails.reduce(
+    (sum, detail) => sum + detail.totalCost, 
+    0
+  );
+
+  // Calculate cost per unit
+  const costPerUnit = production.quantity > 0 
+    ? (production.cost / production.quantity).toFixed(2)
+    : '0.00';
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -94,7 +105,7 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
               
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-gray-500" />
-                <span>За единицу: {(production.cost / production.quantity).toFixed(2)} ₽/{recipe.outputUnit}</span>
+                <span>За единицу: {costPerUnit} ₽/{recipe.outputUnit}</span>
               </div>
             </div>
           </div>
@@ -156,21 +167,44 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                 <div className="space-y-2">
                   {recipe.items
                     .filter(item => item.type === 'recipe' && item.recipeId)
-                    .map((item, index) => (
-                      <div key={index} className="p-3 border border-gray-200 rounded-md">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <ArrowDown className="h-4 w-4 text-gray-500" />
-                            <span>{getRecipeName(item.recipeId || '')}</span>
-                          </div>
-                          <div>
-                            <span>{(item.amount * production.quantity / recipe.output).toFixed(2)} ед.</span>
+                    .map((item, index) => {
+                      const semiFinalAmount = item.amount * production.quantity / recipe.output;
+                      // Calculate the cost percentage this semifinal contributes to total
+                      const semiFinalCostEstimate = (production.cost * 0.7 / recipe.items.filter(i => i.type === 'recipe').length).toFixed(2);
+                      
+                      return (
+                        <div key={index} className="p-3 border border-gray-200 rounded-md">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <ArrowDown className="h-4 w-4 text-gray-500" />
+                              <span>{getRecipeName(item.recipeId || '')}</span>
+                            </div>
+                            <div className="flex gap-4">
+                              <span>{semiFinalAmount.toFixed(2)} ед.</span>
+                              <span className="font-medium">{semiFinalCostEstimate} ₽</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
+              
+              {/* Summary of costs */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Стоимость ингредиентов:</span>
+                  <span>{totalIngredientsCost.toFixed(2)} ₽</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="font-medium">Стоимость полуфабрикатов:</span>
+                  <span>{(production.cost - totalIngredientsCost).toFixed(2)} ₽</span>
+                </div>
+                <div className="flex justify-between items-center mt-2 text-lg">
+                  <span className="font-bold">Общая себестоимость:</span>
+                  <span className="font-bold">{production.cost.toFixed(2)} ₽</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
