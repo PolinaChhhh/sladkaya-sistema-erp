@@ -3,6 +3,7 @@ import { StateCreator } from 'zustand';
 import { ProductionBatch } from '../types';
 import { IngredientSlice } from './ingredientSlice';
 import { ReceiptSlice } from './receiptSlice';
+import { RecipeSlice } from './recipeSlice';
 import { consumeIngredientsWithFifo, restoreIngredientsToReceipts } from '../utils/fifoCalculator';
 
 export interface ProductionSlice {
@@ -12,7 +13,7 @@ export interface ProductionSlice {
   deleteProduction: (id: string) => void;
 }
 
-type StoreWithDependencies = IngredientSlice & ReceiptSlice;
+type StoreWithDependencies = IngredientSlice & ReceiptSlice & RecipeSlice;
 
 export const createProductionSlice: StateCreator<
   ProductionSlice & StoreWithDependencies,
