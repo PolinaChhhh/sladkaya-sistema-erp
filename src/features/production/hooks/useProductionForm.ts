@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Recipe, ProductionBatch } from '@/store/types';
 import { toast } from 'sonner';
@@ -15,6 +15,16 @@ interface UseProductionFormProps {
     canProduce: boolean; 
     insufficientItems: Array<{name: string, required: number, available: number, unit: string}> 
   };
+  initialFormData?: {
+    recipeId: string;
+    quantity: number;
+    date: string;
+    autoProduceSemiFinals: boolean;
+  } | null;
+  initialEditFormData?: {
+    quantity: number;
+    date: string;
+  } | null;
 }
 
 export const useProductionForm = ({
@@ -24,14 +34,16 @@ export const useProductionForm = ({
   addProduction,
   updateProduction,
   calculateCost,
-  checkSemiFinalAvailability
+  checkSemiFinalAvailability,
+  initialFormData = null,
+  initialEditFormData = null
 }: UseProductionFormProps) => {
   const [formData, setFormData] = useState<{
     recipeId: string;
     quantity: number;
     date: string;
     autoProduceSemiFinals: boolean;
-  }>({
+  }>(initialFormData || {
     recipeId: recipes.length > 0 ? recipes[0].id : '',
     quantity: 1,
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -41,12 +53,14 @@ export const useProductionForm = ({
   const [editFormData, setEditFormData] = useState<{
     quantity: number;
     date: string;
-  }>({
+  }>(initialEditFormData || {
     quantity: 1,
     date: format(new Date(), 'yyyy-MM-dd'),
   });
   
-  const handleCreateProduction = () => {
+  const handleCreateProduction = useCallback(() => {
+    console.log("Creating production with data:", formData);
+    
     if (!formData.recipeId) {
       toast.error('Выберите рецепт');
       return false;
@@ -149,10 +163,21 @@ export const useProductionForm = ({
     }
     
     toast.success('Запись о производстве добавлена');
+    
+    // Reset form after successful submission
+    setFormData({
+      recipeId: recipes.length > 0 ? recipes[0].id : '',
+      quantity: 1,
+      date: format(new Date(), 'yyyy-MM-dd'),
+      autoProduceSemiFinals: true,
+    });
+    
     return true;
-  };
+  }, [formData, recipes, ingredients, addProduction, calculateCost, checkSemiFinalAvailability]);
   
-  const handleEditProduction = (selectedProduction: ProductionBatch | null) => {
+  const handleEditProduction = useCallback((selectedProduction: ProductionBatch | null) => {
+    console.log("Editing production with data:", editFormData, "Selected production:", selectedProduction);
+    
     if (!selectedProduction) return false;
     
     if (editFormData.quantity <= 0) {
@@ -171,7 +196,7 @@ export const useProductionForm = ({
     
     toast.success('Запись о производстве обновлена');
     return true;
-  };
+  }, [editFormData, updateProduction, calculateCost]);
 
   return {
     formData,
