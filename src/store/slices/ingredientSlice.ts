@@ -16,7 +16,7 @@ export const createIngredientSlice: StateCreator<IngredientSlice> = (set) => ({
     ingredients: [...state.ingredients, { 
       ...ingredient, 
       id: crypto.randomUUID(),
-      type: ingredient.type || 'Основной' // Ensure type has a default
+      type: ingredient.type || 'Ингредиент' // Default type is now "Ингредиент"
     }]
   })),
   

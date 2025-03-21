@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { 
   Form,
   FormItem,
@@ -64,15 +63,6 @@ const IngredientForm: React.FC<IngredientFormProps> = ({
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Введите название ингредиента"
           />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="type-switch"
-            checked={formData.isSemiFinal}
-            onCheckedChange={(checked) => setFormData({ ...formData, isSemiFinal: checked })}
-          />
-          <Label htmlFor="type-switch">Полуфабрикат</Label>
         </div>
 
         <div className="grid gap-2">

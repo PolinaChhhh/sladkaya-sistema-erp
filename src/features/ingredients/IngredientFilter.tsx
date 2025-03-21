@@ -7,8 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface IngredientFilterProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filterType: 'all' | 'ingredient' | 'semifinal';
-  setFilterType: (type: 'all' | 'ingredient' | 'semifinal') => void;
   ingredientTypeFilter: string;
   setIngredientTypeFilter: (type: string) => void;
   ingredientTypes: string[];
@@ -17,8 +15,6 @@ interface IngredientFilterProps {
 const IngredientFilter: React.FC<IngredientFilterProps> = ({
   searchQuery,
   setSearchQuery,
-  filterType,
-  setFilterType,
   ingredientTypeFilter,
   setIngredientTypeFilter,
   ingredientTypes
@@ -35,17 +31,6 @@ const IngredientFilter: React.FC<IngredientFilterProps> = ({
         />
       </div>
       <div className="flex gap-2">
-        <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Тип ингредиента" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все категории</SelectItem>
-            <SelectItem value="ingredient">Ингредиенты</SelectItem>
-            <SelectItem value="semifinal">Полуфабрикаты</SelectItem>
-          </SelectContent>
-        </Select>
-        
         <Select value={ingredientTypeFilter} onValueChange={(value: any) => setIngredientTypeFilter(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Тип ингредиента" />

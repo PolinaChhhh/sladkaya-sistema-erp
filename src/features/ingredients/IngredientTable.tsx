@@ -10,7 +10,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Ingredient } from '@/store/recipeStore';
+import { Ingredient } from '@/store/types';
 import { format } from 'date-fns';
 
 interface IngredientTableProps {
@@ -38,7 +38,6 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Название</TableHead>
-            <TableHead>Категория</TableHead>
             <TableHead>Тип</TableHead>
             <TableHead>Стоимость</TableHead>
             <TableHead>Количество</TableHead>
@@ -51,22 +50,9 @@ const IngredientTable: React.FC<IngredientTableProps> = ({
             <TableRow key={ingredient.id}>
               <TableCell className="font-medium">{ingredient.name}</TableCell>
               <TableCell>
-                {ingredient.isSemiFinal ? (
-                  <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-mint-100 text-mint-800">
-                    Полуфабрикат
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-cream-100 text-cream-800">
-                    Ингредиент
-                  </span>
-                )}
-              </TableCell>
-              <TableCell>
-                {ingredient.type && (
-                  <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                    {ingredient.type}
-                  </span>
-                )}
+                <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                  {ingredient.type || 'Ингредиент'}
+                </span>
               </TableCell>
               <TableCell>{ingredient.cost.toFixed(2)} ₽/{ingredient.unit}</TableCell>
               <TableCell>

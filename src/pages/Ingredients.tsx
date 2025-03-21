@@ -12,12 +12,11 @@ import IngredientForm from '@/features/ingredients/IngredientForm';
 import DeleteConfirmDialog from '@/features/ingredients/DeleteConfirmDialog';
 import EmptyState from '@/features/ingredients/EmptyState';
 
-const DEFAULT_INGREDIENT_TYPES = ['Основной', 'Вспомогательный', 'Упаковка'];
+const DEFAULT_INGREDIENT_TYPE = 'Ингредиент';
 
 const Ingredients = () => {
   const { ingredients, addIngredient, updateIngredient, deleteIngredient } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'ingredient' | 'semifinal'>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -26,7 +25,7 @@ const Ingredients = () => {
   
   // Get unique ingredient types from existing ingredients
   const existingTypes = [...new Set(ingredients.map(ing => ing.type).filter(Boolean))];
-  const allIngredientTypes = [...DEFAULT_INGREDIENT_TYPES, ...existingTypes.filter(type => !DEFAULT_INGREDIENT_TYPES.includes(type))];
+  const allIngredientTypes = [DEFAULT_INGREDIENT_TYPE, ...existingTypes.filter(type => type !== DEFAULT_INGREDIENT_TYPE)];
   
   const [formData, setFormData] = useState<{
     name: string;
@@ -42,18 +41,15 @@ const Ingredients = () => {
     cost: 0,
     quantity: 0,
     isSemiFinal: false,
-    type: DEFAULT_INGREDIENT_TYPES[0],
+    type: DEFAULT_INGREDIENT_TYPE,
     customType: '',
   });
   
   const filteredIngredients = ingredients.filter(ingredient => {
     const matchesSearch = ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterType === 'all' ? true : 
-                            filterType === 'ingredient' ? !ingredient.isSemiFinal : 
-                            ingredient.isSemiFinal;
     const matchesType = ingredientTypeFilter === 'all' ? true : ingredient.type === ingredientTypeFilter;
     
-    return matchesSearch && matchesCategory && matchesType;
+    return matchesSearch && matchesType;
   });
   
   const initCreateForm = () => {
@@ -63,7 +59,7 @@ const Ingredients = () => {
       cost: 0,
       quantity: 0,
       isSemiFinal: false,
-      type: DEFAULT_INGREDIENT_TYPES[0],
+      type: DEFAULT_INGREDIENT_TYPE,
       customType: '',
     });
     setIsCreateDialogOpen(true);
@@ -77,7 +73,7 @@ const Ingredients = () => {
       cost: ingredient.cost,
       quantity: ingredient.quantity,
       isSemiFinal: ingredient.isSemiFinal,
-      type: ingredient.type || DEFAULT_INGREDIENT_TYPES[0],
+      type: ingredient.type || DEFAULT_INGREDIENT_TYPE,
       customType: '',
     });
     setIsEditDialogOpen(true);
@@ -153,8 +149,6 @@ const Ingredients = () => {
       <IngredientFilter 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        filterType={filterType}
-        setFilterType={setFilterType}
         ingredientTypeFilter={ingredientTypeFilter}
         setIngredientTypeFilter={setIngredientTypeFilter}
         ingredientTypes={allIngredientTypes}
