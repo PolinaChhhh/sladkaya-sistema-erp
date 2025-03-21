@@ -4,7 +4,7 @@ import { ShippingDocument } from '@/store/recipeStore';
 import ShippingItemRow from './ShippingItemRow';
 import ShippingTableHeader from './ShippingTableHeader';
 import ShippingTableFooter from './ShippingTableFooter';
-import { getAvailableQuantity, getProductName, getProductUnit } from '../../utils/shippingUtils';
+import { getProductName, getProductUnit, getProductsInStock } from '../../utils/shippingUtils';
 
 interface ShippingItemsTableProps {
   items: {
@@ -36,17 +36,23 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
     );
   }
 
-  console.log('Shipping items table:', { items, productions, shippings });
+  // Get all products in stock (grouped by recipe)
+  const productsInStock = getProductsInStock(productions, shippings, recipes);
+  
+  console.log('Shipping items table:', { items, groupedProducts: productsInStock });
 
   return (
     <div className="bg-white/70 rounded-lg border overflow-hidden">
       <ShippingTableHeader />
       
       {items.map((item, idx) => {
-        // Use the utility functions to get product details
-        const productName = getProductName(productions, recipes, item.productionBatchId);
-        const productUnit = getProductUnit(productions, recipes, item.productionBatchId);
-        const availableQuantity = getAvailableQuantity(productions, shippings, item.productionBatchId);
+        // Get product details from the grouped products
+        const productDetails = productsInStock.find(p => p.firstProductionBatchId === item.productionBatchId);
+        
+        // Use the utility functions or fallback to values from grouped products
+        const productName = productDetails?.recipeName || getProductName(productions, recipes, item.productionBatchId);
+        const productUnit = productDetails?.unit || getProductUnit(productions, recipes, item.productionBatchId);
+        const availableQuantity = productDetails?.availableQuantity || 0;
         
         console.log('Processing item:', { 
           item, 

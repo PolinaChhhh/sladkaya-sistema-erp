@@ -37,19 +37,21 @@ export const getAvailableQuantity = (
   return production.quantity - shippedQuantity;
 };
 
-// Get all products in stock (with positive available quantity)
+// Get all products in stock (with positive available quantity), grouped by recipe
 export const getProductsInStock = (
   productions: any[],
   shippings: ShippingDocument[],
   recipes: any[]
 ): { 
-  productionBatchId: string;
-  recipeName: string;
   recipeId: string;
+  recipeName: string;
   availableQuantity: number;
   unit: string;
   cost: number;
+  // Reference to the first production batch ID for this recipe (for compatibility)
+  firstProductionBatchId: string;
 }[] => {
+  // First calculate all available products
   const productsInStock = productions
     .map(production => {
       const recipe = recipes.find(r => r.id === production.recipeId);
@@ -75,6 +77,37 @@ export const getProductsInStock = (
     // Filter out products with zero or negative available quantity
     .filter(product => product.availableQuantity > 0);
   
-  console.log('Products in stock:', productsInStock);
-  return productsInStock;
+  // Now group by recipe name
+  const groupedProducts: Record<string, {
+    recipeId: string;
+    recipeName: string;
+    availableQuantity: number;
+    unit: string;
+    cost: number;
+    firstProductionBatchId: string;
+  }> = {};
+  
+  productsInStock.forEach(product => {
+    const recipeId = product.recipeId;
+    
+    if (!groupedProducts[recipeId]) {
+      groupedProducts[recipeId] = {
+        recipeId: product.recipeId,
+        recipeName: product.recipeName,
+        availableQuantity: product.availableQuantity,
+        unit: product.unit,
+        cost: product.cost,
+        firstProductionBatchId: product.productionBatchId
+      };
+    } else {
+      groupedProducts[recipeId].availableQuantity += product.availableQuantity;
+      // We use weighted average for the cost
+      groupedProducts[recipeId].cost = (groupedProducts[recipeId].cost * groupedProducts[recipeId].availableQuantity + 
+                                      product.cost * product.availableQuantity) / 
+                                      (groupedProducts[recipeId].availableQuantity + product.availableQuantity);
+    }
+  });
+  
+  console.log('Grouped products in stock:', Object.values(groupedProducts));
+  return Object.values(groupedProducts);
 };

@@ -42,7 +42,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   const priceWithVat = calculatePriceWithVat(item.price, item.vatRate);
   const amount = item.quantity * priceWithVat;
   
-  // Get products that are actually in stock
+  // Get products that are actually in stock, now grouped by recipe
   const productsInStock = getProductsInStock(productions, shippings, recipes);
 
   return (
@@ -58,8 +58,8 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
           <SelectContent>
             {productsInStock.map((product) => (
               <SelectItem 
-                key={product.productionBatchId} 
-                value={product.productionBatchId}
+                key={product.firstProductionBatchId} 
+                value={product.firstProductionBatchId}
               >
                 {product.recipeName}
               </SelectItem>

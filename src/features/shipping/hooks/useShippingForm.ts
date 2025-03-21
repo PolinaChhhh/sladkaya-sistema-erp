@@ -29,7 +29,7 @@ export const useShippingForm = (
   recipes: any[]
 ) => {
   const addShippingItem = () => {
-    // Get products that are actually in stock using the utility function
+    // Get products that are actually in stock, now grouped by recipe
     const productsInStock = getProductsInStock(productions, shippings, recipes);
     
     if (productsInStock.length === 0) {
@@ -42,7 +42,7 @@ export const useShippingForm = (
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
-        productionBatchId: firstProduct.productionBatchId, 
+        productionBatchId: firstProduct.firstProductionBatchId, 
         quantity: 1, 
         price: firstProduct.cost * 1.3, // Default 30% markup
         vatRate: 20, // Default VAT rate 20%
@@ -58,7 +58,7 @@ export const useShippingForm = (
     if (field === 'productionBatchId' && value !== newItems[index].productionBatchId) {
       // When changing product, update the price based on the new product's cost
       const productsInStock = getProductsInStock(productions, shippings, recipes);
-      const selectedProduct = productsInStock.find(p => p.productionBatchId === value);
+      const selectedProduct = productsInStock.find(p => p.firstProductionBatchId === value);
       
       if (selectedProduct) {
         newItems[index] = { 
