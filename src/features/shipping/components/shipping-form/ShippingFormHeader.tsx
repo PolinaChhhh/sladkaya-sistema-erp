@@ -1,12 +1,25 @@
 
 import React from 'react';
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const ShippingFormHeader: React.FC = () => {
+interface ShippingFormHeaderProps {
+  onAddItem: () => void;
+}
+
+const ShippingFormHeader: React.FC<ShippingFormHeaderProps> = ({ onAddItem }) => {
   return (
-    <DialogHeader>
-      <DialogTitle>Создание отгрузки</DialogTitle>
-    </DialogHeader>
+    <div className="flex justify-between items-center">
+      <h3 className="text-sm font-medium">Товары в отгрузке</h3>
+      <Button 
+        type="button" 
+        variant="outline" 
+        size="sm" 
+        onClick={onAddItem}
+      >
+        <Plus className="h-4 w-4 mr-1.5" /> Добавить товар
+      </Button>
+    </div>
   );
 };
 

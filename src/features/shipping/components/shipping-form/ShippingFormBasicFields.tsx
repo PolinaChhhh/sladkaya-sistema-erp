@@ -5,26 +5,38 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ShippingFormBasicFieldsProps {
-  buyerId: string;
-  date: string;
   buyers: any[];
-  onBuyerChange: (value: string) => void;
-  onDateChange: (value: string) => void;
+  formData: {
+    buyerId: string;
+    date: string;
+    items: any[];
+  };
+  setFormData: React.Dispatch<React.SetStateAction<{
+    buyerId: string;
+    date: string;
+    items: any[];
+  }>>;
 }
 
 const ShippingFormBasicFields: React.FC<ShippingFormBasicFieldsProps> = ({
-  buyerId,
-  date,
   buyers,
-  onBuyerChange,
-  onDateChange
+  formData,
+  setFormData
 }) => {
+  const onBuyerChange = (value: string) => {
+    setFormData(prev => ({ ...prev, buyerId: value }));
+  };
+
+  const onDateChange = (value: string) => {
+    setFormData(prev => ({ ...prev, date: value }));
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="buyer">Клиент</Label>
         <Select 
-          value={buyerId} 
+          value={formData.buyerId} 
           onValueChange={onBuyerChange}
         >
           <SelectTrigger id="buyer">
@@ -43,7 +55,7 @@ const ShippingFormBasicFields: React.FC<ShippingFormBasicFieldsProps> = ({
         <Input
           id="date"
           type="date"
-          value={date}
+          value={formData.date}
           onChange={(e) => onDateChange(e.target.value)}
         />
       </div>
