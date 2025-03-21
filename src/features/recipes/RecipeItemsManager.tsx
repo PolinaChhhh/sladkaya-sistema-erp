@@ -39,39 +39,39 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
 
   const addRecipeItem = () => {
     // For finished products, only allow recipe type (semi-finished products)
-    // For semi-finished products, default to ingredient type
-    const defaultType = category === 'finished' ? 'recipe' : 'ingredient';
-    
-    if (defaultType === 'ingredient' && ingredients.length === 0) {
-      toast.error('Сначала добавьте ингредиенты');
-      return;
-    }
-    
-    if (defaultType === 'recipe' && availableRecipes.length === 0) {
-      toast.error('Сначала создайте полуфабрикаты');
-      return;
-    }
-    
-    let newItem: RecipeItem;
-    
-    if (defaultType === 'ingredient') {
+    // For semi-finished products, only allow ingredient type
+    if (category === 'semi-finished') {
+      if (ingredients.length === 0) {
+        toast.error('Сначала добавьте ингредиенты');
+        return;
+      }
+      
       const defaultId = ingredients.length > 0 ? ingredients[0].id : '';
-      newItem = { 
+      const newItem: RecipeItem = { 
         type: 'ingredient', 
         ingredientId: defaultId, 
         amount: 0 
       };
+      
+      console.log('Added new ingredient item:', newItem);
+      onUpdateItems([...items, newItem]);
     } else {
+      // For finished products
+      if (availableRecipes.length === 0) {
+        toast.error('Сначала создайте полуфабрикаты');
+        return;
+      }
+      
       const defaultId = availableRecipes.length > 0 ? availableRecipes[0].id : '';
-      newItem = { 
+      const newItem: RecipeItem = { 
         type: 'recipe', 
         recipeId: defaultId, 
         amount: 0 
       };
+      
+      console.log('Added new recipe item:', newItem);
+      onUpdateItems([...items, newItem]);
     }
-    
-    console.log('Added new recipe item:', newItem);
-    onUpdateItems([...items, newItem]);
   };
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
@@ -117,8 +117,9 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
               getRecipeUnit={getRecipeUnit}
               onUpdate={updateRecipeItem}
               onRemove={removeRecipeItem}
-              allowRecipeItems={category === 'finished' ? false : true}
+              allowRecipeItems={false}
               forceRecipeItems={category === 'finished'}
+              forcedType={category === 'semi-finished' ? 'ingredient' : 'recipe'}
             />
           ))}
         </div>

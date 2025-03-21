@@ -21,6 +21,7 @@ interface RecipeItemRowProps {
   onRemove: (index: number) => void;
   allowRecipeItems?: boolean;
   forceRecipeItems?: boolean;
+  forcedType?: 'ingredient' | 'recipe';
 }
 
 const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
@@ -36,21 +37,34 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   onRemove,
   allowRecipeItems = false,
   forceRecipeItems = false,
+  forcedType,
 }) => {
   React.useEffect(() => {
-    // If we're forcing recipe items, make sure the type is set to recipe
-    if (forceRecipeItems && item.type !== 'recipe') {
+    // If we're forcing recipe items or have a forced type, ensure the type is set correctly
+    if (forcedType) {
+      if (item.type !== forcedType) {
+        onUpdate(index, 'type', forcedType);
+        
+        if (forcedType === 'ingredient' && ingredients.length > 0) {
+          onUpdate(index, 'ingredientId', ingredients[0].id);
+          onUpdate(index, 'recipeId', undefined);
+        } else if (forcedType === 'recipe' && recipes.length > 0) {
+          onUpdate(index, 'recipeId', recipes[0].id);
+          onUpdate(index, 'ingredientId', undefined);
+        }
+      }
+    } else if (forceRecipeItems && item.type !== 'recipe') {
       onUpdate(index, 'type', 'recipe');
       if (recipes.length > 0) {
         onUpdate(index, 'recipeId', recipes[0].id);
       }
       onUpdate(index, 'ingredientId', undefined);
     }
-  }, [forceRecipeItems, item.type, recipes, index, onUpdate]);
+  }, [forceRecipeItems, forcedType, item.type, recipes, ingredients, index, onUpdate]);
 
   const handleTypeChange = (type: 'ingredient' | 'recipe') => {
-    if (forceRecipeItems && type !== 'recipe') {
-      return; // Don't allow changing from recipe type if forced
+    if (forcedType || (forceRecipeItems && type !== 'recipe')) {
+      return; // Don't allow changing type if it's forced
     }
     
     onUpdate(index, 'type', type);
@@ -86,10 +100,13 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
     return '';
   };
 
+  // Determine which type we're displaying
+  const displayType = forcedType || (forceRecipeItems ? 'recipe' : item.type);
+
   return (
     <div className="bg-gray-50 p-3 rounded-md">
       <div className="space-y-2">
-        {allowRecipeItems && !forceRecipeItems && (
+        {allowRecipeItems && !forceRecipeItems && !forcedType && (
           <ToggleGroup type="single" value={item.type} 
             onValueChange={(value) => {
               if (value) handleTypeChange(value as 'ingredient' | 'recipe');
@@ -107,7 +124,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           </ToggleGroup>
         )}
         
-        {!forceRecipeItems && (item.type === 'ingredient' || !item.type) && (
+        {displayType === 'ingredient' && (
           <Select
             value={item.ingredientId || ''}
             onValueChange={handleIngredientChange}
@@ -125,7 +142,7 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
           </Select>
         )}
         
-        {(item.type === 'recipe' || forceRecipeItems) && (
+        {displayType === 'recipe' && (
           <Select
             value={item.recipeId || ''}
             onValueChange={handleRecipeChange}
