@@ -57,7 +57,8 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
     formData,
     setFormData,
     productions,
-    shippings
+    shippings,
+    recipes
   );
 
   const handleAddItem = () => {
