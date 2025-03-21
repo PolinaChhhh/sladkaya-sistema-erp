@@ -80,19 +80,14 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="in-stock">
-        <RecipeCategoryFilter 
-          categoryFilter={categoryFilter} 
-          onCategoryChange={setCategoryFilter} 
-        />
-        
         <InStockRecipes 
           recipes={recipes.filter(r => {
-            const matchesCategory = categoryFilter === 'all' || r.category === categoryFilter;
+            // Only filter by tags in the In-Stock tab, not by category
             const matchesTags = selectedTags.length === 0 || 
               (r.tags && selectedTags.every(tagId => 
                 r.tags.some(tag => tag.id === tagId)
               ));
-            return matchesCategory && matchesTags;
+            return matchesTags;
           })}
           productions={productions}
           getRecipeUnit={getRecipeUnit}
