@@ -41,7 +41,8 @@ const ProductionPage = () => {
     selectedProduction: detailProduction,
     selectedRecipe,
     getIngredientDetails,
-    getIngredientUsageDetails
+    getIngredientUsageDetails,
+    getSemiFinalBreakdown
   } = useProductionDetailsDialog();
 
   console.log("Create dialog open:", isCreateDialogOpen);
@@ -95,6 +96,7 @@ const ProductionPage = () => {
         getRecipeOutput={getRecipeOutput}
         getIngredientDetails={getIngredientDetails}
         getIngredientUsageDetails={getIngredientUsageDetails}
+        getSemiFinalBreakdown={getSemiFinalBreakdown}
       />
     </div>
   );

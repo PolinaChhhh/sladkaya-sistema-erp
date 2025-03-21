@@ -201,7 +201,7 @@ const ProductionDetailDialog: React.FC<ProductionDetailDialogProps> = ({
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <span className="font-medium">Стоимость полуфабрикатов:</span>
-                  <span>{totalSemiFinalsCount.toFixed(2)} ₽</span>
+                  <span>{totalSemiFinalsCost.toFixed(2)} ₽</span>
                 </div>
                 <div className="flex justify-between items-center mt-2 text-lg">
                   <span className="font-bold">Общая себестоимость:</span>

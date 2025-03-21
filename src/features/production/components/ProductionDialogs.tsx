@@ -56,6 +56,7 @@ interface ProductionDialogsProps {
   getRecipeOutput: (recipeId: string) => string;
   getIngredientDetails: (ingredientId: string) => any;
   getIngredientUsageDetails: (production: ProductionBatch) => any;
+  getSemiFinalBreakdown: (production: ProductionBatch) => { recipeId: string, amount: number, cost: number }[];
 }
 
 const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
@@ -90,7 +91,8 @@ const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
   getRecipeName,
   getRecipeOutput,
   getIngredientDetails,
-  getIngredientUsageDetails
+  getIngredientUsageDetails,
+  getSemiFinalBreakdown
 }) => {
   return (
     <>
@@ -133,6 +135,7 @@ const ProductionDialogs: React.FC<ProductionDialogsProps> = ({
         getIngredientDetails={getIngredientDetails}
         getRecipeName={getRecipeName}
         getIngredientUsageDetails={getIngredientUsageDetails}
+        getSemiFinalBreakdown={getSemiFinalBreakdown}
       />
     </>
   );
