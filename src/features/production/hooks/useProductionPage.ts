@@ -57,12 +57,13 @@ export const useProductionPage = () => {
   
   // Handle form submission with dialog management
   const handleCreateProduction = () => {
-    const success = operationsHandler.handleCreateProduction(formState.createFormData);
-    if (success) {
+    const result = operationsHandler.handleCreateProduction(formState.createFormData);
+    if (!result.error) {
       dialogState.setIsCreateDialogOpen(false);
       formState.resetCreateFormData();
+      return true;
     }
-    return success;
+    return false;
   };
   
   const handleEditProduction = () => {

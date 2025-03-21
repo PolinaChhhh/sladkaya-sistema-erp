@@ -12,12 +12,12 @@ export const useProductionOperationsHandler = (
   const handleCreateProduction = useCallback((formData: any) => {
     if (!formData.recipeId) {
       toast.error('Выберите рецепт');
-      return false;
+      return { error: true };
     }
     
     if (formData.quantity <= 0) {
       toast.error('Количество должно быть больше нуля');
-      return false;
+      return { error: true };
     }
     
     const result = addProduction(formData);
@@ -28,11 +28,11 @@ export const useProductionOperationsHandler = (
       } else {
         toast.error('Не удалось создать производство');
       }
-      return false;
+      return result;
     }
     
     toast.success('Производство создано');
-    return true;
+    return { error: false };
   }, [addProduction]);
   
   const handleEditProduction = useCallback((productionId: string, formData: any) => {
