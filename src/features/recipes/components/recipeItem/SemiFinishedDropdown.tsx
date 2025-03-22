@@ -47,12 +47,13 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
     }
   }, [open]);
 
-  // Filter recipes based on search query
-  const filteredRecipes = semiFinishedRecipes 
+  // Filter recipes based on search query, ensuring we always have an array
+  const filteredRecipes = Array.isArray(semiFinishedRecipes) 
     ? semiFinishedRecipes.filter(recipe => 
         recipe.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
 
+  // If no recipes are available, don't render the component
   if (!semiFinishedRecipes || semiFinishedRecipes.length === 0) {
     return null;
   }

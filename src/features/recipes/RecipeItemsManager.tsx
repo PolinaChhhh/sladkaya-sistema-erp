@@ -105,7 +105,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   // Get all semi-finished recipes (excluding the current one if editing)
   const semiFinishedRecipes = recipes.filter(
     recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
-  );
+  ) || [];
 
   const renderItems = () => {
     if (items.length === 0) {
