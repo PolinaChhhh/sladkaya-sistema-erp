@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
@@ -23,7 +23,7 @@ interface RecipeItemsManagerProps {
 const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   items,
   ingredients,
-  recipes = [], // Default to empty array
+  recipes = [],
   currentRecipeId,
   getIngredientName,
   getIngredientUnit,
@@ -48,19 +48,12 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
       isPackaging: false 
     };
       
-    console.log('Added new ingredient item:', newItem);
     onUpdateItems([...items, newItem]);
   };
   
   const updateRecipeItem = (index: number, field: keyof RecipeItem, value: any) => {
     const newItems = [...items];
-    
-    // Create a copy of the item to modify
     newItems[index] = { ...newItems[index], [field]: value };
-    
-    // Log the update for debugging
-    console.log(`Updated recipe item: ${index} ${String(field)} ${value}`, newItems[index]);
-    
     onUpdateItems(newItems);
   };
   
@@ -69,23 +62,12 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     onUpdateItems(newItems);
   };
 
-  // For finished products, only ingredients are allowed
-  // For semi-finished products, also only ingredients are allowed now
-  const allowRecipeItems = false;
-
   // Handle semi-finished selection with amount
   const handleAddSemiFinishedIngredients = (recipe: Recipe, amount: number) => {
-    if (!recipe) {
-      toast.error('Полуфабрикат не выбран');
+    if (!recipe || amount <= 0) {
+      toast.error('Укажите корректное количество полуфабриката');
       return;
     }
-    
-    if (amount <= 0) {
-      toast.error('Укажите количество больше нуля');
-      return;
-    }
-    
-    console.log(`Adding semi-finished: ${recipe.name} - ${amount}g`);
     
     // Expand the semi-finished recipe into its ingredient components
     const expandedIngredients = expandSemiFinishedToIngredients(
@@ -93,6 +75,11 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
       amount,
       recipes
     );
+
+    if (expandedIngredients.length === 0) {
+      toast.warning(`У полуфабриката "${recipe.name}" нет ингредиентов`);
+      return;
+    }
 
     // Add all expanded ingredients to the current recipe
     onUpdateItems([...items, ...expandedIngredients]);
@@ -102,44 +89,10 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     );
   };
 
-  // Ensure recipes is always an array before filtering
-  const recipesArray = Array.isArray(recipes) ? recipes : [];
-  
   // Get all semi-finished recipes (excluding the current one if editing)
-  const semiFinishedRecipes = recipesArray.filter(
+  const semiFinishedRecipes = recipes.filter(
     recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
   );
-
-  console.log("Available semi-finished recipes:", semiFinishedRecipes.length);
-
-  const renderItems = () => {
-    if (!items || items.length === 0) {
-      return <EmptyItemsMessage category={category} />;
-    }
-
-    return (
-      <div className="space-y-3 mt-3">
-        {items.map((item, index) => (
-          <RecipeItemRow
-            key={index}
-            item={item}
-            index={index}
-            ingredients={ingredients}
-            recipes={[]} // Empty array since we don't allow recipe items anymore for semi-finished
-            getIngredientName={getIngredientName}
-            getIngredientUnit={getIngredientUnit}
-            getRecipeName={getRecipeName}
-            getRecipeUnit={getRecipeUnit}
-            onUpdate={updateRecipeItem}
-            onRemove={removeRecipeItem}
-            allowRecipeItems={allowRecipeItems}
-            forceRecipeItems={false}
-            forcedType="ingredient" // Force all items to be ingredients
-          />
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-3 mt-2">
@@ -150,7 +103,29 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
         onSelectSemiFinished={handleAddSemiFinishedIngredients}
       />
       
-      {renderItems()}
+      {(!items || items.length === 0) ? (
+        <EmptyItemsMessage category={category} />
+      ) : (
+        <div className="space-y-3 mt-3">
+          {items.map((item, index) => (
+            <RecipeItemRow
+              key={index}
+              item={item}
+              index={index}
+              ingredients={ingredients}
+              recipes={[]} // We don't allow recipe items anymore
+              getIngredientName={getIngredientName}
+              getIngredientUnit={getIngredientUnit}
+              getRecipeName={getRecipeName}
+              getRecipeUnit={getRecipeUnit}
+              onUpdate={updateRecipeItem}
+              onRemove={removeRecipeItem}
+              allowRecipeItems={false}
+              forcedType="ingredient"
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Ingredient } from '@/store/types';
-import { Info } from 'lucide-react';
+import { PackageOpen } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -27,7 +27,7 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
         value={ingredientId || ''}
         onValueChange={onIngredientChange}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className={`w-full ${fromSemiFinished ? 'border-blue-200' : ''}`}>
           <SelectValue placeholder="Выберите ингредиент" />
         </SelectTrigger>
         <SelectContent>
@@ -44,7 +44,7 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="text-blue-500">
-                <Info size={16} />
+                <PackageOpen size={16} />
               </div>
             </TooltipTrigger>
             <TooltipContent>

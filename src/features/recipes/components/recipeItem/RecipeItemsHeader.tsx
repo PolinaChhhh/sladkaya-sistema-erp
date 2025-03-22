@@ -15,29 +15,25 @@ interface RecipeItemsHeaderProps {
 
 const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({
   category,
-  semiFinishedRecipes = [], // Default to empty array
+  semiFinishedRecipes = [],
   onAddItem,
   onSelectSemiFinished
 }) => {
-  // Make sure semiFinishedRecipes is always an array
-  const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
-  console.log("RecipeItemsHeader - Available semi-finished recipes:", recipes.length);
-  
   return (
-    <div className="flex flex-wrap justify-between items-center gap-2">
-      <Label className="min-w-[100px]">
+    <div className="flex flex-wrap items-center gap-2 justify-between">
+      <Label className="text-base font-medium">
         {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
       </Label>
-      <div className="flex flex-1 flex-wrap gap-2 justify-end">
-        {/* Always show the semi-finished dropdown for finished products */}
-        {recipes.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {/* Only show semi-finished dropdown for finished recipes */}
+        {category === 'finished' && semiFinishedRecipes.length > 0 && (
           <SemiFinishedDropdown 
-            semiFinishedRecipes={recipes} 
+            semiFinishedRecipes={semiFinishedRecipes} 
             onSelectRecipe={onSelectSemiFinished} 
           />
         )}
         <Button type="button" variant="outline" size="sm" onClick={onAddItem}>
-          <Plus className="h-3 w-3 mr-1" /> Добавить ингредиент
+          <Plus className="h-4 w-4 mr-1" /> Добавить ингредиент
         </Button>
       </div>
     </div>

@@ -1,11 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecipeItem, Recipe, Ingredient } from '@/store/types';
-import TypeSelector from './components/recipeItem/TypeSelector';
 import IngredientSelector from './components/recipeItem/IngredientSelector';
-import RecipeSelector from './components/recipeItem/RecipeSelector';
 import AmountInput from './components/recipeItem/AmountInput';
 
 interface RecipeItemRowProps {
@@ -39,50 +37,19 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   forceRecipeItems = false,
   forcedType,
 }) => {
-  // If forcedType is set, use it, otherwise respect the item's type or default to 'ingredient'
-  const effectiveType = forcedType || item.type || 'ingredient';
+  // The effective type is always ingredient in this simplified version
+  const effectiveType = 'ingredient';
 
-  React.useEffect(() => {
-    // If forcedType is set, we need to update the item type
-    if (forcedType && item.type !== forcedType) {
-      onUpdate(index, 'type', forcedType);
-    }
-    
+  useEffect(() => {
     // If we're forcing ingredient type, but no ingredient ID is set, set a default
-    if ((forcedType === 'ingredient' || effectiveType === 'ingredient') && !item.ingredientId && ingredients.length > 0) {
+    if (!item.ingredientId && ingredients.length > 0) {
       onUpdate(index, 'ingredientId', ingredients[0].id);
-      onUpdate(index, 'recipeId', undefined);
+      onUpdate(index, 'type', 'ingredient');
     }
-    
-    // If we're forcing recipe type, but no recipe ID is set, set a default
-    if ((forcedType === 'recipe' || effectiveType === 'recipe') && !item.recipeId && recipes.length > 0) {
-      onUpdate(index, 'recipeId', recipes[0].id);
-      onUpdate(index, 'ingredientId', undefined);
-    }
-  }, [forcedType, index, onUpdate, ingredients, recipes, item.type, item.ingredientId, item.recipeId, effectiveType]);
-
-  const handleTypeChange = (type: 'ingredient' | 'recipe') => {
-    onUpdate(index, 'type', type);
-    
-    if (type === 'ingredient') {
-      if (ingredients.length > 0) {
-        onUpdate(index, 'ingredientId', ingredients[0].id);
-      }
-      onUpdate(index, 'recipeId', undefined);
-    } else {
-      if (recipes.length > 0) {
-        onUpdate(index, 'recipeId', recipes[0].id);
-      }
-      onUpdate(index, 'ingredientId', undefined);
-    }
-  };
+  }, [index, onUpdate, ingredients, item.ingredientId]);
   
   const handleIngredientChange = (id: string) => {
     onUpdate(index, 'ingredientId', id);
-  };
-  
-  const handleRecipeChange = (id: string) => {
-    onUpdate(index, 'recipeId', id);
   };
   
   const handleAmountChange = (amount: number) => {
@@ -92,8 +59,6 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   const getDisplayUnit = () => {
     if (item.ingredientId) {
       return getIngredientUnit(item.ingredientId);
-    } else if (item.recipeId) {
-      return getRecipeUnit(item.recipeId);
     }
     return '';
   };
@@ -102,51 +67,31 @@ const RecipeItemRow: React.FC<RecipeItemRowProps> = ({
   const isFromSemiFinished = !!item.fromSemiFinished;
 
   return (
-    <div className={`p-3 rounded-md ${isFromSemiFinished ? 'bg-blue-50' : 'bg-gray-50'}`}>
-      <div className="space-y-2">
-        {/* Only show type selector if both recipe items are allowed AND not forced to a specific type */}
-        {allowRecipeItems && !forcedType && (
-          <TypeSelector 
-            type={effectiveType}
-            onTypeChange={handleTypeChange}
+    <div className={`p-3 rounded-md ${isFromSemiFinished ? 'bg-blue-50 border border-blue-100' : 'bg-gray-50'}`}>
+      <div className="flex items-center gap-2">
+        <div className="flex-grow">
+          <IngredientSelector 
+            ingredientId={item.ingredientId || ''}
+            ingredients={ingredients}
+            onIngredientChange={handleIngredientChange}
+            fromSemiFinished={item.fromSemiFinished}
           />
-        )}
-        
-        <div className="flex items-center gap-2">
-          <div className="flex-grow">
-            {effectiveType === 'ingredient' ? (
-              <IngredientSelector 
-                ingredientId={item.ingredientId || ''}
-                ingredients={ingredients}
-                onIngredientChange={handleIngredientChange}
-                fromSemiFinished={item.fromSemiFinished}
-              />
-            ) : (
-              allowRecipeItems && (
-                <RecipeSelector
-                  recipeId={item.recipeId || ''}
-                  recipes={recipes}
-                  onRecipeChange={handleRecipeChange}
-                />
-              )
-            )}
-          </div>
-          
-          <AmountInput 
-            amount={item.amount}
-            unit={getDisplayUnit()}
-            onAmountChange={handleAmountChange}
-          />
-          
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon"
-            onClick={() => onRemove(index)}
-          >
-            <X className="h-4 w-4 text-gray-500" />
-          </Button>
         </div>
+        
+        <AmountInput 
+          amount={item.amount}
+          unit={getDisplayUnit()}
+          onAmountChange={handleAmountChange}
+        />
+        
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="icon"
+          onClick={() => onRemove(index)}
+        >
+          <X className="h-4 w-4 text-gray-500" />
+        </Button>
       </div>
     </div>
   );

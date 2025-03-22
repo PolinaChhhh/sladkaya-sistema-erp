@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Recipe } from '@/store/types';
 import {
   Command,
@@ -14,12 +14,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { Check, Search, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { toast } from 'sonner';
 
 interface SemiFinishedDropdownProps {
   semiFinishedRecipes: Recipe[];
@@ -27,11 +27,10 @@ interface SemiFinishedDropdownProps {
 }
 
 const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({ 
-  semiFinishedRecipes = [], // Default to empty array
+  semiFinishedRecipes = [], 
   onSelectRecipe 
 }) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [amountDialogOpen, setAmountDialogOpen] = useState(false);
@@ -40,47 +39,31 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   // Create a safe reference to semiFinishedRecipes
   const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
   
-  // Log the original recipes and search query for debugging
-  console.log("Available recipes:", recipes.map(r => r.name));
-  console.log("Current search query:", searchQuery);
-  
-  // Filter recipes based on search query - fixed filtering logic
-  const filteredRecipes = searchQuery.trim() === "" 
-    ? recipes 
-    : recipes.filter(recipe => 
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-  
-  console.log("Filtered recipes:", filteredRecipes.map(r => r.name));
+  // Filter recipes based on search query
+  const filteredRecipes = recipes.filter(recipe => 
+    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const handleRecipeSelect = (recipeId: string) => {
-    // Find recipe by id from the list
-    const recipe = recipes.find(r => r.id === recipeId);
-    
-    if (recipe) {
-      console.log("Selected recipe:", recipe.name);
-      setSelectedRecipe(recipe);
-      setOpen(false);
-      // Не очищаем поисковый запрос чтобы пользователь видел что он выбрал
-      setAmountDialogOpen(true); // This opens the amount dialog
-    }
+  const handleRecipeSelect = (recipe: Recipe) => {
+    console.log("Selected recipe:", recipe.name);
+    setSelectedRecipe(recipe);
+    setOpen(false);
+    setAmountDialogOpen(true);
   };
 
   const handleAmountConfirm = () => {
     if (selectedRecipe) {
-      console.log(`Confirming amount: ${amount}g for ${selectedRecipe.name}`);
+      if (amount <= 0) {
+        toast.error('Укажите количество больше нуля');
+        return;
+      }
+      
+      console.log(`Adding ${selectedRecipe.name}: ${amount}g`);
       onSelectRecipe(selectedRecipe, amount);
       setAmountDialogOpen(false);
       setAmount(100); // Reset to default
       setSelectedRecipe(null);
-      setSearchQuery(""); // Clear search query after selection is complete
-    }
-  };
-
-  // Handle keyboard events
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setOpen(false);
+      setSearchQuery(""); // Clear search query
     }
   };
 
@@ -88,36 +71,36 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="relative w-[240px] justify-start">
-            <Search className="mr-2 h-4 w-4" />
-            {searchQuery ? searchQuery : "Поиск полуфабрикатов..."}
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            <span>Добавить полуфабрикат</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-[240px]" align="start">
-          <Command onKeyDown={handleKeyDown}>
+        <PopoverContent className="p-0 w-[300px]" align="start">
+          <Command>
             <CommandInput 
               placeholder="Поиск полуфабрикатов..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
-              className="h-9"
               autoFocus
             />
-            <CommandList>
+            <CommandList className="max-h-[300px]">
               <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
-              <CommandGroup className="max-h-60 overflow-y-auto">
+              <CommandGroup>
                 {filteredRecipes.map((recipe) => (
                   <CommandItem
                     key={recipe.id}
                     value={recipe.id}
-                    onSelect={handleRecipeSelect}
+                    onSelect={() => handleRecipeSelect(recipe)}
+                    className="flex items-center justify-between cursor-pointer"
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === recipe.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {recipe.name}
+                    <div className="flex items-center gap-2">
+                      <Package className="h-4 w-4 text-gray-500" />
+                      <span>{recipe.name}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {recipe.output} {recipe.outputUnit}
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -135,6 +118,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
             </DialogTitle>
             <DialogDescription>
               Укажите нужное количество полуфабриката для добавления в рецепт.
+              Система автоматически разложит полуфабрикат на ингредиенты.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -155,6 +139,12 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
                 step={10}
                 onValueChange={(value) => setAmount(value[0])} 
               />
+              
+              {selectedRecipe && (
+                <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+                  <p>Будут добавлены все ингредиенты из "{selectedRecipe.name}" с учетом указанного количества.</p>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -162,7 +152,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
               Отмена
             </Button>
             <Button onClick={handleAmountConfirm}>
-              Добавить
+              Добавить ингредиенты
             </Button>
           </DialogFooter>
         </DialogContent>
