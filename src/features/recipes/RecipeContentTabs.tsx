@@ -20,7 +20,7 @@ interface RecipeContentTabsProps {
   filteredRecipes: Recipe[];
   recipes: Recipe[];
   productions: ProductionBatch[];
-  shippings: ShippingDocument[]; // Added shippings property to the interface
+  shippings: ShippingDocument[]; 
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
@@ -40,7 +40,7 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
   filteredRecipes,
   recipes,
   productions,
-  shippings, // Added shippings to destructuring
+  shippings,
   onEdit,
   onDelete,
   getIngredientName,
@@ -90,15 +90,16 @@ const RecipeContentTabs: React.FC<RecipeContentTabsProps> = ({
         <TabsContent value="in-stock">
           <InStockRecipes 
             recipes={recipes.filter(r => {
-              // Only filter by tags in the In-Stock tab, not by category
+              // Filter by 'finished' category and tags
+              const isFinished = r.category === 'finished';
               const matchesTags = selectedTags.length === 0 || 
                 (r.tags && selectedTags.every(tagId => 
                   r.tags.some(tag => tag.id === tagId)
                 ));
-              return matchesTags;
+              return isFinished && matchesTags;
             })}
             productions={productions}
-            shippings={shippings} // Pass the shippings prop to InStockRecipes
+            shippings={shippings}
             getRecipeUnit={getRecipeUnit}
           />
         </TabsContent>

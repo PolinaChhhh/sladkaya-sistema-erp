@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { Package, Package2, History } from 'lucide-react';
 import { 
@@ -42,16 +43,18 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
     // Create a map to track produced and shipped quantities by recipe
     const stockMap: Record<string, StockItem> = {};
     
-    // Initialize with all recipes (even those with 0 quantity)
-    recipes.forEach(recipe => {
-      stockMap[recipe.id] = {
-        recipeId: recipe.id,
-        recipeName: recipe.name,
-        quantity: 0,
-        unit: getRecipeUnit(recipe.id),
-        lastProduced: recipe.lastProduced
-      };
-    });
+    // Initialize with only finished recipes (not semi-finished)
+    recipes
+      .filter(recipe => recipe.category === 'finished')
+      .forEach(recipe => {
+        stockMap[recipe.id] = {
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+          quantity: 0,
+          unit: getRecipeUnit(recipe.id),
+          lastProduced: recipe.lastProduced
+        };
+      });
     
     // Add all production quantities
     productions.forEach(production => {
@@ -85,8 +88,8 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
     return recipes.find(r => r.id === historyRecipeId) || null;
   }, [historyRecipeId, recipes]);
 
-  // If no recipes at all, show empty state
-  if (recipes.length === 0) {
+  // If no finished recipes at all, show empty state
+  if (recipes.filter(recipe => recipe.category === 'finished').length === 0) {
     return (
       <EmptyState 
         icon={Package}
