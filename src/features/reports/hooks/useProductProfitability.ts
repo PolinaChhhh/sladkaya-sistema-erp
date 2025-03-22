@@ -2,7 +2,6 @@
 import { useStore } from '@/store/recipeStore';
 import { useMemo, useState, useEffect } from 'react';
 import { ProfitabilityData } from '../types/reports';
-import { useMovementHistory } from '@/features/recipes/product-movement/useMovementHistory';
 import { MovementEvent } from '@/features/recipes/product-movement/types';
 
 export const useProductProfitability = () => {
@@ -17,7 +16,7 @@ export const useProductProfitability = () => {
     // Process all recipes
     recipes.forEach(recipe => {
       // Get movement history for this recipe
-      const movementHistory = useMovementHistoryCalculations(
+      const movementHistory = calculateMovementHistory(
         recipe,
         productions,
         shippings,
@@ -33,43 +32,40 @@ export const useProductProfitability = () => {
       // Skip if no shipments
       if (shipmentEvents.length === 0) return;
       
-      // Calculate total shipped quantity
-      const quantitySold = Math.abs(
-        shipmentEvents.reduce((sum, event) => sum + event.quantity, 0)
-      );
-      
-      // Calculate total revenue from shipments
-      const totalRevenue = shipmentEvents.reduce(
-        (sum, event) => sum + (Math.abs(event.quantity) * event.unitValue),
-        0
-      );
-      
-      // Calculate total cost from the shipped items based on their production events
-      // For each shipment, find the corresponding production events to calculate cost
+      // Initialize tracking variables
+      let totalRevenue = 0;
       let totalCost = 0;
+      let quantitySold = 0;
       
-      // Process each shipment
+      // Process each shipment event
       shipmentEvents.forEach(shipment => {
         const batchId = shipment.batchId;
         if (!batchId) return;
         
-        // Find the production event for this batch
+        // Get the production event for this batch
         const productionEvent = movementHistory.find(
           event => event.type === 'production' && event.batchId === batchId
         );
         
-        if (productionEvent) {
-          // Calculate the portion of the production cost that was shipped
-          const productionQuantity = productionEvent.quantity;
-          const shipmentQuantity = Math.abs(shipment.quantity);
-          const portionShipped = productionQuantity > 0 
-            ? shipmentQuantity / productionQuantity 
-            : 0;
-          
-          // Add the proportional cost to the total
-          totalCost += (productionEvent.unitValue * shipmentQuantity);
-        }
+        if (!productionEvent) return;
+        
+        // Get the absolute quantity from the shipment (shipment quantities are negative)
+        const shipmentQuantity = Math.abs(shipment.quantity);
+        
+        // Calculate revenue from this shipment
+        const shipmentRevenue = shipmentQuantity * shipment.unitValue;
+        totalRevenue += shipmentRevenue;
+        
+        // Calculate cost from the production batch's unit cost
+        const shipmentCost = shipmentQuantity * productionEvent.unitValue;
+        totalCost += shipmentCost;
+        
+        // Add to total quantity sold
+        quantitySold += shipmentQuantity;
       });
+      
+      // Skip if no quantity was sold
+      if (quantitySold === 0) return;
       
       // Calculate gross profit and profitability percentage
       const grossProfit = totalRevenue - totalCost;
@@ -113,9 +109,9 @@ export const useProductProfitability = () => {
 
 /**
  * Helper function to calculate movement history data for a recipe
- * This is derived from useMovementHistory but simplified for direct calculation
+ * This is derived from the original useMovementHistory but adapted for direct calculation
  */
-function useMovementHistoryCalculations(
+function calculateMovementHistory(
   recipe: { id: string, name: string } | null,
   productions: any[],
   shippings: any[],
@@ -139,11 +135,12 @@ function useMovementHistoryCalculations(
   
   events.push(...recipeProductions);
   
-  // Add shipment events
+  // Add shipment events, but only for finalized shipments (not drafts)
   shippings.forEach(shipping => {
     if (shipping.status === 'draft') return; // Skip drafts for reports
     
     shipping.items.forEach(item => {
+      // Find the related production to ensure it's for this recipe
       const relatedProduction = productions.find(p => p.id === item.productionBatchId);
       
       if (relatedProduction && relatedProduction.recipeId === recipe.id) {
