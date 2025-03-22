@@ -52,12 +52,13 @@ export const useShippingForm = (
     
     // Use the first (oldest) available batch
     const oldestBatch = availableBatches[0];
+    const maxQuantity = Math.min(oldestBatch.availableQuantity, 1); // Cap at 1 or available quantity if less
     
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
         productionBatchId: oldestBatch.productionBatchId,
-        quantity: 1, 
+        quantity: maxQuantity, 
         price: oldestBatch.unitCost * 1.3, // Default 30% markup based on actual unit cost
         vatRate: 20, // Default VAT rate 20%
       }],
@@ -79,16 +80,32 @@ export const useShippingForm = (
           ? selectedProduction.cost / selectedProduction.quantity 
           : 0;
         
+        // Find the available quantity for this production batch
+        const availableBatches = getAvailableProductionBatches(
+          productions,
+          shippings,
+          selectedProduction.recipeId
+        );
+        
+        const matchingBatch = availableBatches.find(b => b.productionBatchId === value);
+        const availableQty = matchingBatch ? matchingBatch.availableQuantity : 0;
+        
+        // Cap the quantity at the available amount
+        const newQuantity = Math.min(1, availableQty);
+        
         newItems[index] = { 
           ...newItems[index], 
           [field]: value,
           price: unitCost * 1.3, // Default 30% markup on actual unit cost
-          // Reset quantity to 1 when changing product
-          quantity: 1
+          quantity: newQuantity // Set to 1 or available quantity if less
         };
       } else {
         newItems[index] = { ...newItems[index], [field]: value };
       }
+    } else if (field === 'quantity') {
+      // For quantity, we need to verify that it doesn't exceed available quantity
+      // But this validation happens in the ShippingItemRow component
+      newItems[index] = { ...newItems[index], [field]: value };
     } else {
       newItems[index] = { ...newItems[index], [field]: value };
     }

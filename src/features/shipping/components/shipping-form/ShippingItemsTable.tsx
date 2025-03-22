@@ -4,7 +4,7 @@ import { ShippingDocument } from '@/store/recipeStore';
 import ShippingItemRow from './ShippingItemRow';
 import ShippingTableHeader from './ShippingTableHeader';
 import ShippingTableFooter from './ShippingTableFooter';
-import { getProductName, getProductUnit, getProductsInStock } from '../../utils/shippingUtils';
+import { getProductName, getProductUnit, getProductsInStock, getAvailableQuantity } from '../../utils/shippingUtils';
 
 interface ShippingItemsTableProps {
   items: {
@@ -46,19 +46,29 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
       <ShippingTableHeader />
       
       {items.map((item, idx) => {
-        // Get product details from the grouped products
-        const productDetails = productsInStock.find(p => p.firstProductionBatchId === item.productionBatchId);
+        // Find production and recipe
+        const production = productions.find(p => p.id === item.productionBatchId);
+        
+        // Get the recipeId from the production
+        const recipeId = production?.recipeId;
+        
+        // Get product details from the grouped products if available
+        const productDetails = recipeId
+          ? productsInStock.find(p => p.recipeId === recipeId)
+          : null;
+        
+        // Calculate precise available quantity for this specific production batch
+        const preciseAvailableQuantity = getAvailableQuantity(productions, shippings, item.productionBatchId);
         
         // Use the utility functions or fallback to values from grouped products
-        const productName = productDetails?.recipeName || getProductName(productions, recipes, item.productionBatchId);
-        const productUnit = productDetails?.unit || getProductUnit(productions, recipes, item.productionBatchId);
-        const availableQuantity = productDetails?.availableQuantity || 0;
+        const productName = getProductName(productions, recipes, item.productionBatchId);
+        const productUnit = getProductUnit(productions, recipes, item.productionBatchId);
         
         console.log('Processing item:', { 
           item, 
           productionId: item.productionBatchId,
           productName,
-          availableQuantity
+          availableQuantity: preciseAvailableQuantity
         });
         
         return (
@@ -66,7 +76,7 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
             key={idx}
             item={item}
             idx={idx}
-            availableQuantity={availableQuantity}
+            availableQuantity={preciseAvailableQuantity}
             productName={productName}
             productUnit={productUnit}
             updateShippingItem={updateShippingItem}

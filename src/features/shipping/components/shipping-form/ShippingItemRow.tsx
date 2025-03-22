@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShippingDocument } from '@/store/recipeStore';
 import { vatRateOptions } from '../../hooks/useShippingForm';
 import { calculatePriceWithVat } from '../../hooks/useShipmentsList';
-import { getProductsInStock, getAvailableProductionBatches } from '../../utils/shippingUtils';
+import { getProductsInStock, getAvailableProductionBatches, getAvailableQuantity } from '../../utils/shippingUtils';
+import { toast } from 'sonner';
 
 interface ShippingItemRowProps {
   item: {
@@ -43,11 +44,22 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   const amount = item.quantity * priceWithVat;
   
   // Get products that are actually in stock, grouped by recipe
-  const productsInStock = getProductsInStock(productions, shippings, recipes);
+  const productsInStock = useMemo(() => {
+    return getProductsInStock(productions, shippings, recipes);
+  }, [productions, shippings, recipes]);
+  
+  // Get selected production batch
+  const selectedProduction = useMemo(() => {
+    return productions.find(p => p.id === item.productionBatchId);
+  }, [productions, item.productionBatchId]);
   
   // Get selected product recipe ID
-  const selectedProduction = productions.find(p => p.id === item.productionBatchId);
   const selectedRecipeId = selectedProduction?.recipeId;
+  
+  // Get precise available quantity for the selected production batch
+  const preciseAvailableQuantity = useMemo(() => {
+    return getAvailableQuantity(productions, shippings, item.productionBatchId);
+  }, [productions, shippings, item.productionBatchId]);
   
   // Get all available production batches for the selected recipe
   const availableBatches = useMemo(() => {
@@ -57,14 +69,44 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   
   // Handle quantity validation to respect available stock
   const handleQuantityChange = (newQuantity: number) => {
-    // Make sure we don't exceed available stock
-    const validQuantity = Math.min(newQuantity, availableQuantity);
+    // Ensure we get a valid number
+    const parsedQuantity = newQuantity < 0 ? 0 : newQuantity;
     
-    if (validQuantity !== newQuantity) {
-      console.log(`Limiting quantity to available stock: ${validQuantity} (requested: ${newQuantity})`);
+    // Make sure we don't exceed available stock
+    const validQuantity = Math.min(parsedQuantity, preciseAvailableQuantity);
+    
+    if (validQuantity !== parsedQuantity && parsedQuantity > 0) {
+      console.log(`Limiting quantity to available stock: ${validQuantity} (requested: ${parsedQuantity})`);
+      toast.warning(`Доступно только ${validQuantity} ${productUnit} товара "${productName}"`);
     }
     
     updateShippingItem(idx, 'quantity', validQuantity);
+  };
+  
+  // Handle production batch change
+  const handleBatchChange = (newBatchId: string) => {
+    if (newBatchId === item.productionBatchId) return;
+    
+    // Get available quantity for the new batch
+    const newBatchAvailability = getAvailableQuantity(productions, shippings, newBatchId);
+    
+    // Update the production batch ID
+    updateShippingItem(idx, 'productionBatchId', newBatchId);
+    
+    // Reset quantity to 1 or to the max available if less than 1
+    const newQuantity = Math.min(1, newBatchAvailability);
+    updateShippingItem(idx, 'quantity', newQuantity);
+    
+    // Update price based on the production's unit cost
+    const newProduction = productions.find(p => p.id === newBatchId);
+    if (newProduction) {
+      // Calculate the unit cost from the production's total cost and quantity
+      const unitCost = newProduction.quantity > 0 
+        ? newProduction.cost / newProduction.quantity 
+        : 0;
+      
+      updateShippingItem(idx, 'price', unitCost * 1.3); // Default 30% markup
+    }
   };
 
   return (
@@ -72,7 +114,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
       <div className="col-span-3">
         <Select 
           value={item.productionBatchId} 
-          onValueChange={(value) => updateShippingItem(idx, 'productionBatchId', value)}
+          onValueChange={handleBatchChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Выберите товар" />
@@ -91,17 +133,20 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
       </div>
       
       <div className="col-span-1 text-center">
-        <span className="font-medium whitespace-nowrap">{availableQuantity} {productUnit}</span>
+        <span className={`font-medium whitespace-nowrap ${preciseAvailableQuantity === 0 ? "text-red-500" : ""}`}>
+          {preciseAvailableQuantity} {productUnit}
+        </span>
       </div>
       
       <div className="col-span-1">
         <Input
           type="number"
           min="1"
-          max={availableQuantity}
+          max={preciseAvailableQuantity}
           value={item.quantity}
           onChange={(e) => handleQuantityChange(Number(e.target.value))}
           className="text-center"
+          disabled={preciseAvailableQuantity === 0}
         />
       </div>
       
