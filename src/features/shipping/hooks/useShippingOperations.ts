@@ -57,9 +57,12 @@ export const useShippingOperations = ({
       
       toast.success('Отгрузка удалена');
       setIsDeleteConfirmOpen(false);
+      
+      // Return the result to maintain type compatibility
+      return result;
     }
     
-    // Return the result for type compatibility
+    // If there's no selected shipping, return an empty object to satisfy the type
     return {};
   };
   
