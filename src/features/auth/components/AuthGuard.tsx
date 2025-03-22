@@ -13,6 +13,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [checkComplete, setCheckComplete] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   // Добавляем логирование для отладки
   useEffect(() => {
@@ -20,7 +21,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
   }, [user, profile, isLoading]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading || loadingTimeout) {
       if (!user) {
         console.log('No user found, redirecting to /auth');
         navigate('/auth', { state: { from: location.pathname } });
@@ -40,7 +41,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
       }
       setCheckComplete(true);
     }
-  }, [user, profile, isLoading, navigate, location.pathname, requiredRole]);
+  }, [user, profile, isLoading, navigate, location.pathname, requiredRole, loadingTimeout]);
 
   // Добавляем таймаут, чтобы не зависать бесконечно в состоянии загрузки
   useEffect(() => {
@@ -48,15 +49,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
     if (isLoading) {
       timer = setTimeout(() => {
         console.log('AuthGuard loading timeout reached');
+        setLoadingTimeout(true);
         setCheckComplete(true);
-      }, 5000);
+      }, 3000); // Уменьшаем таймаут до 3 секунд
     }
     return () => {
       if (timer) clearTimeout(timer);
     };
   }, [isLoading]);
 
-  if (isLoading) {
+  if (isLoading && !loadingTimeout) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-confection-500"></div>

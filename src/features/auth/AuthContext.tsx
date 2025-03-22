@@ -102,6 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state
   useEffect(() => {
+    let isMounted = true;
+    
     const initializeAuth = async () => {
       console.log('Initializing auth...');
       
@@ -109,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // First check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session) {
+        if (session && isMounted) {
           console.log('Existing session found:', session.user.id);
           const profile = await fetchUserProfile(session.user.id);
           setState({
@@ -118,13 +120,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             profile,
             isLoading: false,
           });
-        } else {
+        } else if (isMounted) {
           console.log('No session found');
           setState({ ...initialState, isLoading: false });
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        setState({ ...initialState, isLoading: false });
+        if (isMounted) {
+          setState({ ...initialState, isLoading: false });
+        }
       }
     };
 
@@ -135,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
         
-        if (session) {
+        if (session && isMounted) {
           try {
             const profile = await fetchUserProfile(session.user.id);
             setState({
@@ -146,20 +150,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
           } catch (error) {
             console.error('Error during auth state change:', error);
-            setState({
-              user: session.user,
-              session,
-              profile: null,
-              isLoading: false,
-            });
+            if (isMounted) {
+              setState({
+                user: session.user,
+                session,
+                profile: null,
+                isLoading: false,
+              });
+            }
           }
-        } else {
+        } else if (isMounted) {
           setState({ ...initialState, isLoading: false });
         }
       }
     );
 
+    // Таймаут безопасности на случай, если состояние загрузки зависнет
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted && state.isLoading) {
+        console.log('Safety timeout triggered: resetting loading state');
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
+    }, 5000);
+
     return () => {
+      isMounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -167,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Signing in:', email);
-      setState({ ...state, isLoading: true });
+      setState(prev => ({ ...prev, isLoading: true }));
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -189,14 +205,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast.error(error.message || 'Не удалось войти в систему');
-      setState({ ...state, isLoading: false });
+      setState(prev => ({ ...prev, isLoading: false }));
+      throw error; // Прокидываем ошибку, чтобы форма могла её обработать
     }
   };
 
   const signOut = async () => {
     try {
       console.log('Signing out');
-      setState({ ...state, isLoading: true });
+      setState(prev => ({ ...prev, isLoading: true }));
       await supabase.auth.signOut();
       setState({ ...initialState, isLoading: false });
       toast.success('Вы успешно вышли из системы');
@@ -204,7 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       console.error('Sign out error:', error);
       toast.error(error.message || 'Не удалось выйти из системы');
-      setState({ ...state, isLoading: false });
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 

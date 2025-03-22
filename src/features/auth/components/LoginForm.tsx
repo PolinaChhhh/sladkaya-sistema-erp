@@ -20,6 +20,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 const LoginForm: React.FC = () => {
   const { signIn, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [formLoading, setFormLoading] = useState<boolean>(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,12 +32,18 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (values: LoginFormValues) => {
     setError(null);
+    setFormLoading(true);
     try {
       await signIn(values.email, values.password);
     } catch (error: any) {
       setError(error.message || 'Не удалось войти в систему');
+    } finally {
+      setFormLoading(false);
     }
   };
+
+  // Используем локальное состояние загрузки для формы
+  const isFormDisabled = formLoading;
 
   return (
     <Form {...form}>
@@ -59,7 +66,7 @@ const LoginForm: React.FC = () => {
                   placeholder="you@example.com" 
                   {...field} 
                   autoComplete="email"
-                  disabled={isLoading}
+                  disabled={isFormDisabled}
                 />
               </FormControl>
               <FormMessage />
@@ -79,7 +86,7 @@ const LoginForm: React.FC = () => {
                   placeholder="••••••••" 
                   {...field} 
                   autoComplete="current-password"
-                  disabled={isLoading}
+                  disabled={isFormDisabled}
                 />
               </FormControl>
               <FormMessage />
@@ -92,17 +99,17 @@ const LoginForm: React.FC = () => {
             type="button" 
             variant="link" 
             className="px-0 text-confection-600"
-            disabled={isLoading}
+            disabled={isFormDisabled}
           >
             Забыли пароль?
           </Button>
           
           <Button 
             type="submit" 
-            disabled={isLoading}
+            disabled={isFormDisabled}
             className="bg-confection-500 hover:bg-confection-600"
           >
-            {isLoading ? 'Вход...' : 'Войти'}
+            {isFormDisabled ? 'Вход...' : 'Войти'}
           </Button>
         </div>
       </form>
