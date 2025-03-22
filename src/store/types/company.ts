@@ -7,6 +7,7 @@ export type Company = {
   email?: string;
   address?: string;
   tin?: string; // Tax Identification Number (ИНН)
+  kpp?: string; // Tax Registration Reason Code (КПП)
   legalAddress?: string;
   physicalAddress?: string;
   bankDetails?: string;
