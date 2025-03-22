@@ -1,4 +1,3 @@
-
 import { useStore } from '@/store/recipeStore';
 import { useMemo, useState, useEffect } from 'react';
 import { ProfitabilityData } from '../types/reports';
@@ -12,7 +11,7 @@ export const useProductProfitability = () => {
     // Create a map to aggregate data by recipe ID
     const productMap = new Map<string, ProfitabilityData>();
     
-    // First, log all productions to see what should be in the report
+    // First, log all productions for debugging
     console.log('All productions:');
     productions.forEach(p => {
       const recipe = recipes.find(r => r.id === p.recipeId);
@@ -48,7 +47,6 @@ export const useProductProfitability = () => {
         const revenue = priceWithVat * item.quantity;
         
         // Get the unit cost from the production - use the ACTUAL production cost
-        // This is critical for accuracy - we need to use the exact cost from the production batch
         const unitCost = production.quantity > 0 ? production.cost / production.quantity : 0;
         const cost = unitCost * item.quantity;
         
@@ -104,29 +102,6 @@ export const useProductProfitability = () => {
     // Log all products in the report
     console.log(`Products in profitability report: ${Array.from(productMap.keys()).length}`);
     console.log(`Recipe IDs in report: ${Array.from(productMap.keys()).join(', ')}`);
-    
-    // Log all recipes with production to help debugging
-    console.log('All recipes with productions:');
-    const allProducedRecipes = new Set(productions.map(p => p.recipeId));
-    recipes
-      .filter(r => allProducedRecipes.has(r.id))
-      .forEach(r => {
-        console.log(`Recipe: ${r.name} (${r.id})`);
-      });
-    
-    // Also log all shipped products with their production batches
-    console.log('All shipped items:');
-    shippings.forEach(shipping => {
-      if (shipping.status !== 'draft') {
-        shipping.items.forEach(item => {
-          const production = productions.find(p => p.id === item.productionBatchId);
-          if (production) {
-            const recipe = recipes.find(r => r.id === production.recipeId);
-            console.log(`Shipped: ${recipe?.name || 'Unknown'}, productionId: ${item.productionBatchId}, recipeId: ${production.recipeId}, quantity: ${item.quantity}`);
-          }
-        });
-      }
-    });
     
     // Convert the map to an array and sort by profitability (descending)
     return Array.from(productMap.values())

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShippingDocument } from '@/store/recipeStore';
 import { vatRateOptions } from '../../hooks/useShippingForm';
 import { calculatePriceWithVat } from '../../hooks/useShipmentsList';
-import { getProductsInStock } from '../../utils/shippingUtils';
+import { getProductsInStock, getAvailableProductionBatches } from '../../utils/shippingUtils';
 
 interface ShippingItemRowProps {
   item: {
@@ -42,8 +42,30 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   const priceWithVat = calculatePriceWithVat(item.price, item.vatRate);
   const amount = item.quantity * priceWithVat;
   
-  // Get products that are actually in stock, now grouped by recipe
+  // Get products that are actually in stock, grouped by recipe
   const productsInStock = getProductsInStock(productions, shippings, recipes);
+  
+  // Get selected product recipe ID
+  const selectedProduction = productions.find(p => p.id === item.productionBatchId);
+  const selectedRecipeId = selectedProduction?.recipeId;
+  
+  // Get all available production batches for the selected recipe
+  const availableBatches = useMemo(() => {
+    if (!selectedRecipeId) return [];
+    return getAvailableProductionBatches(productions, shippings, selectedRecipeId);
+  }, [selectedRecipeId, productions, shippings]);
+  
+  // Handle quantity validation to respect available stock
+  const handleQuantityChange = (newQuantity: number) => {
+    // Make sure we don't exceed available stock
+    const validQuantity = Math.min(newQuantity, availableQuantity);
+    
+    if (validQuantity !== newQuantity) {
+      console.log(`Limiting quantity to available stock: ${validQuantity} (requested: ${newQuantity})`);
+    }
+    
+    updateShippingItem(idx, 'quantity', validQuantity);
+  };
 
   return (
     <div className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center">
@@ -61,7 +83,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
                 key={product.firstProductionBatchId} 
                 value={product.firstProductionBatchId}
               >
-                {product.recipeName}
+                {product.recipeName} ({product.availableQuantity} {product.unit})
               </SelectItem>
             ))}
           </SelectContent>
@@ -78,7 +100,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
           min="1"
           max={availableQuantity}
           value={item.quantity}
-          onChange={(e) => updateShippingItem(idx, 'quantity', Number(e.target.value))}
+          onChange={(e) => handleQuantityChange(Number(e.target.value))}
           className="text-center"
         />
       </div>

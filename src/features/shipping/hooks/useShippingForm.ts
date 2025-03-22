@@ -1,7 +1,7 @@
 
 import { Dispatch, SetStateAction } from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
-import { getProductsInStock } from '../utils/shippingUtils';
+import { getProductsInStock, getAvailableProductionBatches } from '../utils/shippingUtils';
 
 export const useShippingForm = (
   formData: {
@@ -39,12 +39,26 @@ export const useShippingForm = (
     // Select the first product in stock for the new item
     const firstProduct = productsInStock[0];
     
+    // Find the oldest production batch with available quantity for this recipe (FIFO)
+    const availableBatches = getAvailableProductionBatches(
+      productions,
+      shippings,
+      firstProduct.recipeId
+    );
+    
+    if (availableBatches.length === 0) {
+      return { error: 'Нет доступных партий продукта' };
+    }
+    
+    // Use the first (oldest) available batch
+    const oldestBatch = availableBatches[0];
+    
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
-        productionBatchId: firstProduct.firstProductionBatchId, 
+        productionBatchId: oldestBatch.productionBatchId,
         quantity: 1, 
-        price: firstProduct.cost * 1.3, // Default 30% markup
+        price: oldestBatch.unitCost * 1.3, // Default 30% markup based on actual unit cost
         vatRate: 20, // Default VAT rate 20%
       }],
     }));
@@ -56,15 +70,21 @@ export const useShippingForm = (
     const newItems = [...formData.items];
     
     if (field === 'productionBatchId' && value !== newItems[index].productionBatchId) {
-      // When changing product, update the price based on the new product's cost
-      const productsInStock = getProductsInStock(productions, shippings, recipes);
-      const selectedProduct = productsInStock.find(p => p.firstProductionBatchId === value);
+      // When changing product, update the price based on the production's unit cost
+      const selectedProduction = productions.find(p => p.id === value);
       
-      if (selectedProduct) {
+      if (selectedProduction) {
+        // Calculate the unit cost from the production's total cost and quantity
+        const unitCost = selectedProduction.quantity > 0 
+          ? selectedProduction.cost / selectedProduction.quantity 
+          : 0;
+        
         newItems[index] = { 
           ...newItems[index], 
           [field]: value,
-          price: selectedProduct.cost * 1.3 // Default 30% markup when changing product
+          price: unitCost * 1.3, // Default 30% markup on actual unit cost
+          // Reset quantity to 1 when changing product
+          quantity: 1
         };
       } else {
         newItems[index] = { ...newItems[index], [field]: value };
