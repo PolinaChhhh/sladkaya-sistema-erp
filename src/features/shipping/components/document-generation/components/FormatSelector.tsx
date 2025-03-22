@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, FileSpreadsheet } from 'lucide-react';
+import { FileSpreadsheet, FilePdf } from 'lucide-react';
 
 interface FormatSelectorProps {
-  documentFormat: 'word' | 'excel';
-  setDocumentFormat: (format: 'word' | 'excel') => void;
+  documentFormat: 'pdf' | 'excel';
+  setDocumentFormat: (format: 'pdf' | 'excel') => void;
   isGenerating: boolean;
 }
 
@@ -19,13 +19,13 @@ const FormatSelector: React.FC<FormatSelectorProps> = ({
       <label className="text-sm font-medium">Формат документа</label>
       <Tabs 
         value={documentFormat} 
-        onValueChange={(value) => setDocumentFormat(value as 'word' | 'excel')}
+        onValueChange={(value) => setDocumentFormat(value as 'pdf' | 'excel')}
         className="w-full"
       >
         <TabsList className="grid grid-cols-2 w-full">
-          <TabsTrigger value="word" disabled={isGenerating}>
-            <FileText className="h-4 w-4 mr-2" />
-            Word
+          <TabsTrigger value="pdf" disabled={isGenerating}>
+            <FilePdf className="h-4 w-4 mr-2" />
+            PDF
           </TabsTrigger>
           <TabsTrigger value="excel" disabled={isGenerating}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />

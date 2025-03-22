@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useStore } from '@/store/recipeStore';
@@ -6,8 +7,7 @@ import {
   prepareDocumentData, 
   generateDocument, 
   downloadDocument, 
-  buildDocumentFileName,
-  setDocumentTemplate
+  buildDocumentFileName
 } from '../../../services/document-generator';
 
 export const useDocumentGeneration = (
@@ -17,8 +17,7 @@ export const useDocumentGeneration = (
   const { buyers, productions, recipes, updateShippingDocument } = useStore();
   const [documentType, setDocumentType] = useState<RussianDocumentType>('TORG12');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [documentFormat, setDocumentFormat] = useState<'word' | 'excel'>('excel');
-  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [documentFormat, setDocumentFormat] = useState<'pdf' | 'excel'>('excel');
   
   // Find the buyer for this shipping
   const buyer = buyers.find(b => b.id === shipping.buyerId);
@@ -32,11 +31,6 @@ export const useDocumentGeneration = (
     setIsGenerating(true);
     
     try {
-      // If template file is provided, set it first
-      if (templateFile) {
-        await setDocumentTemplate(documentType, templateFile);
-      }
-      
       // Prepare data for document generation
       const documentData = prepareDocumentData(shipping, buyer, productions, recipes);
       
@@ -52,7 +46,7 @@ export const useDocumentGeneration = (
       // Update the shipping record to mark document as generated
       updateShippingDocument(shipping.id, documentType, true);
       
-      toast.success(`Документ успешно создан в формате ${documentFormat === 'word' ? 'Word' : 'Excel'}`);
+      toast.success(`Документ успешно создан в формате ${documentFormat === 'pdf' ? 'PDF' : 'Excel'}`);
       onDialogClose();
     } catch (error) {
       console.error('Error generating document:', error);
@@ -70,8 +64,6 @@ export const useDocumentGeneration = (
     isGenerating,
     documentFormat,
     setDocumentFormat,
-    templateFile,
-    setTemplateFile,
     handleDocumentGeneration,
     canGenerate,
     buyer

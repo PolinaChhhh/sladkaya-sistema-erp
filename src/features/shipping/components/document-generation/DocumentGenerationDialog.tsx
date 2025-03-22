@@ -6,7 +6,6 @@ import { ShippingDocument } from '@/store/types/shipping';
 import { useDocumentGeneration } from './hooks/useDocumentGeneration';
 import { 
   DocumentSelector,
-  DocumentUploader, 
   FormatSelector, 
   DocumentGenerationButton,
   DocumentAlerts 
@@ -29,8 +28,6 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
     isGenerating,
     documentFormat,
     setDocumentFormat,
-    templateFile,
-    setTemplateFile,
     handleDocumentGeneration,
     canGenerate
   } = useDocumentGeneration(shipping, () => onOpenChange(false));
@@ -53,12 +50,6 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
             disabled={isGenerating}
           />
           
-          <DocumentUploader 
-            templateFile={templateFile}
-            setTemplateFile={setTemplateFile}
-            isGenerating={isGenerating}
-          />
-          
           <FormatSelector 
             documentFormat={documentFormat}
             setDocumentFormat={setDocumentFormat}
@@ -67,7 +58,6 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
           
           <DocumentAlerts 
             documentType={documentType}
-            templateFile={templateFile}
             canGenerate={canGenerate}
           />
         </div>
