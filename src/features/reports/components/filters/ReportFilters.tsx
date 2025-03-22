@@ -84,14 +84,14 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
       <div className="flex flex-col space-y-2">
         <label className="text-sm font-medium">Product</label>
         <Select
-          value={selectedRecipeId || ''}
-          onValueChange={(value) => setSelectedRecipeId(value === '' ? null : value)}
+          value={selectedRecipeId || 'all'}
+          onValueChange={(value) => setSelectedRecipeId(value === 'all' ? null : value)}
         >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All products" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All products</SelectItem>
+            <SelectItem value="all">All products</SelectItem>
             {recipes.map((recipe) => (
               <SelectItem key={recipe.id} value={recipe.id}>
                 {recipe.name}
