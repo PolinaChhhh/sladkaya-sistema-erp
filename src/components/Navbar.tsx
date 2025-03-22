@@ -1,17 +1,21 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BarChart3, Building2 } from 'lucide-react';
+import { Menu, X, BarChart3, Building2, LogOut, User } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 import { Dialog } from '@/components/ui/dialog';
 import CompanyDialog from '@/features/company/CompanyDialog';
 import CompanyDetails from '@/features/company/CompanyDetails';
+import { useAuth } from '@/features/auth/AuthContext';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
   const location = useLocation();
   const { company } = useStore();
+  const { user, profile, signOut } = useAuth();
 
   const navigation = [
     { name: 'Главная', path: '/' },
@@ -58,6 +62,26 @@ const Navbar: React.FC = () => {
               <Building2 className="h-4 w-4 mr-1.5" />
               {company ? 'Наша компания' : 'Добавить компанию'}
             </button>
+
+            {/* User dropdown menu */}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center text-gray-700 hover:bg-gray-100">
+                    <User className="h-4 w-4 mr-1.5" />
+                    {profile?.full_name || user.email}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           
           {/* Mobile menu button */}
@@ -102,6 +126,20 @@ const Navbar: React.FC = () => {
                 <Building2 className="h-4 w-4 mr-1.5" />
                 {company ? 'Наша компания' : 'Добавить компанию'}
               </button>
+
+              {/* Logout button for mobile */}
+              {user && (
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    signOut();
+                  }}
+                  className="w-full text-left block px-3 py-2 rounded-md text-base font-medium flex items-center text-gray-700 hover:bg-gray-100"
+                >
+                  <LogOut className="h-4 w-4 mr-1.5" />
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         )}

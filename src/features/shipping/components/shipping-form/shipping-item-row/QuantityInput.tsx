@@ -49,6 +49,11 @@ const QuantityInput: React.FC<QuantityInputProps> = ({
           Превышение доступного количества
         </p>
       )}
+      {availableQuantity === 0 && (
+        <p className="text-xs text-amber-500 mt-1">
+          Нет в наличии
+        </p>
+      )}
     </div>
   );
 };

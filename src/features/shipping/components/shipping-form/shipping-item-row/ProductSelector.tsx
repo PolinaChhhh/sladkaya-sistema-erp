@@ -52,6 +52,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
             <SelectItem 
               key={product.recipeId} 
               value={product.recipeId}
+              disabled={product.availableQuantity <= 0}
             >
               {product.recipeName} ({product.availableQuantity} {product.unit})
             </SelectItem>
