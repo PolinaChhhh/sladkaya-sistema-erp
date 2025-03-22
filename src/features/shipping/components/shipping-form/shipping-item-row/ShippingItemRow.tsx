@@ -92,7 +92,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center">
+    <div className="grid grid-cols-12 gap-2 p-3 text-sm border-t border-gray-100 items-center hover:bg-gray-50">
       <ProductSelector 
         selectedProductionBatchId={item.productionBatchId}
         onProductChange={handleBatchChange}

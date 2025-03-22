@@ -12,7 +12,7 @@ interface DialogBodyProps {
       quantity: number;
       price: number;
       vatRate: number;
-      productName?: string; // Make optional to match our type change
+      productName?: string;
     }[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -23,7 +23,7 @@ interface DialogBodyProps {
       quantity: number;
       price: number;
       vatRate: number;
-      productName?: string; // Make optional to match our type change
+      productName?: string;
     }[];
   }>>;
   buyers: any[];
@@ -47,31 +47,33 @@ const DialogBody: React.FC<DialogBodyProps> = ({
   removeShippingItem
 }) => {
   return (
-    <div className="my-4 space-y-6">
-      <ShippingFormHeader
-        onAddItem={() => {
-          const result = addShippingItem();
-          if (result.error) {
-            // Could use toast here
-            alert(result.error);
-          }
-        }}
-      />
-      
+    <div className="grid gap-6 py-4">
       <ShippingFormBasicFields
         buyers={buyers}
         formData={formData}
         setFormData={setFormData}
       />
       
-      <ShippingItemsTable
-        items={formData.items}
-        productions={productions}
-        recipes={recipes}
-        shippings={shippings}
-        updateShippingItem={updateShippingItem}
-        removeShippingItem={removeShippingItem}
-      />
+      <div className="space-y-2">
+        <ShippingFormHeader
+          onAddItem={() => {
+            const result = addShippingItem();
+            if (result.error) {
+              // Could use toast here
+              alert(result.error);
+            }
+          }}
+        />
+        
+        <ShippingItemsTable
+          items={formData.items}
+          productions={productions}
+          recipes={recipes}
+          shippings={shippings}
+          updateShippingItem={updateShippingItem}
+          removeShippingItem={removeShippingItem}
+        />
+      </div>
     </div>
   );
 };

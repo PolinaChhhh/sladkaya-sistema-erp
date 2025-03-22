@@ -42,55 +42,48 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
     const confirmedShipments = shippings.filter(s => s.status !== 'draft');
     return getProductsInStock(productions, confirmedShipments, recipes);
   }, [productions, shippings, recipes]);
-  
-  console.log('Shipping items table:', { items, groupedProducts: productsInStock });
 
   return (
-    <div className="bg-white/70 rounded-lg border overflow-hidden">
+    <div className="border rounded-lg overflow-hidden">
       <ShippingTableHeader />
       
-      {items.map((item, idx) => {
-        // Find production and recipe
-        const production = productions.find(p => p.id === item.productionBatchId);
-        
-        // Get the recipeId from the production
-        const recipeId = production?.recipeId;
-        
-        // Get product details from the grouped products if available
-        const productDetails = recipeId
-          ? productsInStock.find(p => p.recipeId === recipeId)
-          : null;
-        
-        // Use total available quantity from grouped products
-        const totalAvailableQuantity = productDetails?.availableQuantity || 0;
-        
-        // Get product name and unit
-        const productName = getProductName(productions, recipes, item.productionBatchId);
-        const productUnit = getProductUnit(productions, recipes, item.productionBatchId);
-        
-        console.log('Processing item:', { 
-          item, 
-          productionId: item.productionBatchId,
-          productName,
-          totalAvailableQuantity
-        });
-        
-        return (
-          <ShippingItemRow
-            key={idx}
-            item={item}
-            idx={idx}
-            availableQuantity={totalAvailableQuantity} // Use the total available quantity
-            productName={productName}
-            productUnit={productUnit}
-            updateShippingItem={updateShippingItem}
-            removeShippingItem={removeShippingItem}
-            productions={productions}
-            recipes={recipes}
-            shippings={shippings}
-          />
-        );
-      })}
+      <div className="max-h-[400px] overflow-y-auto">
+        {items.map((item, idx) => {
+          // Find production and recipe
+          const production = productions.find(p => p.id === item.productionBatchId);
+          
+          // Get the recipeId from the production
+          const recipeId = production?.recipeId;
+          
+          // Get product details from the grouped products if available
+          const productDetails = recipeId
+            ? productsInStock.find(p => p.recipeId === recipeId)
+            : null;
+          
+          // Use total available quantity from grouped products
+          const totalAvailableQuantity = productDetails?.availableQuantity || 0;
+          
+          // Get product name and unit
+          const productName = getProductName(productions, recipes, item.productionBatchId);
+          const productUnit = getProductUnit(productions, recipes, item.productionBatchId);
+          
+          return (
+            <ShippingItemRow
+              key={idx}
+              item={item}
+              idx={idx}
+              availableQuantity={totalAvailableQuantity} // Use the total available quantity
+              productName={productName}
+              productUnit={productUnit}
+              updateShippingItem={updateShippingItem}
+              removeShippingItem={removeShippingItem}
+              productions={productions}
+              recipes={recipes}
+              shippings={shippings}
+            />
+          );
+        })}
+      </div>
       
       <ShippingTableFooter items={items} />
     </div>

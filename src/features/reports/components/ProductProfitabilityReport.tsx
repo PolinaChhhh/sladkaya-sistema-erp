@@ -28,7 +28,7 @@ const ProductProfitabilityReport: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Анализ валовой прибыли по продуктам</h2>
         <div className="text-sm text-muted-foreground">
-          Данные основаны на фактических отгрузках
+          Данные на основе фактических отгрузок
         </div>
       </div>
       

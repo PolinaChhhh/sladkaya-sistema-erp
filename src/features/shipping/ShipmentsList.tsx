@@ -36,7 +36,7 @@ const ShipmentsList = () => {
   } = useShipmentsList();
   
   return (
-    <div>
+    <div className="animate-fade-in">
       <ShippingHeader 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

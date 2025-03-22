@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 interface ShippingFormHeaderProps {
   onAddItem: () => void;
@@ -9,15 +9,14 @@ interface ShippingFormHeaderProps {
 
 const ShippingFormHeader: React.FC<ShippingFormHeaderProps> = ({ onAddItem }) => {
   return (
-    <div className="flex justify-between items-center">
-      <h3 className="text-sm font-medium">Товары в отгрузке</h3>
+    <div className="flex justify-between items-center mb-2">
+      <h3 className="text-base font-medium">Товары для отгрузки</h3>
       <Button 
-        type="button" 
-        variant="outline" 
+        onClick={onAddItem} 
         size="sm" 
-        onClick={onAddItem}
+        className="bg-blue-600 hover:bg-blue-700"
       >
-        <Plus className="h-4 w-4 mr-1.5" /> Добавить товар
+        <PlusCircle className="h-4 w-4 mr-1" /> Добавить товар
       </Button>
     </div>
   );

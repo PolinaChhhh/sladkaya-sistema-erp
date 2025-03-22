@@ -30,8 +30,6 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     return production?.recipeId;
   }, [selectedProductionBatchId, productions]);
 
-  console.log('Consolidated products for selection:', consolidatedProducts);
-
   return (
     <div className="col-span-3">
       <Select 
@@ -44,10 +42,10 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
           }
         }}
       >
-        <SelectTrigger>
+        <SelectTrigger className="h-9">
           <SelectValue placeholder="Выберите товар" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-[300px]">
           {consolidatedProducts.map((product) => (
             <SelectItem 
               key={product.recipeId} 

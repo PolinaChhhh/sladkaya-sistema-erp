@@ -18,8 +18,8 @@ const ShippingHeader: React.FC<ShippingHeaderProps> = ({
   canCreateShipment
 }) => {
   return (
-    <div className="flex justify-between items-center mb-6">
-      <div className="relative w-64">
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 pb-4 border-b">
+      <div className="relative w-full sm:w-64">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
         <Input 
           placeholder="Поиск по клиентам..." 
@@ -30,7 +30,7 @@ const ShippingHeader: React.FC<ShippingHeaderProps> = ({
       </div>
       <Button 
         onClick={onCreateClick} 
-        className="bg-blue-600 hover:bg-blue-700"
+        className="w-full sm:w-auto"
         disabled={!canCreateShipment}
       >
         <Plus className="h-4 w-4 mr-2" /> Создать отгрузку

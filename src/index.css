@@ -35,7 +35,7 @@
     --input: 240 5.9% 90%;
     --ring: 142.1 76.2% 36.3%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   body {
@@ -82,5 +82,45 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* Global styles for UI consistency */
+@layer components {
+  /* Form layout consistency */
+  .form-grid {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2;
+  }
+  
+  .form-group {
+    @apply space-y-2;
+  }
+  
+  /* Consistent field styles */
+  .field-label {
+    @apply text-sm font-medium text-gray-700;
+  }
+  
+  /* Table styles */
+  .table-header {
+    @apply bg-slate-100 text-sm font-medium text-gray-600 rounded-t-md;
+  }
+  
+  .table-row {
+    @apply border-t border-gray-100 hover:bg-gray-50;
+  }
+  
+  .table-footer {
+    @apply bg-slate-50 border-t text-sm font-medium;
+  }
+  
+  /* Dropdown improvements */
+  .select-content {
+    @apply max-h-[300px] min-w-[180px] z-50;
+  }
+  
+  /* Fix for dropdown content */
+  [data-radix-popper-content-wrapper] {
+    @apply z-50 !important;
   }
 }

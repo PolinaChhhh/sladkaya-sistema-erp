@@ -20,10 +20,10 @@ const VatRateSelector: React.FC<VatRateSelectorProps> = ({
         value={String(vatRate)}
         onValueChange={(value) => onChange(index, 'vatRate', Number(value))}
       >
-        <SelectTrigger className="text-center">
+        <SelectTrigger className="h-9 justify-center min-w-[70px]">
           <SelectValue placeholder="НДС %" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="center" className="min-w-[80px]">
           {vatRateOptions.map((option) => (
             <SelectItem key={option.value} value={String(option.value)}>
               {option.label}

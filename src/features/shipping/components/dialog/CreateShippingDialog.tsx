@@ -57,7 +57,7 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Редактировать отгрузку' : 'Создать отгрузку'}</DialogTitle>
         </DialogHeader>
@@ -74,11 +74,11 @@ const CreateShippingDialog: React.FC<CreateShippingDialogProps> = ({
           removeShippingItem={removeShippingItem}
         />
         
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Отмена
           </Button>
-          <Button onClick={onSubmit}>
+          <Button type="submit" onClick={onSubmit}>
             {isEditing ? 'Сохранить' : 'Создать'}
           </Button>
         </DialogFooter>
