@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
 import ShippingItemRow from './shipping-item-row';
 import ShippingTableHeader from './ShippingTableHeader';
 import ShippingTableFooter from './ShippingTableFooter';
-import { getProductName, getProductUnit, getProductsInStock, getAvailableQuantity } from '../../utils/shippingUtils';
+import { getProductName, getProductUnit, getProductsInStock } from '../../utils/shippingUtils';
 
 interface ShippingItemsTableProps {
   items: {
@@ -56,13 +57,10 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
           ? productsInStock.find(p => p.recipeId === recipeId)
           : null;
         
-        // Use total recipe quantity instead of just the batch quantity
+        // Use total available quantity from grouped products
         const totalAvailableQuantity = productDetails?.availableQuantity || 0;
         
-        // Also get precise batch quantity for validation
-        const preciseAvailableQuantity = getAvailableQuantity(productions, shippings, item.productionBatchId);
-        
-        // Use the utility functions or fallback to values from grouped products
+        // Get product name and unit
         const productName = getProductName(productions, recipes, item.productionBatchId);
         const productUnit = getProductUnit(productions, recipes, item.productionBatchId);
         
@@ -70,7 +68,6 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
           item, 
           productionId: item.productionBatchId,
           productName,
-          batchAvailableQuantity: preciseAvailableQuantity,
           totalAvailableQuantity
         });
         
@@ -79,8 +76,7 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
             key={idx}
             item={item}
             idx={idx}
-            availableQuantity={totalAvailableQuantity} // Use total quantity for display
-            preciseAvailableQuantity={preciseAvailableQuantity} // Pass batch quantity for validation
+            availableQuantity={totalAvailableQuantity} // Use the total available quantity
             productName={productName}
             productUnit={productUnit}
             updateShippingItem={updateShippingItem}

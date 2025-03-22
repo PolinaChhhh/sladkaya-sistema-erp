@@ -52,8 +52,8 @@ export const useShippingForm = (
     // Use the first (oldest) available batch for the initial reference
     const oldestBatch = availableBatches[0];
     
-    // Instead of capping at 1, allow using the full quantity available for this recipe
-    const initialQuantity = Math.min(firstProduct.availableQuantity, 1); // Start with 1 but allow more
+    // Start with just 1 unit, but allow more based on total available quantity
+    const initialQuantity = 1;
     
     setFormData(prev => ({
       ...prev,

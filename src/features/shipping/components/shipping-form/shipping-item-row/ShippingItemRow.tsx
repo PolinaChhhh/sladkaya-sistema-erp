@@ -14,7 +14,6 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   item,
   idx,
   availableQuantity,
-  preciseAvailableQuantity,
   productName,
   productUnit,
   updateShippingItem,
