@@ -1,0 +1,339 @@
+
+/* Стили для печатной формы УПД */
+.upd-print-container {
+  font-family: 'Arial', sans-serif;
+  font-size: 10px;
+  color: #000;
+  width: 210mm;
+  margin: 0 auto;
+  padding: 10mm;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+/* Header */
+.upd-header {
+  margin-bottom: 20px;
+}
+
+.upd-title-container {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.upd-title-section {
+  display: flex;
+  width: 80px;
+}
+
+.upd-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.upd-status {
+  font-size: 8px;
+  margin-left: 10px;
+}
+
+.upd-status p {
+  margin: 0;
+  padding: 0;
+}
+
+.upd-document-number {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.upd-document-number h2 {
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.upd-correction {
+  font-size: 10px;
+  margin: 5px 0 0 0;
+}
+
+.upd-reference-numbers {
+  width: 30px;
+  text-align: right;
+}
+
+.upd-reference-numbers p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Info Section */
+.upd-info-section {
+  font-size: 9px;
+}
+
+.upd-info-row {
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.upd-label {
+  width: 25%;
+  font-weight: bold;
+}
+
+.upd-value {
+  width: 70%;
+}
+
+.upd-reference {
+  width: 5%;
+  text-align: right;
+}
+
+/* Table */
+.upd-table-section {
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.upd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8px;
+}
+
+.upd-table th, 
+.upd-table td {
+  border: 1px solid #000;
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.upd-table th {
+  background-color: #f5f5f5;
+  font-weight: normal;
+}
+
+.upd-table thead th {
+  font-size: 7px;
+}
+
+.upd-column-indices td {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+
+.upd-table tbody td:nth-child(2) {
+  text-align: left;
+}
+
+.upd-total-label {
+  text-align: right;
+  font-weight: bold;
+}
+
+/* Signatures */
+.upd-signatures {
+  margin: 20px 0;
+}
+
+.upd-signature-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.upd-signature-section p {
+  margin: 0 0 5px 0;
+}
+
+.upd-signature-line {
+  display: flex;
+  margin: 5px 0;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+}
+
+.upd-signature-placeholder {
+  width: 150px;
+  color: #888;
+  font-style: italic;
+}
+
+.upd-signature-name {
+  margin-left: 20px;
+}
+
+.upd-signature-description {
+  display: flex;
+  font-size: 8px;
+  color: #666;
+}
+
+.upd-signature-description span:first-child {
+  width: 150px;
+}
+
+/* Footer */
+.upd-footer {
+  margin-top: 20px;
+}
+
+.upd-foundation,
+.upd-transportation {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.upd-foundation p,
+.upd-transportation p {
+  margin: 0;
+}
+
+.upd-foundation-value,
+.upd-transportation-value {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  margin: 0 5px;
+}
+
+.upd-transfer-receive {
+  display: flex;
+  margin-top: 20px;
+}
+
+.upd-transfer,
+.upd-receive {
+  width: 50%;
+}
+
+.upd-transfer h3,
+.upd-receive h3 {
+  font-size: 11px;
+  text-align: center;
+  margin: 0 0 10px 0;
+}
+
+.upd-receive-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upd-receive-title p {
+  margin: 0;
+  font-weight: bold;
+}
+
+.upd-transfer-row {
+  display: flex;
+  margin: 5px 0;
+  align-items: center;
+}
+
+.upd-transfer-label {
+  width: 30%;
+  font-size: 9px;
+}
+
+.upd-transfer-value {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  min-height: 16px;
+}
+
+.upd-transfer-signature-placeholder {
+  font-style: italic;
+  color: #888;
+  margin-right: 10px;
+  font-size: 9px;
+}
+
+.upd-transfer-description {
+  font-size: 7px;
+  color: #666;
+  font-style: italic;
+}
+
+.upd-responsible,
+.upd-entity {
+  margin-top: 10px;
+}
+
+.upd-responsible p,
+.upd-entity p {
+  margin: 5px 0;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+/* EDO Section */
+.upd-edo-section {
+  margin-top: 40px;
+  position: relative;
+}
+
+.upd-doc-id {
+  text-align: right;
+  font-size: 8px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.upd-edo-info {
+  border: 1px solid #000;
+  padding: 10px;
+  position: relative;
+}
+
+.upd-edo-title {
+  text-align: center;
+  font-weight: bold;
+  color: #0056b3;
+  margin: 0 0 15px 0;
+  font-size: 12px;
+}
+
+.upd-edo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.upd-edo-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.upd-edo-label {
+  font-size: 8px;
+  color: #666;
+}
+
+.upd-edo-value {
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.upd-edo-cert-icon {
+  color: #0056b3;
+}
+
+/* Печатные стили */
+@media print {
+  .upd-print-container {
+    padding: 0;
+    width: 100%;
+  }
+  
+  @page {
+    margin: 10mm;
+    size: A4 portrait;
+  }
+}
