@@ -55,7 +55,7 @@ export const useMovementHistory = (
         if (!dateFilter) return true;
         
         const eventDate = new Date(event.date);
-        return format(eventDate, 'yyyy-MM-dd').includes(dateFilter);
+        return formatDate(eventDate).includes(dateFilter);
       });
   }, [recipe, productions, shippings, dateFilter]);
 
@@ -63,6 +63,6 @@ export const useMovementHistory = (
 };
 
 // Helper function to format date
-const format = (date: Date, formatString: string) => {
+const formatDate = (date: Date): string => {
   return date.toISOString().split('T')[0]; // Simple YYYY-MM-DD format
 };

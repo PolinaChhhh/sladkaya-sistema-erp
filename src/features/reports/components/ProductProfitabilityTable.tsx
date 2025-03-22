@@ -9,9 +9,17 @@ interface ProductProfitabilityTableProps {
 }
 
 const getProfitabilityColor = (profitability: number): string => {
-  if (profitability < 50) return 'bg-red-50';
-  if (profitability < 60) return 'bg-yellow-50';
+  if (profitability < 0) return 'bg-red-100';
+  if (profitability < 20) return 'bg-red-50';
+  if (profitability < 50) return 'bg-yellow-50';
   return 'bg-green-50';
+};
+
+const formatNumber = (value: number): string => {
+  return value.toLocaleString('ru-RU', { 
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 };
 
 const ProductProfitabilityTable: React.FC<ProductProfitabilityTableProps> = ({ data }) => {
@@ -35,11 +43,21 @@ const ProductProfitabilityTable: React.FC<ProductProfitabilityTableProps> = ({ d
               className={cn(getProfitabilityColor(item.profitabilityPercent))}
             >
               <TableCell className="font-medium">{item.productName}</TableCell>
-              <TableCell className="text-right">{item.quantitySold.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{item.totalCost.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{item.totalRevenue.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{item.grossProfit.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{item.profitabilityPercent.toFixed(2)}%</TableCell>
+              <TableCell className="text-right">{formatNumber(item.quantitySold)} {item.unit}</TableCell>
+              <TableCell className="text-right">{formatNumber(item.totalCost)}</TableCell>
+              <TableCell className="text-right">{formatNumber(item.totalRevenue)}</TableCell>
+              <TableCell className="text-right" className={cn(
+                "text-right",
+                item.grossProfit < 0 ? "text-red-600 font-medium" : ""
+              )}>
+                {formatNumber(item.grossProfit)}
+              </TableCell>
+              <TableCell className="text-right" className={cn(
+                "text-right",
+                item.profitabilityPercent < 0 ? "text-red-600 font-medium" : ""
+              )}>
+                {formatNumber(item.profitabilityPercent)}%
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
