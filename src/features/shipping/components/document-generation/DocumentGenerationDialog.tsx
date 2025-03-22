@@ -8,7 +8,8 @@ import {
   DocumentSelector,
   FormatSelector, 
   DocumentGenerationButton,
-  DocumentAlerts 
+  DocumentAlerts,
+  UPDGeneratorTest // Добавляем импорт нашего тестового компонента
 } from './components';
 
 interface DocumentGenerationDialogProps {
@@ -62,6 +63,12 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
             canGenerate={canGenerate}
             buyer={buyer}
           />
+          
+          {/* Добавляем тестовую кнопку для генерации УПД */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500 mb-2">Тестовая функция:</p>
+            <UPDGeneratorTest shipping={shipping} />
+          </div>
         </div>
         
         <DialogFooter>
