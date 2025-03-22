@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { calculatePriceWithVat } from '../../../hooks/useShipmentsList';
+import { calculatePriceWithVat } from '../../../hooks/useShippingUtils';
 
 interface AmountDisplayProps {
   quantity: number;

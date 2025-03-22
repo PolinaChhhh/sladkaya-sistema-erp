@@ -1,9 +1,10 @@
 
 import { useState, useMemo } from 'react';
-import { useRecipeStore } from '@/store/recipeStore';
+import { useStore } from '@/store/recipeStore';
 import { format, parseISO } from 'date-fns';
 import { useShippingFilters } from './useShippingFilters';
 import { useShippingOperations } from './useShippingOperations';
+import { useShippingUtils } from './useShippingUtils';
 
 export const useShipmentsList = () => {
   const {
@@ -16,7 +17,7 @@ export const useShipmentsList = () => {
     updateShippingStatus,
     deleteShipping,
     updateProduction
-  } = useRecipeStore(state => ({
+  } = useStore(state => ({
     shippings: state.shippings,
     buyers: state.buyers,
     productions: state.productions,
@@ -29,14 +30,7 @@ export const useShipmentsList = () => {
   }));
   
   // Search and filter functionality
-  const { searchQuery, setSearchQuery, filteredShippings } = useShippingFilters(shippings, buyers);
-  
-  // Sort shippings by date, newest first
-  const sortedShippings = useMemo(() => {
-    return [...filteredShippings].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }, [filteredShippings]);
+  const { searchQuery, setSearchQuery, sortedShippings } = useShippingFilters(shippings, buyers);
   
   // Dialog state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -106,6 +100,18 @@ export const useShipmentsList = () => {
       setIsEditDialogOpen(false);
     }
   };
+
+  // Handle create shipping submission - use the formData
+  const handleCreateShippingWrapper = () => {
+    const result = handleCreateShipping(formData);
+    
+    if (result) {
+      setIsCreateDialogOpen(false);
+    }
+  };
+  
+  // Import shipping utility functions
+  const shippingUtils = useShippingUtils();
   
   return {
     searchQuery,
@@ -128,9 +134,10 @@ export const useShipmentsList = () => {
     initEditForm,
     initDeleteConfirm,
     handleDeleteConfirm,
-    handleCreateShipping,
+    handleCreateShipping: handleCreateShippingWrapper,
     handleUpdateShipping,
     handleStatusUpdate,
-    canCreateShipment
+    canCreateShipment,
+    ...shippingUtils
   };
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ShippingItemRow from './ShippingItemRow';
-import { calculateTotalAmount, calculateVatAmount } from '../../hooks/useShipmentsList';
+import { calculateTotalAmount, calculateVatAmount } from '../../hooks/useShippingUtils';
 import { ShippingDocument } from '@/store/recipeStore';
 
 interface ShippingItemsTableProps {

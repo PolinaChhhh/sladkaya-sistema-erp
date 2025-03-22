@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { calculateTotalAmount, calculateVatAmount } from '../../hooks/useShipmentsList';
+import { calculateTotalAmount, calculateVatAmount } from '../../hooks/useShippingUtils';
 
 interface ShippingTableFooterProps {
   items: {

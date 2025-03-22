@@ -9,7 +9,7 @@ import {
   getStatusText, 
   getBuyerName,
   formatShipmentNumber
-} from '../../hooks/useShipmentsList';
+} from '../../hooks/useShippingUtils';
 
 interface ShippingCardHeaderProps {
   shipping: ShippingDocument;
