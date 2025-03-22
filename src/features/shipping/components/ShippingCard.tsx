@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { useStore } from '@/store/recipeStore';
-import { ShippingDocument } from '@/store/types';
+import { ShippingDocument, Buyer, ProductionBatch, Recipe } from '@/store/types';
 import { 
   ShippingCardHeader, 
   ShippingCardActions,
@@ -11,6 +11,9 @@ import {
 
 interface ShippingCardProps {
   shipping: ShippingDocument;
+  buyers: Buyer[];
+  productions: ProductionBatch[];
+  recipes: Recipe[];
   onEditClick: (shipping: ShippingDocument) => void;
   onDeleteClick: (shipping: ShippingDocument) => void;
   onStatusUpdate: (shippingId: string, newStatus: ShippingDocument['status']) => void;
@@ -18,12 +21,13 @@ interface ShippingCardProps {
 
 const ShippingCard: React.FC<ShippingCardProps> = ({
   shipping,
+  buyers,
+  productions,
+  recipes,
   onEditClick,
   onDeleteClick,
   onStatusUpdate
 }) => {
-  const { productions, recipes, buyers } = useStore();
-  
   const canShip = shipping.status === 'draft';
   const canDeliver = shipping.status === 'shipped';
   const canGenerate = true; // Allow document generation in any status
