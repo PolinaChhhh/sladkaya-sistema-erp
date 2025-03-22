@@ -5,12 +5,15 @@ import GlassMorphicCard from '@/components/ui/GlassMorphicCard';
 import { ChefHat, Box, TrendingUp, Truck, Bot, FileText, Building2 } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 import { Button } from '@/components/ui/button';
-import CompanyDialog from '@/features/company/CompanyDialog';
+import { Dialog } from '@/components/ui/dialog';
+import CompanyForm from '@/features/company/CompanyForm';
+import { useCompanyDialog } from '@/features/company/useCompanyDialog';
 
 const Index = () => {
   const navigate = useNavigate();
   const { ingredients, recipes, productions, shippings, receipts, company } = useStore();
   const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const { formData, setFormData, handleSave } = useCompanyDialog();
   
   const stats = [
     {
@@ -128,11 +131,20 @@ const Index = () => {
         </GlassMorphicCard>
       </div>
       
-      {/* Company Dialog */}
-      <CompanyDialog 
-        isOpen={isCompanyDialogOpen} 
-        setIsOpen={setIsCompanyDialogOpen} 
-      />
+      {/* Company Dialog with Form for editing */}
+      {isCompanyDialogOpen && (
+        <Dialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen}>
+          <CompanyForm 
+            formData={formData}
+            setFormData={setFormData}
+            onCancel={() => setIsCompanyDialogOpen(false)}
+            onSubmit={() => {
+              handleSave();
+              setIsCompanyDialogOpen(false);
+            }}
+          />
+        </Dialog>
+      )}
     </div>
   );
 };

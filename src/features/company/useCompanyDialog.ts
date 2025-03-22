@@ -31,9 +31,9 @@ export const useCompanyDialog = () => {
     bankDetails: '',
   });
   
-  // Load existing company data when the dialog opens
+  // Load existing company data when the component mounts or when company changes
   useEffect(() => {
-    if (isDialogOpen && company) {
+    if (company) {
       setFormData({
         name: company.name,
         contactPerson: company.contactPerson || '',
@@ -46,7 +46,7 @@ export const useCompanyDialog = () => {
         bankDetails: company.bankDetails || '',
       });
     }
-  }, [isDialogOpen, company]);
+  }, [company]);
   
   const openDialog = () => {
     setIsDialogOpen(true);
