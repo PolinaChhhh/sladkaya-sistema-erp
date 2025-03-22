@@ -40,17 +40,22 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   // Create a safe reference to semiFinishedRecipes
   const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
   
-  // Filter recipes based on search query
+  // Filter recipes based on search query - исправим логику фильтрации
   const filteredRecipes = recipes.filter(recipe => 
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleRecipeSelect = (recipe: Recipe) => {
-    console.log("Selected recipe:", recipe.name);
-    setSelectedRecipe(recipe);
-    setOpen(false);
-    setSearchQuery("");
-    setAmountDialogOpen(true); // This opens the amount dialog
+  const handleRecipeSelect = (recipeId: string) => {
+    // Найдем рецепт по id из списка
+    const recipe = recipes.find(r => r.id === recipeId);
+    
+    if (recipe) {
+      console.log("Selected recipe:", recipe.name);
+      setSelectedRecipe(recipe);
+      setOpen(false);
+      // Не очищаем поисковый запрос чтобы пользователь видел что он выбрал
+      setAmountDialogOpen(true); // This opens the amount dialog
+    }
   };
 
   const handleAmountConfirm = () => {
@@ -60,6 +65,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
       setAmountDialogOpen(false);
       setAmount(100); // Reset to default
       setSelectedRecipe(null);
+      setSearchQuery(""); // Очищаем запрос после завершения выбора
     }
   };
 
@@ -78,6 +84,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
               placeholder="Поиск полуфабрикатов..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
+              className="h-9"
             />
             <CommandList>
               <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
@@ -86,7 +93,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
                   <CommandItem
                     key={recipe.id}
                     value={recipe.id}
-                    onSelect={() => handleRecipeSelect(recipe)}
+                    onSelect={handleRecipeSelect}
                   >
                     <Check
                       className={cn(
