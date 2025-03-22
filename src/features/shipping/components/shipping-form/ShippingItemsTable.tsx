@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
-import ShippingItemRow from './ShippingItemRow';
+import ShippingItemRow from './shipping-item-row';
 import ShippingTableHeader from './ShippingTableHeader';
 import ShippingTableFooter from './ShippingTableFooter';
 import { getProductName, getProductUnit, getProductsInStock, getAvailableQuantity } from '../../utils/shippingUtils';
