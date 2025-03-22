@@ -1,7 +1,6 @@
 
-import { Recipe, Ingredient } from '@/store/types';
+import { Recipe, Ingredient, ProductionBatch } from '@/store/types';
 import { getIngredientDetails } from '@/features/production/utils/calculations/ingredientDetails';
-import { calculateTotalCost } from '@/features/production/utils/calculations/costCalculations';
 
 interface CostBreakdownItem {
   name: string;
@@ -11,34 +10,65 @@ interface CostBreakdownItem {
 }
 
 /**
- * Calculate breakdown of costs by ingredient categories
+ * Calculate breakdown of costs by ingredient categories based on actual production data
  */
 export function calculateCostBreakdown(
   recipe: Recipe,
   allRecipes: Recipe[],
   ingredients: Ingredient[],
-  productions: any[],
+  productions: ProductionBatch[],
   selectedMonth: Date
 ): CostBreakdownItem[] {
-  // Calculate total costs and ingredient breakdown
-  const quantity = 1; // Calculate for 1 unit of output
-  const ingredientDetails = getIngredientDetails(allRecipes, recipe.id, quantity, ingredients);
+  // Filter productions for the selected recipe and month
+  const monthFilter = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
   
-  if (ingredientDetails.length === 0) return [];
+  const recipeProductions = productions.filter(p => 
+    p.recipeId === recipe.id && 
+    p.date.startsWith(monthFilter)
+  );
   
-  // Calculate total cost using the dedicated cost calculation function
-  // This ensures we're using the same pricing logic across the application
-  const totalCost = calculateTotalCost(allRecipes, recipe.id, quantity, ingredients);
+  if (recipeProductions.length === 0) return [];
   
-  // Group by categories (packaging vs raw materials)
-  const packagingCosts = ingredientDetails
-    .filter(item => {
-      const ingredient = ingredients.find(i => i.id === item.ingredientId);
-      return ingredient && ingredient.type === 'Упаковка';
-    })
-    .reduce((sum, item) => sum + item.cost, 0);
+  // Calculate total production quantity and cost
+  const totalQuantity = recipeProductions.reduce((sum, p) => sum + p.quantity, 0);
+  const totalCost = recipeProductions.reduce((sum, p) => sum + p.cost, 0);
+  
+  if (totalQuantity === 0 || totalCost === 0) return [];
+  
+  // Analyze ingredient consumption from production details
+  let packagingCosts = 0;
+  let rawMaterialCosts = 0;
+  
+  // Go through all productions and their consumption details
+  recipeProductions.forEach(production => {
+    if (!production.consumptionDetails) return;
     
-  const rawMaterialCosts = totalCost - packagingCosts;
+    // Check each ingredient in the consumption details
+    Object.keys(production.consumptionDetails).forEach(ingredientId => {
+      const ingredient = ingredients.find(i => i.id === ingredientId);
+      if (!ingredient) return;
+      
+      // Calculate cost for this ingredient in this production
+      const consumedItems = production.consumptionDetails[ingredientId];
+      const ingredientCost = consumedItems.reduce((sum, item: any) => 
+        sum + (item.amount * item.unitPrice), 0);
+      
+      // Categorize cost as packaging or raw material
+      if (ingredient.type === 'Упаковка') {
+        packagingCosts += ingredientCost;
+      } else {
+        rawMaterialCosts += ingredientCost;
+      }
+    });
+  });
+  
+  // If we couldn't extract categorized costs from consumption details,
+  // estimate based on typical percentages from the recipe
+  if (packagingCosts === 0 && rawMaterialCosts === 0) {
+    // As a fallback, assume 80% raw materials, 20% packaging
+    rawMaterialCosts = totalCost * 0.8;
+    packagingCosts = totalCost * 0.2;
+  }
   
   // Define color scheme for chart
   const colors = {

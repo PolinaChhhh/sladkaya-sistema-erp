@@ -55,11 +55,11 @@ const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Структура затрат</CardTitle>
-          <CardDescription>Нет данных для выбранного продукта</CardDescription>
+          <CardDescription>Нет данных о производстве выбранного продукта за указанный период</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Не найдено данных о затратах</p>
+            <p className="text-muted-foreground">Производства не найдены</p>
           </div>
         </CardContent>
       </Card>
@@ -72,6 +72,7 @@ const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
         <CardTitle>Структура затрат: {selectedProduct}</CardTitle>
         <CardDescription>
           Общая себестоимость: ₽{totalCost.toFixed(2)} за {unit}
+          <span className="ml-2 text-sm text-muted-foreground">(на основе данных о производстве)</span>
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -20,14 +20,14 @@ const CostBreakdownReport: React.FC = () => {
     outputUnit
   } = useProductProfitability();
   
-  const showChart = selectedRecipeId !== null && profitabilityData.length > 0;
+  const showChart = selectedRecipeId !== null && costBreakdownData.length > 0;
   
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Структура затрат по продуктам</h2>
         <div className="text-sm text-muted-foreground">
-          Данные основаны на фактических отгрузках
+          Данные на основе фактического производства
         </div>
       </div>
       
@@ -51,7 +51,7 @@ const CostBreakdownReport: React.FC = () => {
           selectedProduct={recipes.find(r => r.id === selectedRecipeId)?.name || ''}
         />
       ) : (
-        <EmptyReportState message="Выберите продукт для просмотра структуры затрат" />
+        <EmptyReportState message="Выберите продукт и период для просмотра структуры затрат" />
       )}
     </Card>
   );
