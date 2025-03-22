@@ -1,0 +1,20 @@
+
+@import './variables.css';
+
+.upd-container {
+  width: 100%;
+  font-family: var(--upd-font-family);
+  font-size: var(--upd-font-size-base);
+  color: var(--upd-color-text);
+  background-color: var(--upd-color-background);
+  padding: 10px;
+  border: 1px solid var(--upd-color-border);
+}
+
+@media print {
+  .upd-container {
+    page-break-after: always;
+    border: none;
+    padding: 0;
+  }
+}

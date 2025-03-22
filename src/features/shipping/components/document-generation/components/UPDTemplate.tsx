@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { useStore } from '@/store/recipeStore';
 import { ShippingDocument } from '@/store/types/shipping';
-import './UPDTemplate.css';
+import '../styles/upd/index.css';
 
 interface UPDTemplateProps {
   shipping: ShippingDocument;

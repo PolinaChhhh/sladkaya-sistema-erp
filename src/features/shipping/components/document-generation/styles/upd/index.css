@@ -1,0 +1,9 @@
+
+/* Import all UPD CSS files */
+@import './variables.css';
+@import './container.css';
+@import './header.css';
+@import './table.css';
+@import './footer.css';
+@import './signatures.css';
+@import './transfer-receive.css';

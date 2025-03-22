@@ -1,0 +1,14 @@
+
+:root {
+  --upd-font-family: 'Times New Roman', serif;
+  --upd-font-size-base: 10pt;
+  --upd-font-size-small: 9pt;
+  --upd-font-size-tiny: 8pt;
+  --upd-font-size-micro: 7pt;
+  --upd-font-size-large: 12pt;
+  --upd-color-text: #000;
+  --upd-color-background: #fff;
+  --upd-color-border: #ddd;
+  --upd-color-muted: #666;
+  --upd-color-table-header: #f5f5f5;
+}

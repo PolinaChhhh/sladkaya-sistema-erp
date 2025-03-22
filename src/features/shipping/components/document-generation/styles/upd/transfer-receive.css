@@ -1,0 +1,108 @@
+
+@import './variables.css';
+
+.upd-transfer-receive-section {
+  margin-top: 20px;
+}
+
+.upd-foundation,
+.upd-transportation {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: flex-end;
+}
+
+.upd-foundation-label,
+.upd-transportation-label {
+  width: 30%;
+}
+
+.upd-foundation-value,
+.upd-transportation-value {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+  text-align: center;
+}
+
+.upd-transfer-receive-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.upd-transfer,
+.upd-receive {
+  padding: 5px;
+}
+
+.upd-transfer-title,
+.upd-receive-title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.upd-transfer-row {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: flex-end;
+}
+
+.upd-transfer-label {
+  width: 30%;
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+}
+
+.upd-transfer-signature,
+.upd-transfer-name {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  text-align: center;
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+  margin: 0 5px;
+}
+
+.upd-transfer-date,
+.upd-transfer-value {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+}
+
+.upd-responsible {
+  margin: 15px 0;
+}
+
+.upd-responsible-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.upd-entity {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.upd-entity-value {
+  font-weight: normal;
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+  margin: 5px 0;
+}
+
+.upd-entity-stamp {
+  margin-top: 10px;
+  font-weight: normal;
+}

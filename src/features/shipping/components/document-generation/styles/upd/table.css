@@ -1,0 +1,52 @@
+
+@import './variables.css';
+
+/* Table section */
+.upd-table-section {
+  margin-bottom: 15px;
+  overflow-x: auto;
+}
+
+.upd-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--upd-font-size-tiny);
+}
+
+.upd-items-table th, 
+.upd-items-table td {
+  border: 1px solid #000;
+  padding: 3px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.upd-items-table th {
+  font-weight: normal;
+  background-color: var(--upd-color-table-header);
+}
+
+.upd-column-indices td {
+  font-size: var(--upd-font-size-micro);
+  font-style: italic;
+  background-color: var(--upd-color-table-header);
+}
+
+.upd-items-table td:nth-child(2) {
+  text-align: left;
+}
+
+.upd-total-row td {
+  font-weight: bold;
+}
+
+@media print {
+  .upd-items-table th,
+  .upd-items-table td {
+    font-size: var(--upd-font-size-micro);
+  }
+  
+  .upd-items-table {
+    page-break-inside: avoid;
+  }
+}

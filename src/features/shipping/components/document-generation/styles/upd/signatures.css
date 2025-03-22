@@ -1,0 +1,63 @@
+
+@import './variables.css';
+
+.upd-signatures-section {
+  margin-bottom: 15px;
+}
+
+.upd-signatures-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upd-signature-cell {
+  width: 50%;
+  vertical-align: top;
+  padding: 5px;
+}
+
+.upd-signature-title {
+  font-weight: normal;
+  margin-bottom: 15px;
+}
+
+.upd-signature-line {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.upd-signature-placeholder {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  text-align: center;
+  color: var(--upd-color-muted);
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+}
+
+.upd-signature-name {
+  width: 60%;
+  border-bottom: 1px solid #000;
+  text-align: center;
+  margin-left: 10px;
+}
+
+.upd-signature-caption {
+  display: flex;
+  font-size: var(--upd-font-size-tiny);
+  color: var(--upd-color-muted);
+}
+
+.upd-signature-caption span {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.upd-signature-extra {
+  font-size: var(--upd-font-size-tiny);
+  font-style: italic;
+  color: var(--upd-color-muted);
+  text-align: center;
+}

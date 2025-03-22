@@ -1,0 +1,29 @@
+
+@import './variables.css';
+
+/* Footer section */
+.upd-footer {
+  font-size: var(--upd-font-size-small);
+}
+
+.upd-document-info {
+  margin-bottom: 15px;
+}
+
+.upd-document-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.upd-document-pages {
+  border-bottom: 1px solid #000;
+  flex-grow: 1;
+  margin-left: 5px;
+}
+
+@media print {
+  .upd-footer {
+    page-break-inside: avoid;
+  }
+}

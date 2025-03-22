@@ -1,0 +1,118 @@
+
+@import './variables.css';
+
+/* Header section */
+.upd-header {
+  margin-bottom: 15px;
+}
+
+.upd-header-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+}
+
+.upd-header-title {
+  width: 25%;
+}
+
+.upd-title {
+  font-weight: bold;
+  font-size: var(--upd-font-size-large);
+  margin-bottom: 10px;
+}
+
+.upd-status-box {
+  border: 1px solid #000;
+  padding: 5px;
+  font-size: var(--upd-font-size-small);
+}
+
+.upd-status-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.upd-checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.upd-checkbox {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.upd-checkbox.checked::after {
+  content: "✓";
+  font-size: 10px;
+  display: block;
+  text-align: center;
+  line-height: 12px;
+}
+
+.upd-status-text {
+  font-size: var(--upd-font-size-tiny);
+}
+
+.upd-invoice-info {
+  width: 50%;
+}
+
+.upd-invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upd-invoice-table td {
+  padding: 3px;
+  vertical-align: middle;
+}
+
+.upd-appendix {
+  width: 25%;
+  font-size: var(--upd-font-size-micro);
+  text-align: right;
+}
+
+.upd-appendix-text {
+  margin-bottom: 2px;
+}
+
+.upd-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 5px;
+}
+
+.upd-info-table td {
+  padding: 3px;
+  vertical-align: top;
+  font-size: var(--upd-font-size-small);
+}
+
+.upd-label {
+  width: 25%;
+  text-align: left;
+  vertical-align: top;
+  font-weight: normal;
+}
+
+.upd-value {
+  border-bottom: 1px solid #000;
+  width: 70%;
+}
+
+.upd-reference {
+  width: 5%;
+  text-align: right;
+  vertical-align: top;
+  font-size: var(--upd-font-size-tiny);
+  color: var(--upd-color-muted);
+}
