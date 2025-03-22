@@ -88,39 +88,106 @@ export function calculateRecipeProfitability(
   // Skip if no shipments
   if (shipmentEvents.length === 0) return null;
   
-  // Build a map of production events by batch ID for efficient lookup
-  const productionEventsByBatchId = buildProductionEventsByBatchId(movementHistory);
+  // Get all production events for this recipe, sorted by date (oldest first for FIFO)
+  const productionEvents = movementHistory
+    .filter(event => event.type === 'production')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Create a queue of available production batches with remaining quantities
+  const productionQueue: {
+    batchId: string;
+    date: string;
+    remainingQuantity: number;
+    unitCost: number;
+  }[] = productionEvents.map(event => ({
+    batchId: event.batchId!,
+    date: event.date,
+    remainingQuantity: event.quantity,
+    unitCost: event.unitValue
+  }));
   
   // Initialize tracking variables
   let totalRevenue = 0;
   let totalCost = 0;
   let quantitySold = 0;
   
-  // Process each shipment event to calculate revenue and cost
-  shipmentEvents.forEach(shipment => {
-    const batchId = shipment.batchId;
-    if (!batchId) return;
-    
-    // Find the corresponding production event for this batch
-    const productionEvent = productionEventsByBatchId[batchId];
-    if (!productionEvent) return;
-    
-    // Get the absolute quantity from the shipment (shipment quantities are negative)
-    const shipmentQuantity = Math.abs(shipment.quantity);
-    
-    // Calculate revenue from this shipment using the shipment's unit price
-    const shipmentRevenue = shipmentQuantity * shipment.unitValue;
-    totalRevenue += shipmentRevenue;
-    
-    // Calculate cost using the production batch's unit cost
-    const shipmentCost = shipmentQuantity * productionEvent.unitValue;
-    totalCost += shipmentCost;
-    
-    // Add to total quantity sold
-    quantitySold += shipmentQuantity;
-
-    console.log(`FIFO Shipment calculation: Batch ${batchId}: ${shipmentQuantity} units sold at ${shipment.unitValue}₽, cost ${productionEvent.unitValue}₽/unit, total cost ${shipmentCost}₽, revenue ${shipmentRevenue}₽`);
-  });
+  // Process each shipment event in chronological order (oldest first)
+  shipmentEvents
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .forEach(shipment => {
+      // Get the absolute quantity from the shipment (shipment quantities are negative)
+      const shipmentQuantity = Math.abs(shipment.quantity);
+      let remainingToShip = shipmentQuantity;
+      
+      // Calculate revenue from this shipment
+      const shipmentRevenue = shipmentQuantity * shipment.unitValue;
+      totalRevenue += shipmentRevenue;
+      
+      // Track costs for this specific shipment for detailed logging
+      let shipmentCost = 0;
+      let shipmentsFromBatches = [];
+      
+      console.log(`Processing shipment ${shipment.reference} for ${shipmentQuantity} units of ${recipe.name} at ${shipment.unitValue}₽ per unit`);
+      
+      // Consume from production batches using FIFO
+      while (remainingToShip > 0 && productionQueue.length > 0) {
+        const batch = productionQueue[0];
+        
+        // If this batch is empty, remove it and continue
+        if (batch.remainingQuantity <= 0) {
+          productionQueue.shift();
+          continue;
+        }
+        
+        // Calculate how much to take from this batch
+        const takeFromBatch = Math.min(remainingToShip, batch.remainingQuantity);
+        
+        // Calculate cost for this portion
+        const batchCost = takeFromBatch * batch.unitCost;
+        shipmentCost += batchCost;
+        
+        // Track which batch was used
+        shipmentsFromBatches.push({
+          batchId: batch.batchId,
+          quantity: takeFromBatch,
+          unitCost: batch.unitCost,
+          totalCost: batchCost,
+          date: batch.date
+        });
+        
+        // Update batch remaining quantity
+        batch.remainingQuantity -= takeFromBatch;
+        remainingToShip -= takeFromBatch;
+        
+        // If batch is now empty, remove it
+        if (batch.remainingQuantity <= 0) {
+          productionQueue.shift();
+        }
+        
+        console.log(`  - Used ${takeFromBatch} units from batch ${batch.batchId} (${new Date(batch.date).toLocaleDateString()})`);
+        console.log(`    Unit cost: ${batch.unitCost.toFixed(2)}₽, Portion cost: ${batchCost.toFixed(2)}₽`);
+      }
+      
+      // If we still have remaining to ship but no batches, log a warning
+      if (remainingToShip > 0) {
+        console.warn(`Warning: Not enough production batches for shipment ${shipment.reference}. Missing ${remainingToShip} units.`);
+      }
+      
+      // Add to totals
+      totalCost += shipmentCost;
+      quantitySold += shipmentQuantity - remainingToShip;
+      
+      // Log the detailed breakdown of this shipment
+      console.log(`FIFO Shipment calculation for ${shipment.reference}: ${shipmentQuantity} units sold at ${shipment.unitValue}₽/unit`);
+      console.log(`  - Total revenue: ${shipmentRevenue.toFixed(2)}₽`);
+      console.log(`  - Total cost: ${shipmentCost.toFixed(2)}₽`);
+      console.log(`  - Profit: ${(shipmentRevenue - shipmentCost).toFixed(2)}₽`);
+      console.log(`  - Used ${shipmentsFromBatches.length} production batches:`);
+      
+      shipmentsFromBatches.forEach(batch => {
+        console.log(`    * Batch ${batch.batchId} (${new Date(batch.date).toLocaleDateString()}): ${batch.quantity} units at ${batch.unitCost.toFixed(2)}₽/unit = ${batch.totalCost.toFixed(2)}₽`);
+      });
+    });
   
   // Skip if no quantity was sold
   if (quantitySold === 0) return null;
