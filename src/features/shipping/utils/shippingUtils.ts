@@ -17,7 +17,7 @@ export const getProductUnit = (productions: any[], recipes: any[], productionBat
   return recipe ? recipe.outputUnit : '';
 };
 
-// Calculate available stock quantity for a production batch, factoring in all shipments including drafts
+// Calculate available stock quantity for a production batch, factoring in only confirmed shipments
 export const getAvailableQuantity = (
   productions: any[],
   shippings: ShippingDocument[],
@@ -26,8 +26,9 @@ export const getAvailableQuantity = (
   const production = productions.find(p => p.id === productionBatchId);
   if (!production) return 0;
   
-  // Calculate already shipped quantity, including drafts
-  const shippedQuantity = shippings.reduce((total, shipping) => {
+  // Calculate already shipped quantity, only including confirmed shipments (not drafts)
+  const confirmedShippings = shippings.filter(s => s.status !== 'draft');
+  const shippedQuantity = confirmedShippings.reduce((total, shipping) => {
     return total + shipping.items
       .filter(item => item.productionBatchId === productionBatchId)
       .reduce((sum, item) => sum + item.quantity, 0);
@@ -58,8 +59,9 @@ export const getProductsInStock = (
     .map(production => {
       const recipe = recipes.find(r => r.id === production.recipeId);
       
-      // Calculate already shipped quantity, including drafts
-      const shippedQuantity = shippings.reduce((total, shipping) => {
+      // Calculate already shipped quantity, including only confirmed shipments
+      const confirmedShippings = shippings.filter(s => s.status !== 'draft');
+      const shippedQuantity = confirmedShippings.reduce((total, shipping) => {
         return total + shipping.items
           .filter(item => item.productionBatchId === production.id)
           .reduce((sum, item) => sum + item.quantity, 0);
@@ -148,11 +150,14 @@ export const getAvailableProductionBatches = (
   unitCost: number;
   totalCost: number;
 }> => {
+  // Only consider confirmed shipments for availability calculations
+  const confirmedShippings = shippings.filter(s => s.status !== 'draft');
+  
   return productions
     .filter(p => p.recipeId === recipeId)
     .map(production => {
       // Calculate already shipped quantity
-      const shippedQuantity = shippings.reduce((total, shipping) => {
+      const shippedQuantity = confirmedShippings.reduce((total, shipping) => {
         return total + shipping.items
           .filter(item => item.productionBatchId === production.id)
           .reduce((sum, item) => sum + item.quantity, 0);

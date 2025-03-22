@@ -1,6 +1,8 @@
+
 import { Dispatch, SetStateAction } from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
 import { getProductsInStock, getAvailableProductionBatches } from '../utils/shippingUtils';
+import { toast } from 'sonner';
 
 export const useShippingForm = (
   formData: {
@@ -28,8 +30,11 @@ export const useShippingForm = (
   recipes: any[]
 ) => {
   const addShippingItem = () => {
+    // Only consider confirmed shipments for stock calculation
+    const confirmedShipments = shippings.filter(s => s.status !== 'draft');
+    
     // Get products that are actually in stock, now grouped by recipe
-    const productsInStock = getProductsInStock(productions, shippings, recipes);
+    const productsInStock = getProductsInStock(productions, confirmedShipments, recipes);
     
     if (productsInStock.length === 0) {
       return { error: 'Нет доступных товаров на складе' };
@@ -41,7 +46,7 @@ export const useShippingForm = (
     // Find the oldest production batch with available quantity for this recipe (FIFO)
     const availableBatches = getAvailableProductionBatches(
       productions,
-      shippings,
+      confirmedShipments,
       firstProduct.recipeId
     );
     
@@ -53,7 +58,11 @@ export const useShippingForm = (
     const oldestBatch = availableBatches[0];
     
     // Start with just 1 unit, but allow more based on total available quantity
-    const initialQuantity = 1;
+    const initialQuantity = Math.min(1, firstProduct.availableQuantity);
+    
+    if (initialQuantity <= 0) {
+      return { error: 'Нет доступного количества продукта на складе' };
+    }
     
     setFormData(prev => ({
       ...prev,
@@ -82,7 +91,9 @@ export const useShippingForm = (
           : 0;
         
         // Get the total available quantity for this recipe
-        const productsInStock = getProductsInStock(productions, shippings, recipes);
+        // Only consider confirmed shipments for stock calculation
+        const confirmedShipments = shippings.filter(s => s.status !== 'draft');
+        const productsInStock = getProductsInStock(productions, confirmedShipments, recipes);
         const recipeProduct = productsInStock.find(p => p.recipeId === selectedProduction.recipeId);
         const totalAvailable = recipeProduct ? recipeProduct.availableQuantity : 0;
         
@@ -90,12 +101,39 @@ export const useShippingForm = (
         const existingQuantity = newItems[index].quantity;
         const newQuantity = Math.min(existingQuantity > 0 ? existingQuantity : 1, totalAvailable);
         
+        if (newQuantity <= 0) {
+          toast.error('Нет доступного количества этого продукта на складе');
+        }
+        
         newItems[index] = { 
           ...newItems[index], 
           [field]: value,
           price: unitCost * 1.3, // Default 30% markup on actual unit cost
           quantity: newQuantity
         };
+      } else {
+        newItems[index] = { ...newItems[index], [field]: value };
+      }
+    } else if (field === 'quantity') {
+      // When changing quantity, validate against available stock
+      const selectedProduction = productions.find(p => p.id === newItems[index].productionBatchId);
+      
+      if (selectedProduction) {
+        // Get the total available quantity for this recipe
+        // Only consider confirmed shipments for stock calculation
+        const confirmedShipments = shippings.filter(s => s.status !== 'draft');
+        const productsInStock = getProductsInStock(productions, confirmedShipments, recipes);
+        const recipeProduct = productsInStock.find(p => p.recipeId === selectedProduction.recipeId);
+        const totalAvailable = recipeProduct ? recipeProduct.availableQuantity : 0;
+        
+        // Ensure quantity doesn't exceed available stock
+        const newQuantity = Math.min(value, totalAvailable);
+        
+        if (newQuantity < value) {
+          toast.warning(`Доступно только ${totalAvailable} единиц этого продукта`);
+        }
+        
+        newItems[index] = { ...newItems[index], quantity: newQuantity };
       } else {
         newItems[index] = { ...newItems[index], [field]: value };
       }

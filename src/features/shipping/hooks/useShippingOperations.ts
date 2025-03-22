@@ -56,7 +56,8 @@ export const useShippingOperations = ({
       }
       
       toast.success('Отгрузка удалена');
-      setIsDeleteConfirmOpen(false);
+      setIsDeleteConfirmOpen(false); // Close the dialog after successful deletion
+      setSelectedShipping(null); // Reset the selected shipping
       
       // Return the result to maintain type compatibility
       return result;

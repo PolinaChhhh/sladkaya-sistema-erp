@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { ShippingItemRowProps } from './types';
 import { getProductsInStock, getAvailableProductionBatches } from '../../../utils/shippingUtils';
@@ -38,8 +39,18 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   
   // Get products that are actually in stock, grouped by recipe
   const productsInStock = useMemo(() => {
-    return getProductsInStock(productions, shippings, recipes);
+    // Important: when calculating available stock, only consider confirmed shipments
+    // not including drafts that haven't been shipped yet
+    const confirmedShipments = shippings.filter(s => s.status !== 'draft');
+    return getProductsInStock(productions, confirmedShipments, recipes);
   }, [productions, shippings, recipes]);
+  
+  // Get the current recipe's total available quantity (considering only confirmed shipments)
+  const currentProductStock = useMemo(() => {
+    if (!selectedRecipeId) return 0;
+    const productInfo = productsInStock.find(p => p.recipeId === selectedRecipeId);
+    return productInfo?.availableQuantity || 0;
+  }, [selectedRecipeId, productsInStock]);
   
   // Handle production batch change
   const handleBatchChange = (newBatchId: string) => {
@@ -91,13 +102,13 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
       />
       
       <AvailableQuantityDisplay 
-        availableQuantity={availableQuantity}
+        availableQuantity={currentProductStock}
         productUnit={productUnit}
       />
       
       <QuantityInput 
         quantity={item.quantity}
-        availableQuantity={availableQuantity}
+        availableQuantity={currentProductStock}
         productName={productName}
         productUnit={productUnit}
         onChange={handleQuantityChange}

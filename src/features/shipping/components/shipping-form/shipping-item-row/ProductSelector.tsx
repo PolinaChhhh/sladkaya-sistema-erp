@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getProductsInStock, getAvailableProductionBatches } from '../../../utils/shippingUtils';
+import { getProductsInStock } from '../../../utils/shippingUtils';
 
 interface ProductSelectorProps {
   selectedProductionBatchId: string;
@@ -18,63 +18,42 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
   recipes,
   shippings
 }) => {
-  // Get all available production batches (not grouped by recipe)
-  const availableBatches = useMemo(() => {
-    // Get all production batches with available quantity
-    return productions
-      .filter(production => {
-        // Calculate already shipped quantity
-        const shippedQuantity = shippings.reduce((total, shipping) => {
-          return total + shipping.items
-            .filter(item => item.productionBatchId === production.id)
-            .reduce((sum, item) => sum + item.quantity, 0);
-        }, 0);
-        
-        // Stock quantity is production quantity minus shipped quantity
-        const availableQuantity = Math.max(0, production.quantity - shippedQuantity);
-        return availableQuantity > 0;
-      })
-      .map(production => {
-        const recipe = recipes.find(r => r.id === production.recipeId);
-        
-        // Calculate already shipped quantity
-        const shippedQuantity = shippings.reduce((total, shipping) => {
-          return total + shipping.items
-            .filter(item => item.productionBatchId === production.id)
-            .reduce((sum, item) => sum + item.quantity, 0);
-        }, 0);
-        
-        const availableQuantity = Math.max(0, production.quantity - shippedQuantity);
-        
-        return {
-          productionBatchId: production.id,
-          recipeId: production.recipeId,
-          recipeName: recipe ? recipe.name : 'Неизвестный рецепт',
-          availableQuantity,
-          unit: recipe ? recipe.outputUnit : 'шт',
-        };
-      })
-      .sort((a, b) => a.recipeName.localeCompare(b.recipeName));
+  // Get all available products grouped by recipe (consolidated view)
+  const consolidatedProducts = useMemo(() => {
+    // Get all production batches with available quantity, but group by recipe
+    return getProductsInStock(productions, shippings, recipes);
   }, [productions, shippings, recipes]);
 
-  console.log('Available batches for selection:', availableBatches);
+  // Find the current recipe ID for the selected production batch
+  const currentRecipeId = useMemo(() => {
+    const production = productions.find(p => p.id === selectedProductionBatchId);
+    return production?.recipeId;
+  }, [selectedProductionBatchId, productions]);
+
+  console.log('Consolidated products for selection:', consolidatedProducts);
 
   return (
     <div className="col-span-3">
       <Select 
-        value={selectedProductionBatchId} 
-        onValueChange={onProductChange}
+        value={currentRecipeId || ''} 
+        onValueChange={(recipeId) => {
+          // Find the first production batch for this recipe to use as reference
+          const productInfo = consolidatedProducts.find(p => p.recipeId === recipeId);
+          if (productInfo) {
+            onProductChange(productInfo.firstProductionBatchId);
+          }
+        }}
       >
         <SelectTrigger>
           <SelectValue placeholder="Выберите товар" />
         </SelectTrigger>
         <SelectContent>
-          {availableBatches.map((batch) => (
+          {consolidatedProducts.map((product) => (
             <SelectItem 
-              key={batch.productionBatchId} 
-              value={batch.productionBatchId}
+              key={product.recipeId} 
+              value={product.recipeId}
             >
-              {batch.recipeName} ({batch.availableQuantity} {batch.unit})
+              {product.recipeName} ({product.availableQuantity} {product.unit})
             </SelectItem>
           ))}
         </SelectContent>

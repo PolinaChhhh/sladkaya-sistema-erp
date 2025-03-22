@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
 import ShippingItemRow from './shipping-item-row';
 import ShippingTableHeader from './ShippingTableHeader';
@@ -36,8 +36,12 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
     );
   }
 
-  // Get all products in stock (grouped by recipe)
-  const productsInStock = getProductsInStock(productions, shippings, recipes);
+  // Use useMemo to only recalculate when dependencies change
+  const productsInStock = useMemo(() => {
+    // Important: Only consider confirmed shipments for stock calculation
+    const confirmedShipments = shippings.filter(s => s.status !== 'draft');
+    return getProductsInStock(productions, confirmedShipments, recipes);
+  }, [productions, shippings, recipes]);
   
   console.log('Shipping items table:', { items, groupedProducts: productsInStock });
 

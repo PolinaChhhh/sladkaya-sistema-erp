@@ -27,7 +27,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({
     
     if (validQuantity !== parsedQuantity && parsedQuantity > 0) {
       console.log(`Limiting quantity to available stock: ${validQuantity} (requested: ${parsedQuantity})`);
-      toast.warning(`Доступно только ${validQuantity} ${productUnit} товара "${productName}"`);
+      toast.warning(`Доступно только ${availableQuantity} ${productUnit} товара "${productName}"`);
     }
     
     onChange(validQuantity);
@@ -44,6 +44,11 @@ const QuantityInput: React.FC<QuantityInputProps> = ({
         className="text-center"
         disabled={availableQuantity === 0}
       />
+      {quantity > availableQuantity && (
+        <p className="text-xs text-red-500 mt-1">
+          Превышение доступного количества
+        </p>
+      )}
     </div>
   );
 };
