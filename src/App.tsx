@@ -35,7 +35,7 @@ const App = () => (
             <Route path="/production" element={<Layout><Production /></Layout>} />
             <Route path="/shipping" element={<Layout><Shipping /></Layout>} />
             <Route path="/receipts" element={<Layout><Receipts /></Layout>} />
-            <Route path="/reports" element={<Layout requiredRole="manager"><Reports /></Layout>} />
+            <Route path="/reports" element={<Layout><Reports /></Layout>} />
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </AuthProvider>
