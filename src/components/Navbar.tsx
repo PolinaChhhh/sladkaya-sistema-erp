@@ -107,19 +107,11 @@ const Navbar: React.FC = () => {
         )}
       </div>
       
-      {/* Display read-only company details if user is in navbar */}
-      {isCompanyDialogOpen && location.pathname !== '/' && (
+      {/* Always display CompanyDetails for navbar button clicks */}
+      {isCompanyDialogOpen && (
         <Dialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen}>
           <CompanyDetails onClose={() => setIsCompanyDialogOpen(false)} />
         </Dialog>
-      )}
-      
-      {/* Use company dialog with form only on home page */}
-      {isCompanyDialogOpen && location.pathname === '/' && (
-        <CompanyDialog 
-          isOpen={isCompanyDialogOpen} 
-          setIsOpen={setIsCompanyDialogOpen} 
-        />
       )}
     </nav>
   );
