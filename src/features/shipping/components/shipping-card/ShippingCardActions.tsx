@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { 
   Truck, 
   CheckCircle, 
-  AlertCircle,
   FileText,
   Edit,
   Trash2

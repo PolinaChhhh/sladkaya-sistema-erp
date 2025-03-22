@@ -1,13 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { useStore } from '@/store/recipeStore';
 import { ShippingDocument, Buyer, ProductionBatch, Recipe } from '@/store/types';
 import { 
   ShippingCardHeader, 
   ShippingCardActions,
   ShippingItemsTable
 } from './shipping-card';
+import { DocumentGenerationDialog } from './document-generation';
 
 interface ShippingCardProps {
   shipping: ShippingDocument;
@@ -28,13 +28,15 @@ const ShippingCard: React.FC<ShippingCardProps> = ({
   onDeleteClick,
   onStatusUpdate
 }) => {
+  const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false);
+  
   const canShip = shipping.status === 'draft';
   const canDeliver = shipping.status === 'shipped';
   const canGenerate = true; // Allow document generation in any status
   
   const handleGenerateDocument = () => {
     console.log('Generate document for shipment:', shipping.id);
-    // This will be implemented with the document generation feature
+    setIsDocumentDialogOpen(true);
   };
   
   return (
@@ -66,6 +68,13 @@ const ShippingCard: React.FC<ShippingCardProps> = ({
           />
         </div>
       </div>
+      
+      {/* Document Generation Dialog */}
+      <DocumentGenerationDialog
+        isOpen={isDocumentDialogOpen}
+        onOpenChange={setIsDocumentDialogOpen}
+        shipping={shipping}
+      />
     </Card>
   );
 };
