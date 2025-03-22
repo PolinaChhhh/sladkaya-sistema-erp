@@ -32,7 +32,7 @@ export function calculateCostBreakdown(
   const packagingCosts = ingredientDetails
     .filter(item => {
       const ingredient = ingredients.find(i => i.id === item.ingredientId);
-      return ingredient && ingredient.isPackaging;
+      return ingredient && ingredient.type === 'Упаковка';
     })
     .reduce((sum, item) => sum + item.cost, 0);
     
