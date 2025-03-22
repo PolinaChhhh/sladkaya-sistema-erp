@@ -15,7 +15,7 @@ export const useShipmentsList = () => {
     addShipping,
     updateShipping,
     updateShippingStatus,
-    deleteShipping: storeDeleteShipping,
+    deleteShipping,
     updateProduction
   } = useStore(state => ({
     shippings: state.shippings,
@@ -84,7 +84,7 @@ export const useShipmentsList = () => {
     addShipping,
     updateShipping,
     updateShippingStatus,
-    deleteShipping: storeDeleteShipping, // This function returns { _deletedShipping?: ShippingDocument }
+    deleteShipping, // Pass the store's deleteShipping function directly
     buyers,
     productions,
     updateProduction
