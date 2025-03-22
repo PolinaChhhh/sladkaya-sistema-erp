@@ -40,7 +40,7 @@ const ProductProfitabilityTable: React.FC<ProductProfitabilityTableProps> = ({ d
           {data.map((item) => (
             <TableRow 
               key={item.recipeId} 
-              className={cn(getProfitabilityColor(item.profitabilityPercent))}
+              className={getProfitabilityColor(item.profitabilityPercent)}
             >
               <TableCell className="font-medium">{item.productName}</TableCell>
               <TableCell className="text-right">{formatNumber(item.quantitySold)} {item.unit}</TableCell>

@@ -37,8 +37,41 @@ export const useProductProfitability = () => {
       let totalCost = 0;
       let quantitySold = 0;
       
-      // For each recipe, we need to track which production batches fulfilled each shipment
-      // Group production events by their batch ID for easier lookup
+      // Map shipping items to their corresponding shipments for lookup
+      const shippingItemsMap = new Map<string, {
+        shipmentNumber: string;
+        date: string;
+        items: Array<{
+          productionBatchId: string;
+          quantity: number;
+          price: number;
+        }>;
+      }>();
+      
+      // Build a map of shipping documents with batch information
+      shippings.forEach(shipping => {
+        if (shipping.status === 'draft') return; // Skip drafts
+        
+        // Get all shipping items related to this recipe
+        const recipeItems = shipping.items.filter(item => {
+          const prod = productions.find(p => p.id === item.productionBatchId);
+          return prod && prod.recipeId === recipe.id;
+        });
+        
+        if (recipeItems.length > 0) {
+          shippingItemsMap.set(shipping.id, {
+            shipmentNumber: shipping.shipmentNumber,
+            date: shipping.date,
+            items: recipeItems.map(item => ({
+              productionBatchId: item.productionBatchId,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          });
+        }
+      });
+      
+      // For each recipe, build a map of production events by batch ID for efficient lookup
       const productionEventsByBatchId = movementHistory
         .filter(event => event.type === 'production')
         .reduce((acc, event) => {
@@ -48,24 +81,23 @@ export const useProductProfitability = () => {
           return acc;
         }, {} as Record<string, MovementEvent>);
       
-      // Process each shipment event
+      // Process each shipment event to calculate revenue and cost
       shipmentEvents.forEach(shipment => {
         const batchId = shipment.batchId;
         if (!batchId) return;
         
-        // Get the production event for this batch
+        // Find the corresponding production event for this batch
         const productionEvent = productionEventsByBatchId[batchId];
-        
         if (!productionEvent) return;
         
         // Get the absolute quantity from the shipment (shipment quantities are negative)
         const shipmentQuantity = Math.abs(shipment.quantity);
         
-        // Calculate revenue from this shipment
+        // Calculate revenue from this shipment using the shipment's unit price
         const shipmentRevenue = shipmentQuantity * shipment.unitValue;
         totalRevenue += shipmentRevenue;
         
-        // Calculate cost from the production batch's unit cost
+        // Calculate cost using the production batch's unit cost
         const shipmentCost = shipmentQuantity * productionEvent.unitValue;
         totalCost += shipmentCost;
         
