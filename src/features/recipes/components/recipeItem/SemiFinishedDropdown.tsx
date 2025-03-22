@@ -14,8 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 interface SemiFinishedDropdownProps {
   semiFinishedRecipes: Recipe[];
@@ -30,6 +31,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   const [value, setValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Focus the search input when the dropdown opens
   useEffect(() => {
@@ -56,25 +58,43 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          role="combobox" 
-          aria-expanded={open}
-          size="sm"
-          className="justify-between"
-        >
-          {value ? semiFinishedRecipes.find(recipe => recipe.id === value)?.name : "Добавить из полуфабриката"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        {!open ? (
+          <Button 
+            variant="outline" 
+            role="combobox" 
+            aria-expanded={open}
+            size="sm"
+            className="justify-between gap-1"
+            ref={buttonRef}
+          >
+            <Search className="h-4 w-4" />
+            Добавить из полуфабриката
+            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        ) : (
+          <div className="min-w-[240px]">
+            <Input
+              ref={inputRef}
+              className="h-9 border-dashed"
+              placeholder="Поиск полуфабрикатов..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setOpen(false);
+                }
+              }}
+            />
+          </div>
+        )}
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-72">
+      <PopoverContent className="p-0 w-[240px]" align="start">
         <Command>
           <CommandInput 
             placeholder="Поиск полуфабрикатов..." 
             className="h-9"
             value={searchQuery}
             onValueChange={setSearchQuery}
-            ref={inputRef}
           />
           <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-y-auto">
