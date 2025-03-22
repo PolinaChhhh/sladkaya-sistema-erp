@@ -75,7 +75,7 @@ export const useShipmentsList = () => {
     setSelectedShipping,
     initDeleteConfirm,
     handleDeleteConfirm,
-    handleCreateShipping,
+    handleCreateShipping: operationsHandleCreateShipping,
     handleUpdateShipping: operationsHandleUpdateShipping,
     handleStatusUpdate,
     canCreateShipment
@@ -103,7 +103,7 @@ export const useShipmentsList = () => {
 
   // Handle create shipping submission - use the formData
   const handleCreateShippingWrapper = () => {
-    const result = handleCreateShipping(formData);
+    const result = operationsHandleCreateShipping(formData);
     
     if (result) {
       setIsCreateDialogOpen(false);

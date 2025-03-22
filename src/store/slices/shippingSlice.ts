@@ -8,7 +8,7 @@ export interface ShippingSlice {
   addShipping: (shipping: Omit<ShippingDocument, 'id' | 'shipmentNumber'>) => void;
   updateShipping: (updatedShipping: ShippingDocument) => void;
   updateShippingStatus: (id: string, status: ShippingDocument['status']) => void;
-  deleteShipping: (id: string) => void;
+  deleteShipping: (id: string) => { _deletedShipping?: ShippingDocument };
   updateShippingDocument: (id: string, documentType: RussianDocumentType, generated: boolean) => void;
 }
 
@@ -41,17 +41,18 @@ export const createShippingSlice: StateCreator<ShippingSlice> = (set, get) => ({
     )
   })),
   
-  deleteShipping: (id) => set((state) => {
+  deleteShipping: (id) => {
     // Find the shipping to be deleted first, so we can return it from the function
-    const shippingToDelete = state.shippings.find(shipping => shipping.id === id);
+    const shippingToDelete = get().shippings.find(shipping => shipping.id === id);
     
-    return {
+    set((state) => ({
       // Remove the shipping from the state
       shippings: state.shippings.filter((shipping) => shipping.id !== id),
-      // Return the deleted shipping for potential further processing
-      _deletedShipping: shippingToDelete
-    };
-  }),
+    }));
+    
+    // Return the deleted shipping for potential further processing
+    return { _deletedShipping: shippingToDelete };
+  },
   
   updateShippingDocument: (id, documentType, generated) => set((state) => ({
     shippings: state.shippings.map((shipping) => 
