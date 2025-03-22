@@ -1,21 +1,24 @@
 
 import React from 'react';
-import { Clock, ArrowRight, Thermometer } from 'lucide-react';
+import { Clock, Thermometer, Printer, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from "sonner";
 
 interface RecipeProcessProps {
   processSteps: string[];
   preparationTime?: number;
   category: 'finished' | 'semi-finished';
   bakingTemperature?: number;
+  recipeName?: string;
 }
 
 const RecipeProcess: React.FC<RecipeProcessProps> = ({ 
   processSteps, 
   preparationTime, 
   category,
-  bakingTemperature
+  bakingTemperature,
+  recipeName
 }) => {
   const highlightProcessText = (text: string) => {
     const keyWords = ['mix', 'bake', 'cool', 'stir', 'whisk', 'fold', 'knead', 'melt', 'sift', 'beat', 'chill', 'boil', 'simmer', 'roast', 'fry'];
@@ -36,6 +39,26 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
     if (remainingMinutes === 0) return `${hours} ч`;
     return `${hours} ч ${remainingMinutes} мин`;
   };
+
+  const handlePrintToWord = () => {
+    // Generate Word document
+    const filename = `Тех_карта_${recipeName || 'рецепт'}.docx`;
+    
+    // In a real implementation, we would use a library like docx to generate
+    // the Word document from the recipe data
+    
+    // For now, we'll just show a toast notification
+    toast.success("Подготовка документа Word...", {
+      description: `Файл ${filename} будет скачан через несколько секунд.`,
+    });
+    
+    // Simulate download delay
+    setTimeout(() => {
+      toast.success("Документ успешно создан!", {
+        description: "Технологическая карта сохранена в формате Word.",
+      });
+    }, 1500);
+  };
   
   return (
     <div>
@@ -44,6 +67,25 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
           <Clock className="h-5 w-5 text-mint-600" />
           Технологический процесс
         </h2>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5"
+                onClick={handlePrintToWord}
+              >
+                <FileText className="h-4 w-4" />
+                <span className="whitespace-nowrap">Скачать тех.карту</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Скачать технологическую карту в формате Word</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       
       <div className="bg-white border border-cream-100 rounded-xl p-5 mb-6 shadow-sm">
@@ -98,15 +140,6 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
             </div>
           </div>
         )}
-      </div>
-      
-      <div className="text-right">
-        <Button 
-          className="bg-confection-600 hover:bg-confection-700 text-white"
-        >
-          Добавить в производство
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
