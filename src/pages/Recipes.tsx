@@ -15,7 +15,7 @@ import { useRecipeFilters } from '@/features/recipes/hooks/useRecipeFilters';
 import { useRecipeUtils } from '@/features/recipes/hooks/useRecipeUtils';
 
 const Recipes = () => {
-  const { recipes, ingredients, productions, addRecipe, updateRecipe, deleteRecipe } = useStore();
+  const { recipes, ingredients, productions, shippings, addRecipe, updateRecipe, deleteRecipe } = useStore();
   
   // Use custom hooks
   const { 
@@ -83,6 +83,7 @@ const Recipes = () => {
         filteredRecipes={filteredRecipes}
         recipes={recipes}
         productions={productions}
+        shippings={shippings} // Added shippings prop
         onEdit={initEditForm}
         onDelete={initDeleteConfirm}
         getIngredientName={getIngredientName}
