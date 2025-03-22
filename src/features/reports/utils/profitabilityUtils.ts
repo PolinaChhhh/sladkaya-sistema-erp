@@ -69,14 +69,15 @@ export function buildProductionEventsByBatchId(
 export function calculateRecipeProfitability(
   recipe: { id: string, name: string, outputUnit: string },
   productions: any[],
-  shippings: any[]
+  shippings: any[],
+  dateFilter: string
 ): ProfitabilityData | null {
-  // Get movement history for this recipe
+  // Get movement history for this recipe with date filter
   const movementHistory = calculateMovementHistory(
     recipe,
     productions,
     shippings,
-    '' // No date filter
+    dateFilter // This is now passed to filter by date
   );
   
   // Only process recipes that have any movements
@@ -115,6 +116,11 @@ export function calculateRecipeProfitability(
   shipmentEvents
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .forEach(shipment => {
+      // Skip shipments outside the date filter if it exists
+      if (dateFilter && !shipment.date.includes(dateFilter)) {
+        return;
+      }
+      
       // Get the absolute quantity from the shipment (shipment quantities are negative)
       const shipmentQuantity = Math.abs(shipment.quantity);
       let remainingToShip = shipmentQuantity;
@@ -218,9 +224,10 @@ export function calculateRecipeProfitability(
 export function calculateProfitabilityData(
   recipes: any[],
   productions: any[],
-  shippings: any[]
+  shippings: any[],
+  dateFilter: string = ''
 ): ProfitabilityData[] {
-  console.log("Calculating profitability data with FIFO-based costing");
+  console.log(`Calculating profitability data with FIFO-based costing, date filter: ${dateFilter || 'none'}`);
   
   // Create a map to aggregate data by recipe ID
   const productMap = new Map<string, ProfitabilityData>();
@@ -228,7 +235,7 @@ export function calculateProfitabilityData(
   // Process all recipes
   recipes.forEach(recipe => {
     console.log(`Processing recipe: ${recipe.name} (${recipe.id})`);
-    const profitabilityData = calculateRecipeProfitability(recipe, productions, shippings);
+    const profitabilityData = calculateRecipeProfitability(recipe, productions, shippings, dateFilter);
     if (profitabilityData) {
       productMap.set(recipe.id, profitabilityData);
     }

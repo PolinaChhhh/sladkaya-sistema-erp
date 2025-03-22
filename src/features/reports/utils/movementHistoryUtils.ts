@@ -50,17 +50,19 @@ export function calculateMovementHistory(
     });
   });
   
+  // Filter by date if present
+  const filteredEvents = events.filter(event => {
+    if (!dateFilter) return true;
+    
+    const eventDate = new Date(event.date);
+    const formattedDate = formatDate(eventDate);
+    return formattedDate.includes(dateFilter);
+  });
+  
   // Sort by date, most recent first
-  return events
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .filter(event => {
-      // Apply date filter if present
-      if (!dateFilter) return true;
-      
-      const eventDate = new Date(event.date);
-      const formattedDate = formatDate(eventDate);
-      return formattedDate.includes(dateFilter);
-    });
+  return filteredEvents.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 }
 
 // Helper function to format date
