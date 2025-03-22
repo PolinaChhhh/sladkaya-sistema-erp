@@ -1,3 +1,4 @@
+
 import { useStore } from '@/store/recipeStore';
 import { useMemo, useState, useEffect } from 'react';
 import { ProfitabilityData } from '../types/reports';
@@ -29,9 +30,12 @@ export const useProductProfitability = () => {
         const priceWithVat = item.price * (1 + item.vatRate / 100);
         const revenue = priceWithVat * item.quantity;
         
-        // Get the unit cost from the production
+        // Get the unit cost from the production - use the ACTUAL production cost
+        // This is critical for accuracy - we need to use the exact cost from the production batch
         const unitCost = production.quantity > 0 ? production.cost / production.quantity : 0;
         const cost = unitCost * item.quantity;
+        
+        console.log(`Shipped item: ${recipe.name}, quantity: ${item.quantity}, unitCost: ${unitCost}, totalCost: ${cost}`);
         
         // If we already have this recipe in our map, update the values
         if (productMap.has(recipe.id)) {
