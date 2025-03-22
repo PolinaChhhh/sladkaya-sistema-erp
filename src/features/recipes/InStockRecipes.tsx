@@ -1,6 +1,6 @@
 
-import React, { useMemo } from 'react';
-import { Package, Package2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Package, Package2, History } from 'lucide-react';
 import { 
   Table, 
   TableBody, 
@@ -10,8 +10,10 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ProductionBatch, Recipe, ShippingDocument } from '@/store/types';
 import EmptyState from './EmptyState';
+import ProductMovementHistory from './ProductMovementHistory';
 
 interface InStockRecipesProps {
   recipes: Recipe[];
@@ -34,6 +36,9 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
   shippings,
   getRecipeUnit
 }) => {
+  // Track which recipe's movement history is being viewed
+  const [historyRecipeId, setHistoryRecipeId] = useState<string | null>(null);
+  
   const inStockItems = useMemo(() => {
     // Create a map to track produced and shipped quantities by recipe
     const stockMap: Record<string, StockItem> = {};
@@ -77,6 +82,11 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
       .sort((a, b) => a.recipeName.localeCompare(b.recipeName));
   }, [recipes, productions, shippings, getRecipeUnit]);
 
+  const historyRecipe = useMemo(() => {
+    if (!historyRecipeId) return null;
+    return recipes.find(r => r.id === historyRecipeId) || null;
+  }, [historyRecipeId, recipes]);
+
   // If no items in stock, show empty state
   if (inStockItems.length === 0) {
     return (
@@ -104,7 +114,8 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
                 <TableHead className="w-[40%]">Название</TableHead>
                 <TableHead className="w-[20%]">Количество</TableHead>
                 <TableHead className="w-[15%]">Ед. изм.</TableHead>
-                <TableHead className="w-[25%]">Посл. производство</TableHead>
+                <TableHead className="w-[15%]">Посл. производство</TableHead>
+                <TableHead className="w-[10%]">Действия</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -118,12 +129,33 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
                       ? new Date(item.lastProduced).toLocaleDateString('ru-RU') 
                       : 'Никогда'}
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1.5"
+                      onClick={() => setHistoryRecipeId(item.recipeId)}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      <span className="sr-only sm:not-sr-only sm:inline-block sm:whitespace-nowrap">История</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+      
+      {/* Product Movement History Dialog */}
+      <ProductMovementHistory 
+        isOpen={Boolean(historyRecipeId)}
+        onClose={() => setHistoryRecipeId(null)}
+        recipe={historyRecipe}
+        productions={productions}
+        shippings={shippings}
+        getRecipeUnit={getRecipeUnit}
+      />
     </div>
   );
 };
