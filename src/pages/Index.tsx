@@ -1,13 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassMorphicCard from '@/components/ui/GlassMorphicCard';
-import { ChefHat, Box, TrendingUp, Truck, Bot, FileText } from 'lucide-react';
+import { ChefHat, Box, TrendingUp, Truck, Bot, FileText, Building2 } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
+import { Button } from '@/components/ui/button';
+import CompanyDialog from '@/features/company/CompanyDialog';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { ingredients, recipes, productions, shippings, receipts } = useStore();
+  const { ingredients, recipes, productions, shippings, receipts, company } = useStore();
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
   
   const stats = [
     {
@@ -49,8 +52,17 @@ const Index = () => {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Сладкая Система</h1>
+      <header className="mb-10 text-center relative">
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <h1 className="text-4xl font-bold text-gray-900">Сладкая Система</h1>
+          <Button 
+            onClick={() => setIsCompanyDialogOpen(true)}
+            className="bg-confection-600 hover:bg-confection-700 text-white flex items-center gap-2"
+          >
+            <Building2 className="h-5 w-5" />
+            {company ? 'Данные компании' : 'Добавить компанию'}
+          </Button>
+        </div>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Система управления кондитерским производством
         </p>
@@ -115,6 +127,12 @@ const Index = () => {
           </div>
         </GlassMorphicCard>
       </div>
+      
+      {/* Company Dialog */}
+      <CompanyDialog 
+        isOpen={isCompanyDialogOpen} 
+        setIsOpen={setIsCompanyDialogOpen} 
+      />
     </div>
   );
 };

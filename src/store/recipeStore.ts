@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument, Buyer } from './types';
+import { Ingredient, Recipe, Supplier, Receipt, ProductionBatch, ShippingDocument, Buyer, Company } from './types';
 import { createIngredientSlice, IngredientSlice } from './slices/ingredientSlice';
 import { createRecipeSlice, RecipeSlice } from './slices/recipeSlice';
 import { createSupplierSlice, SupplierSlice } from './slices/supplierSlice';
@@ -9,6 +9,7 @@ import { createReceiptSlice, ReceiptSlice } from './slices/receiptSlice';
 import { createProductionSlice, ProductionSlice } from './slices/productionSlice';
 import { createShippingSlice, ShippingSlice } from './slices/shippingSlice';
 import { createBuyerSlice, BuyerSlice } from './slices/buyerSlice';
+import { createCompanySlice, CompanySlice } from './slices/companySlice';
 
 // Export all types from the types directory
 export type { 
@@ -22,7 +23,8 @@ export type {
   ProductionBatch, 
   RecipeItem,    
   RecipeCategory, 
-  RecipeTag      
+  RecipeTag,
+  Company      
 } from './types';
 
 // Create the store combining all slices
@@ -34,7 +36,8 @@ interface StoreState extends
   ReceiptSlice, 
   ProductionSlice, 
   ShippingSlice, 
-  BuyerSlice {
+  BuyerSlice,
+  CompanySlice {
   // Add loading and error states to the store
   isLoading: boolean;
   error: Error | null;
@@ -51,6 +54,7 @@ export const useStore = create<StoreState>()(
         ...createProductionSlice(...args),
         ...createShippingSlice(...args),
         ...createBuyerSlice(...args),
+        ...createCompanySlice(...args),
         // Initialize loading and error states
         isLoading: false,
         error: null
@@ -64,8 +68,9 @@ export const useStore = create<StoreState>()(
           suppliers: state.suppliers,
           receipts: state.receipts,
           productions: state.productions,
-          shippings: state.shippings, // Changed from shipments to shippings to match the ShippingSlice interface
+          shippings: state.shippings,
           buyers: state.buyers,
+          company: state.company,
           // Don't persist these states
           isLoading: false,
           error: null

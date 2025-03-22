@@ -5,4 +5,4 @@ export * from './buyer';
 export * from './ingredient';
 export * from './receipt';
 export * from './supplier';
-
+export * from './company';
