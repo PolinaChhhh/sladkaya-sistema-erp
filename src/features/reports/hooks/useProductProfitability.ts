@@ -37,15 +37,24 @@ export const useProductProfitability = () => {
       let totalCost = 0;
       let quantitySold = 0;
       
+      // For each recipe, we need to track which production batches fulfilled each shipment
+      // Group production events by their batch ID for easier lookup
+      const productionEventsByBatchId = movementHistory
+        .filter(event => event.type === 'production')
+        .reduce((acc, event) => {
+          if (event.batchId) {
+            acc[event.batchId] = event;
+          }
+          return acc;
+        }, {} as Record<string, MovementEvent>);
+      
       // Process each shipment event
       shipmentEvents.forEach(shipment => {
         const batchId = shipment.batchId;
         if (!batchId) return;
         
         // Get the production event for this batch
-        const productionEvent = movementHistory.find(
-          event => event.type === 'production' && event.batchId === batchId
-        );
+        const productionEvent = productionEventsByBatchId[batchId];
         
         if (!productionEvent) return;
         
