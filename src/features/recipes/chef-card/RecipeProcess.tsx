@@ -140,7 +140,8 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
             <TooltipContent>
               <p>Скачать технологическую карту в формате Word</p>
             </TooltipContent>
-          </TooltipProvider>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       
       <div className="bg-white border border-cream-100 rounded-xl p-5 mb-6 shadow-sm">
