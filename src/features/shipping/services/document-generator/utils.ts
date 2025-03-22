@@ -1,4 +1,3 @@
-
 import { ShippingDocument, RussianDocumentType } from '@/store/types/shipping';
 import { Buyer } from '@/store/types/buyer';
 import { Recipe, ProductionBatch } from '@/store/types/recipe';
@@ -48,13 +47,38 @@ export const prepareDocumentData = (
     };
   });
   
+  // Для ТОРГ-12 добавим дополнительные данные для улучшения шаблонов
+  const currentDate = new Date().toLocaleDateString('ru-RU');
+  const formattedShipmentNumber = formatShipmentNumber(shipping.shipmentNumber);
+  
+  // Расширенные данные для ТОРГ-12
+  const extendedData = {
+    shipping: {
+      ...shipping,
+      formattedNumber: formattedShipmentNumber,
+      formattedDate: shipping.date,
+      currentDate
+    },
+    buyer,
+    items,
+    totals: {
+      withoutVat: totalWithoutVat,
+      vatAmount: totalVatAmount,
+      withVat: totalWithVat,
+      itemsCount: items.length,
+      // Текстовое представление суммы прописью (заглушка)
+      amountInWords: `${Math.floor(totalWithVat)} руб. ${Math.round((totalWithVat - Math.floor(totalWithVat)) * 100)} коп.`
+    }
+  };
+  
   return {
     shipping,
     buyer,
     items,
     totalWithoutVat,
     totalVatAmount,
-    totalWithVat
+    totalWithVat,
+    extendedData // Добавляем расширенные данные для шаблонов
   };
 };
 
@@ -93,6 +117,75 @@ export const buildDocumentFileName = (
   const extension = format === 'excel' ? 'xls' : 'pdf';
   
   return `${documentType}_${formattedNumber}_${sanitizedBuyerName}.${extension}`;
+};
+
+/**
+ * Validates substitution rules JSON
+ */
+export const validateSubstitutionRules = (rulesJson: string): boolean => {
+  try {
+    const rules = JSON.parse(rulesJson);
+    
+    if (!rules.rules || !Array.isArray(rules.rules)) {
+      return false;
+    }
+    
+    // Проверяем базовую структуру правил
+    for (const rule of rules.rules) {
+      if (rule.type === 'table') {
+        // Проверка правил для таблиц
+        if (!rule.items || !rule.fields || !Array.isArray(rule.fields)) {
+          return false;
+        }
+      } else if (!rule.placeholder || !rule.field) {
+        // Проверка простых правил замены
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Gets TORG-12 specific template data 
+ * This function extracts additional data useful for TORG-12 documents
+ */
+export const getTORG12TemplateData = (data: DocumentGenerationData): Record<string, any> => {
+  const { shipping, buyer, items, totalWithVat } = data;
+  
+  return {
+    documentNumber: formatShipmentNumber(shipping.shipmentNumber),
+    documentDate: shipping.date,
+    currentDate: new Date().toLocaleDateString('ru-RU'),
+    supplierName: "Ваша компания", // Это должно быть взято из настроек компании
+    supplierTIN: "1234567890", // Это должно быть взято из настроек компании
+    buyerName: buyer.name,
+    buyerTIN: buyer.tin || "",
+    buyerAddress: buyer.legalAddress || "",
+    items: items.map((item, index) => ({
+      ...item,
+      number: index + 1, // Номер по порядку
+      totalPrice: item.priceWithoutVat * item.quantity // Общая стоимость без НДС
+    })),
+    totalItems: items.length,
+    totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+    totalAmount: totalWithVat,
+    amountInWords: `${Math.floor(totalWithVat)} руб. ${Math.round((totalWithVat - Math.floor(totalWithVat)) * 100)} коп.`,
+    // Подписи для ТОРГ-12
+    signatures: {
+      supplier: {
+        position: "Генеральный директор",
+        name: "Иванов И.И."
+      },
+      recipient: {
+        position: "",
+        name: ""
+      }
+    }
+  };
 };
 
 /**

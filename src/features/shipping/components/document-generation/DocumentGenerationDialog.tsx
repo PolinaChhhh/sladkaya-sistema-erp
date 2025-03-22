@@ -29,7 +29,8 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
     documentFormat,
     setDocumentFormat,
     handleDocumentGeneration,
-    canGenerate
+    canGenerate,
+    buyer
   } = useDocumentGeneration(shipping, () => onOpenChange(false));
   
   return (
@@ -59,6 +60,7 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
           <DocumentAlerts 
             documentType={documentType}
             canGenerate={canGenerate}
+            buyer={buyer}
           />
         </div>
         

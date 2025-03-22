@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Clipboard, Info } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TemplateRulesFieldProps {
   rules: string;
@@ -8,6 +11,52 @@ interface TemplateRulesFieldProps {
 }
 
 const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange }) => {
+  // Шаблоны правил для быстрой вставки
+  const basicRulesTemplate = `{
+  "rules": [
+    {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
+    {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
+    {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"}
+  ]
+}`;
+
+  const excelTableRulesTemplate = `{
+  "rules": [
+    {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
+    {
+      "type": "table",
+      "startRow": 10,
+      "sheet": "Sheet1",
+      "items": "items",
+      "fields": [
+        {"column": "A", "field": "productName"},
+        {"column": "B", "field": "quantity"},
+        {"column": "C", "field": "unit"},
+        {"column": "D", "field": "priceWithoutVat"},
+        {"column": "E", "field": "vatRate"},
+        {"column": "F", "field": "vatAmount"},
+        {"column": "G", "field": "totalAmount"}
+      ]
+    },
+    {"placeholder": "{{total_no_vat}}", "field": "totalWithoutVat"},
+    {"placeholder": "{{total_vat}}", "field": "totalVatAmount"},
+    {"placeholder": "{{total_with_vat}}", "field": "totalWithVat"}
+  ]
+}`;
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Шаблон скопирован в буфер обмена');
+  };
+
+  const insertTemplate = (template: string) => {
+    onChange(template);
+    toast.success('Шаблон правил добавлен');
+  };
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Правила подстановки (JSON)</label>
@@ -15,11 +64,48 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
         value={rules} 
         onChange={(e) => onChange(e.target.value)} 
         placeholder='{"rules": []}'
-        rows={4}
+        rows={8}
         className="font-mono text-xs"
       />
+      
+      <div className="flex gap-2 items-center">
+        <div className="text-xs text-gray-500 flex items-center">
+          <Info className="h-3 w-3 mr-1" />
+          Шаблоны правил:
+        </div>
+        <Button 
+          type="button" 
+          size="sm" 
+          variant="outline" 
+          className="text-xs h-7 px-2"
+          onClick={() => insertTemplate(basicRulesTemplate)}
+        >
+          Базовые правила
+        </Button>
+        <Button 
+          type="button" 
+          size="sm" 
+          variant="outline" 
+          className="text-xs h-7 px-2"
+          onClick={() => insertTemplate(excelTableRulesTemplate)}
+        >
+          Excel с таблицей
+        </Button>
+        <Button 
+          type="button" 
+          size="sm" 
+          variant="ghost" 
+          className="text-xs h-7 px-2 ml-auto"
+          onClick={() => copyToClipboard(rules)}
+        >
+          <Clipboard className="h-3 w-3 mr-1" />
+          Копировать
+        </Button>
+      </div>
+      
       <p className="text-xs text-gray-500">
-        Задает правила подстановки данных в шаблон документа в формате JSON
+        Задает правила подстановки данных в шаблон документа в формате JSON.
+        Подробное руководство доступно на странице шаблонов.
       </p>
     </div>
   );

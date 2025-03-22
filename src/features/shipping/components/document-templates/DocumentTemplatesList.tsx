@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useTemplatesList } from './hooks/useTemplatesList';
 import { TemplateCard, TemplateDialog, EmptyTemplatesList } from './components';
+import TemplateRulesGuide from './components/TemplateRulesGuide';
 
 const DocumentTemplatesList = () => {
   const {
@@ -46,6 +47,9 @@ const DocumentTemplatesList = () => {
           ))}
         </div>
       )}
+      
+      {/* Добавляем компонент с руководством по созданию шаблонов */}
+      <TemplateRulesGuide />
       
       {/* Upload Template Dialog */}
       <TemplateDialog
