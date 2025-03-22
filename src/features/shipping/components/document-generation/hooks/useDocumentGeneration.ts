@@ -17,7 +17,7 @@ export const useDocumentGeneration = (
   const { buyers, productions, recipes, updateShippingDocument } = useStore();
   const [documentType, setDocumentType] = useState<RussianDocumentType>('TORG12');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [documentFormat, setDocumentFormat] = useState<'pdf' | 'excel'>('excel');
+  const [documentFormat, setDocumentFormat] = useState<'pdf' | 'excel'>('pdf');
   
   // Find the buyer for this shipping
   const buyer = buyers.find(b => b.id === shipping.buyerId);

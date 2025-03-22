@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, FileSpreadsheet } from 'lucide-react';
+import { FileText, FileSpreadsheet, Printer } from 'lucide-react';
 
 interface FormatSelectorProps {
   documentFormat: 'pdf' | 'excel';
