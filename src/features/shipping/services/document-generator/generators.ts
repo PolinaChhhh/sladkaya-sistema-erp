@@ -11,14 +11,14 @@ const generateFromTemplate = async (
   documentType: RussianDocumentType,
   template: File,
   data: DocumentGenerationData,
-  format: 'word' | 'excel'
+  format: 'pdf' | 'excel'
 ): Promise<Blob> => {
   console.log(`Generating ${format} document from template for ${documentType}`);
   
   try {
     // In a real implementation, we would use a library to fill the template
     // For Excel templates, we might use SheetJS/xlsx
-    // For Word templates, we might use docxtemplater
+    // For PDF templates, we might use a PDF library
     
     // For now, we'll read the template file and return it unchanged
     // In a production environment, this would be replaced with actual template filling
@@ -29,7 +29,7 @@ const generateFromTemplate = async (
     return new Blob([arrayBuffer], { 
       type: format === 'excel' 
         ? 'application/vnd.ms-excel' 
-        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+        : 'application/pdf' 
     });
   } catch (error) {
     console.error('Error generating document from template:', error);
@@ -38,13 +38,13 @@ const generateFromTemplate = async (
 };
 
 /**
- * Generates a Word document
+ * Generates a PDF document
  */
-const generateWordDocument = async (
+const generatePdfDocument = async (
   documentType: RussianDocumentType,
   data: DocumentGenerationData
 ): Promise<Blob> => {
-  // In a real implementation, this would use a library like docxtemplater
+  // In a real implementation, this would use a PDF generation library
   // For now, we'll simulate the document generation
   
   // Get template based on document type
@@ -55,7 +55,7 @@ const generateWordDocument = async (
   const documentContent = generateDocumentContent(documentType, data);
   
   // Create a Blob containing the document content
-  const blob = new Blob([documentContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const blob = new Blob([documentContent], { type: 'application/pdf' });
   
   return blob;
 };
@@ -125,7 +125,7 @@ export const generateExcelDocument = async (
 export const generateDocument = async (
   documentType: RussianDocumentType,
   data: DocumentGenerationData,
-  format: 'word' | 'excel' = 'word'
+  format: 'pdf' | 'excel' = 'excel'
 ): Promise<Blob> => {
   // Check if we have a template for this document type
   const template = documentTemplates[documentType];
@@ -140,6 +140,6 @@ export const generateDocument = async (
     return generateExcelDocument(documentType, data);
   }
   
-  // For Word documents
-  return generateWordDocument(documentType, data);
+  // For PDF documents
+  return generatePdfDocument(documentType, data);
 };

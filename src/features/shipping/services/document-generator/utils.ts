@@ -86,11 +86,11 @@ export const buildDocumentFileName = (
   documentType: RussianDocumentType,
   shipmentNumber: number,
   buyerName: string,
-  format: 'word' | 'excel' = 'word'
+  format: 'pdf' | 'excel' = 'excel'
 ): string => {
   const formattedNumber = formatShipmentNumber(shipmentNumber);
   const sanitizedBuyerName = buyerName.replace(/[^\w\s]/gi, '').substring(0, 20);
-  const extension = format === 'excel' ? 'xls' : 'docx';
+  const extension = format === 'excel' ? 'xls' : 'pdf';
   
   return `${documentType}_${formattedNumber}_${sanitizedBuyerName}.${extension}`;
 };

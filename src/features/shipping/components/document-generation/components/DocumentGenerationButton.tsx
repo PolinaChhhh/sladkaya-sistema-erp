@@ -7,7 +7,7 @@ interface DocumentGenerationButtonProps {
   onClick: () => void;
   isGenerating: boolean;
   canGenerate: boolean;
-  documentFormat: 'word' | 'excel';
+  documentFormat: 'pdf' | 'excel';
 }
 
 const DocumentGenerationButton: React.FC<DocumentGenerationButtonProps> = ({
@@ -28,7 +28,7 @@ const DocumentGenerationButton: React.FC<DocumentGenerationButtonProps> = ({
         </>
       ) : (
         <>
-          {documentFormat === 'word' ? (
+          {documentFormat === 'pdf' ? (
             <FileText className="h-4 w-4 mr-2" />
           ) : (
             <FileSpreadsheet className="h-4 w-4 mr-2" />

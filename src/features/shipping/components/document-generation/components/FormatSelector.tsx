@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileSpreadsheet, FilePdf } from 'lucide-react';
+import { FileText, FileSpreadsheet } from 'lucide-react';
 
 interface FormatSelectorProps {
   documentFormat: 'pdf' | 'excel';
@@ -24,7 +24,7 @@ const FormatSelector: React.FC<FormatSelectorProps> = ({
       >
         <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="pdf" disabled={isGenerating}>
-            <FilePdf className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 mr-2" />
             PDF
           </TabsTrigger>
           <TabsTrigger value="excel" disabled={isGenerating}>
