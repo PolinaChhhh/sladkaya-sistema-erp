@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import RecipeBasicFields from './RecipeBasicFields';
 import RecipeOutputFields from './RecipeOutputFields';
 import RecipeItemsManager from './RecipeItemsManager';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface RecipeFormProps {
   isOpen: boolean;
@@ -115,53 +116,55 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   const mainItems = formData.items.filter(item => !item.isPackaging);
 
   return (
-    <DialogContent className="sm:max-w-lg">
+    <DialogContent className="sm:max-w-[65vw] max-h-[90vh]">
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
       </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <RecipeBasicFields
-          name={formData.name}
-          description={formData.description}
-          tags={formData.tags}
-          imageUrl={formData.imageUrl}
-          preparationTime={formData.preparationTime}
-          bakingTemperature={formData.bakingTemperature}
-          category={formData.category}
-          onNameChange={(value) => setFormData({ ...formData, name: value })}
-          onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
-          onTagsChange={handleTagsChange}
-          onImageChange={handleImageChange}
-          onPreparationTimeChange={handlePreparationTimeChange}
-          onBakingTemperatureChange={handleBakingTemperatureChange}
-        />
-        
-        <RecipeOutputFields 
-          output={formData.output}
-          outputUnit={formData.outputUnit}
-          category={formData.category}
-          items={mainItems}
-          lossPercentage={formData.lossPercentage}
-          onOutputChange={(value) => setFormData({ ...formData, output: value })}
-          onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
-          onCategoryChange={handleCategoryChange}
-          onLossPercentageChange={handleLossPercentageChange}
-          getIngredientUnit={getIngredientUnit}
-        />
-        
-        <RecipeItemsManager
-          items={mainItems}
-          ingredients={ingredients}
-          recipes={recipes}
-          currentRecipeId={currentRecipeId}
-          getIngredientName={getIngredientName}
-          getIngredientUnit={getIngredientUnit}
-          getRecipeName={getRecipeName}
-          getRecipeUnit={getRecipeUnit}
-          onUpdateItems={(items) => setFormData({ ...formData, items })}
-          category={formData.category}
-        />
-      </div>
+      <ScrollArea className="max-h-[70vh] pr-4">
+        <div className="grid gap-4 py-4">
+          <RecipeBasicFields
+            name={formData.name}
+            description={formData.description}
+            tags={formData.tags}
+            imageUrl={formData.imageUrl}
+            preparationTime={formData.preparationTime}
+            bakingTemperature={formData.bakingTemperature}
+            category={formData.category}
+            onNameChange={(value) => setFormData({ ...formData, name: value })}
+            onDescriptionChange={(value) => setFormData({ ...formData, description: value })}
+            onTagsChange={handleTagsChange}
+            onImageChange={handleImageChange}
+            onPreparationTimeChange={handlePreparationTimeChange}
+            onBakingTemperatureChange={handleBakingTemperatureChange}
+          />
+          
+          <RecipeOutputFields 
+            output={formData.output}
+            outputUnit={formData.outputUnit}
+            category={formData.category}
+            items={mainItems}
+            lossPercentage={formData.lossPercentage}
+            onOutputChange={(value) => setFormData({ ...formData, output: value })}
+            onOutputUnitChange={(value) => setFormData({ ...formData, outputUnit: value })}
+            onCategoryChange={handleCategoryChange}
+            onLossPercentageChange={handleLossPercentageChange}
+            getIngredientUnit={getIngredientUnit}
+          />
+          
+          <RecipeItemsManager
+            items={mainItems}
+            ingredients={ingredients}
+            recipes={recipes}
+            currentRecipeId={currentRecipeId}
+            getIngredientName={getIngredientName}
+            getIngredientUnit={getIngredientUnit}
+            getRecipeName={getRecipeName}
+            getRecipeUnit={getRecipeUnit}
+            onUpdateItems={(items) => setFormData({ ...formData, items })}
+            category={formData.category}
+          />
+        </div>
+      </ScrollArea>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
           Отмена

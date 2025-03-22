@@ -64,7 +64,7 @@ const Recipes = () => {
   const selectedRecipe = formSelectedRecipe || deleteSelectedRecipe;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <RecipeHeader onAddNew={initCreateForm} />
       
       <RecipeSearch 
