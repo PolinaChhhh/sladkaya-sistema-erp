@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Package, Package2, History } from 'lucide-react';
 import { 
@@ -13,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProductionBatch, Recipe, ShippingDocument } from '@/store/types';
 import EmptyState from './EmptyState';
-import ProductMovementHistory from './ProductMovementHistory';
+import ProductMovementHistory from './product-movement/ProductMovementHistory';
 
 interface InStockRecipesProps {
   recipes: Recipe[];
