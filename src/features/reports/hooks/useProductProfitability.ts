@@ -20,11 +20,17 @@ export const useProductProfitability = () => {
       shipping.items.forEach(item => {
         // Find the production batch for this shipment item
         const production = productions.find(p => p.id === item.productionBatchId);
-        if (!production) return;
+        if (!production) {
+          console.log(`Production not found for item in shipping ${shipping.id}`);
+          return;
+        }
         
         // Find the recipe for this production
         const recipe = recipes.find(r => r.id === production.recipeId);
-        if (!recipe) return;
+        if (!recipe) {
+          console.log(`Recipe not found for production ${production.id}`);
+          return;
+        }
         
         // Calculate revenue including VAT
         const priceWithVat = item.price * (1 + item.vatRate / 100);
@@ -35,7 +41,7 @@ export const useProductProfitability = () => {
         const unitCost = production.quantity > 0 ? production.cost / production.quantity : 0;
         const cost = unitCost * item.quantity;
         
-        console.log(`Shipped item: ${recipe.name}, quantity: ${item.quantity}, unitCost: ${unitCost}, totalCost: ${cost}`);
+        console.log(`Shipped item: ${recipe.name}, quantity: ${item.quantity}, unitCost: ${unitCost}, totalCost: ${cost}, recipeId: ${recipe.id}`);
         
         // If we already have this recipe in our map, update the values
         if (productMap.has(recipe.id)) {
@@ -61,6 +67,33 @@ export const useProductProfitability = () => {
           });
         }
       });
+    });
+    
+    // Log all products in the report
+    console.log(`Products in profitability report: ${Array.from(productMap.keys()).length}`);
+    console.log(`Recipe IDs in report: ${Array.from(productMap.keys()).join(', ')}`);
+    
+    // Log all recipes with production to help debugging
+    console.log('All recipes with productions:');
+    const allProducedRecipes = new Set(productions.map(p => p.recipeId));
+    recipes
+      .filter(r => allProducedRecipes.has(r.id))
+      .forEach(r => {
+        console.log(`Recipe: ${r.name} (${r.id})`);
+      });
+    
+    // Also log all shipped products with their production batches
+    console.log('All shipped items:');
+    shippings.forEach(shipping => {
+      if (shipping.status !== 'draft') {
+        shipping.items.forEach(item => {
+          const production = productions.find(p => p.id === item.productionBatchId);
+          if (production) {
+            const recipe = recipes.find(r => r.id === production.recipeId);
+            console.log(`Shipped: ${recipe?.name || 'Unknown'}, productionId: ${item.productionBatchId}, recipeId: ${production.recipeId}`);
+          }
+        });
+      }
     });
     
     // Convert the map to an array and sort by profitability (descending)
