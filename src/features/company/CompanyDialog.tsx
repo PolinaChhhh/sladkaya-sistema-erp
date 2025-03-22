@@ -18,7 +18,10 @@ const CompanyDialog: React.FC<CompanyDialogProps> = ({ isOpen, setIsOpen }) => {
         formData={formData}
         setFormData={setFormData}
         onCancel={() => setIsOpen(false)}
-        onSubmit={handleSave}
+        onSubmit={() => {
+          handleSave();
+          setIsOpen(false);
+        }}
       />
     </Dialog>
   );
