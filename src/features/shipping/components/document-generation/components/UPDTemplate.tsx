@@ -27,95 +27,109 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
   return (
     <div className="upd-container">
       <div className="upd-header">
-        <div className="upd-title">Универсальный передаточный документ</div>
-        
-        <table className="upd-info-table">
-          <tbody>
-            <tr>
-              <td className="upd-label">Счет-фактура №</td>
-              <td className="upd-value">{shipping.shipmentNumber}</td>
-              <td className="upd-label">от</td>
-              <td className="upd-value">{formatDate(shipping.date)}</td>
-              <td className="upd-reference">(1)</td>
-            </tr>
-            <tr>
-              <td className="upd-label">Исправление №</td>
-              <td className="upd-value">—</td>
-              <td className="upd-label">от</td>
-              <td className="upd-value">—</td>
-              <td className="upd-reference">(1a)</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div className="upd-status-box">
-          <div className="upd-status-title">Статус:</div>
-          <div className="upd-status-checkbox">
-            <div className="upd-checkbox checked"></div>
-            <div className="upd-status-text">1 - счет-фактура и передаточный документ (акт)</div>
+        <div className="upd-header-top">
+          <div className="upd-header-title">
+            <div className="upd-title">Универсальный передаточный документ</div>
           </div>
-          <div className="upd-status-checkbox">
-            <div className="upd-checkbox"></div>
-            <div className="upd-status-text">2 - передаточный документ (акт)</div>
+          
+          <div className="upd-invoice-info">
+            <table className="upd-invoice-table">
+              <tbody>
+                <tr>
+                  <td>Счет-фактура №</td>
+                  <td className="upd-value">{shipping.shipmentNumber}</td>
+                  <td>от</td>
+                  <td className="upd-value">{formatDate(shipping.date)}</td>
+                  <td className="upd-reference">(1)</td>
+                </tr>
+                <tr>
+                  <td>Исправление №</td>
+                  <td className="upd-value">—</td>
+                  <td>от</td>
+                  <td className="upd-value">—</td>
+                  <td className="upd-reference">(1a)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="upd-appendix">
+            <div className="upd-appendix-number">Приложение № 1</div>
+            <div className="upd-appendix-text">к постановлению Правительства РФ от 26.12.2011 № 1137</div>
+            <div className="upd-appendix-text">(в редакции постановления Правительства РФ от 16.08.2024 № 1096)</div>
+          </div>
+        </div>
+        
+        <div className="upd-status-section">
+          <div className="upd-status-title">Статус:</div>
+          <div className="upd-status-box">
+            <div className="upd-status-checkbox">
+              <div className="upd-checkbox checked"></div>
+              <div className="upd-status-text">1 - счет-фактура и передаточный документ (акт)</div>
+            </div>
+            <div className="upd-status-checkbox">
+              <div className="upd-checkbox"></div>
+              <div className="upd-status-text">2 - передаточный документ (акт)</div>
+            </div>
           </div>
         </div>
         
         <table className="upd-info-table">
           <tbody>
             <tr>
-              <td className="upd-label">Продавец:</td>
+              <td className="upd-label">Продавец</td>
               <td className="upd-value">{data.extendedData?.company?.name || "ООО \"Ваша компания\""}</td>
               <td className="upd-reference">(2)</td>
             </tr>
             <tr>
-              <td className="upd-label">Адрес:</td>
+              <td className="upd-label">Адрес</td>
               <td className="upd-value">{data.extendedData?.company?.legalAddress || "г. Москва, ул. Примерная, д. 1"}</td>
               <td className="upd-reference">(2a)</td>
             </tr>
             <tr>
-              <td className="upd-label">ИНН/КПП продавца:</td>
+              <td className="upd-label">ИНН/КПП продавца</td>
               <td className="upd-value">{data.extendedData?.company?.tin || "1234567890"}</td>
               <td className="upd-reference">(2б)</td>
             </tr>
             <tr>
-              <td className="upd-label">Грузоотправитель и его адрес:</td>
+              <td className="upd-label">Грузоотправитель и его адрес</td>
               <td className="upd-value">он же</td>
               <td className="upd-reference">(3)</td>
             </tr>
             <tr>
-              <td className="upd-label">Грузополучатель и его адрес:</td>
+              <td className="upd-label">Грузополучатель и его адрес</td>
               <td className="upd-value">
-                {buyer.name}, {buyer.tin}, {buyer.legalAddress}, {buyer.physicalAddress}
+                {buyer.name} {buyer.tin} {buyer.legalAddress} {buyer.physicalAddress}
               </td>
               <td className="upd-reference">(4)</td>
             </tr>
             <tr>
-              <td className="upd-label">К платежно-расчетному документу:</td>
+              <td className="upd-label">К платежно-расчетному документу</td>
               <td className="upd-value">№ — от —</td>
               <td className="upd-reference">(5)</td>
             </tr>
             <tr>
-              <td className="upd-label">Документ об отгрузке:</td>
+              <td className="upd-label">Документ об отгрузке: наименование,</td>
               <td className="upd-value">№ {shipping.shipmentNumber} от {formatDate(shipping.date)}</td>
               <td className="upd-reference">(5a)</td>
             </tr>
             <tr>
-              <td className="upd-label">Покупатель:</td>
+              <td className="upd-label">Покупатель</td>
               <td className="upd-value">{buyer.name}</td>
               <td className="upd-reference">(6)</td>
             </tr>
             <tr>
-              <td className="upd-label">Адрес:</td>
-              <td className="upd-value">{buyer.legalAddress || ""}</td>
+              <td className="upd-label">Адрес</td>
+              <td className="upd-value">{buyer.physicalAddress || ""}</td>
               <td className="upd-reference">(6a)</td>
             </tr>
             <tr>
-              <td className="upd-label">ИНН/КПП покупателя:</td>
+              <td className="upd-label">ИНН/КПП покупателя</td>
               <td className="upd-value">{buyer.tin}</td>
               <td className="upd-reference">(6б)</td>
             </tr>
             <tr>
-              <td className="upd-label">Валюта: наименование, код:</td>
+              <td className="upd-label">Валюта: наименование, код</td>
               <td className="upd-value">российский рубль, 643</td>
               <td className="upd-reference">(7)</td>
             </tr>
@@ -125,7 +139,7 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
         <table className="upd-contract-table">
           <tbody>
             <tr>
-              <td className="upd-label">Идентификатор государственного контракта, договора (соглашения) (при наличии):</td>
+              <td className="upd-label">Идентификатор государственного контракта, договора (соглашения) (при наличии)</td>
               <td className="upd-value">—</td>
               <td className="upd-reference">(8)</td>
             </tr>
