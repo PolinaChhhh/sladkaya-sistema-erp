@@ -1,7 +1,7 @@
 
 import TemplateCard from './TemplateCard';
-import TemplateDialog from './TemplateDialog';
 import EmptyTemplatesList from './EmptyTemplatesList';
+import { TemplateDialog } from './dialog';
 
 export {
   TemplateCard,
