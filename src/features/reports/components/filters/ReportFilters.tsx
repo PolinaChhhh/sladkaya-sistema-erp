@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -75,7 +76,6 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
               className={cn("p-3 pointer-events-auto")}
               ISOWeek={false}
               defaultMonth={selectedMonth}
-              view="month"
             />
           </PopoverContent>
         </Popover>
