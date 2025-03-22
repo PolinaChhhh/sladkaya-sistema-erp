@@ -1,6 +1,7 @@
 
 import { Recipe, Ingredient } from '@/store/types';
 import { getIngredientDetails } from '@/features/production/utils/calculations/ingredientDetails';
+import { calculateTotalCost } from '@/features/production/utils/calculations/costCalculations';
 
 interface CostBreakdownItem {
   name: string;
@@ -21,12 +22,13 @@ export function calculateCostBreakdown(
 ): CostBreakdownItem[] {
   // Calculate total costs and ingredient breakdown
   const quantity = 1; // Calculate for 1 unit of output
-  const ingredientDetails = getIngredientDetails(allRecipes, recipe.id, recipe.output, ingredients);
+  const ingredientDetails = getIngredientDetails(allRecipes, recipe.id, quantity, ingredients);
   
   if (ingredientDetails.length === 0) return [];
   
-  // Calculate total cost
-  const totalCost = ingredientDetails.reduce((total, item) => total + item.cost, 0);
+  // Calculate total cost using the dedicated cost calculation function
+  // This ensures we're using the same pricing logic across the application
+  const totalCost = calculateTotalCost(allRecipes, recipe.id, quantity, ingredients);
   
   // Group by categories (packaging vs raw materials)
   const packagingCosts = ingredientDetails
