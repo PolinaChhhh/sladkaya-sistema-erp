@@ -2,7 +2,7 @@
 import { RussianDocumentType } from '@/store/types/shipping';
 
 // Store templates for document types
-const documentTemplates: Record<RussianDocumentType, File | null> = {
+export const documentTemplates: Record<RussianDocumentType, File | null> = {
   TORG12: null,
   UTD: null,
   TTN: null,
@@ -28,5 +28,3 @@ export const getDocumentTemplate = async (documentType: RussianDocumentType): Pr
   // For now, we'll return a placeholder
   return `Template for ${documentType}`;
 };
-
-export { documentTemplates };
