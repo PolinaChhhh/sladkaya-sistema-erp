@@ -54,8 +54,8 @@ const ShipmentsList = () => {
               productions={productions}
               recipes={recipes}
               onStatusUpdate={handleStatusUpdate}
-              onDeleteClick={initDeleteConfirm}
-              onEditClick={initEditForm}
+              onDeleteClick={() => initDeleteConfirm(shipping)}
+              onEditClick={() => initEditForm(shipping)}
             />
           ))}
         </div>
