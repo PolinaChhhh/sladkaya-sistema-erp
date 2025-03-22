@@ -35,12 +35,12 @@ export const useShippingOperations = ({
   const handleDeleteConfirm = () => {
     if (selectedShipping) {
       // Delete the shipping and get the deleted document
-      const { _deletedShipping } = deleteShipping(selectedShipping.id);
+      const result = deleteShipping(selectedShipping.id);
       
       // If we have the deleted shipping document, restore the items to inventory
-      if (_deletedShipping) {
+      if (result._deletedShipping) {
         // For each item in the deleted shipping, restore the quantity to the production batch
-        _deletedShipping.items.forEach(item => {
+        result._deletedShipping.items.forEach(item => {
           // Find the production batch
           const production = productions.find(p => p.id === item.productionBatchId);
           
@@ -58,6 +58,9 @@ export const useShippingOperations = ({
       toast.success('Отгрузка удалена');
       setIsDeleteConfirmOpen(false);
     }
+    
+    // Return the result for type compatibility
+    return {};
   };
   
   const handleCreateShipping = (formData: {
