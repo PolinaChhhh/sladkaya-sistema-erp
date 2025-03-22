@@ -29,7 +29,7 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
   const { buyers, productions, recipes, updateShippingDocument } = useStore();
   const [documentType, setDocumentType] = useState<RussianDocumentType>('TORG12');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [documentFormat, setDocumentFormat] = useState<'word' | 'excel'>('word');
+  const [documentFormat, setDocumentFormat] = useState<'word' | 'excel'>('excel');
   
   // Find the buyer for this shipping
   const buyer = buyers.find(b => b.id === shipping.buyerId);

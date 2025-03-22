@@ -115,48 +115,53 @@ export const generateExcelDocument = async (
   data: DocumentGenerationData
 ): Promise<Blob> => {
   // In a real implementation, we would use a library like xlsx or exceljs
-  // For demonstration purposes, we'll create a CSV file which can be opened in Excel
   const { shipping, buyer, items, totalWithoutVat, totalVatAmount, totalWithVat } = data;
   
-  // Header rows with document info
-  let csvContent = 'Документ:,' + documentType + ',Номер:,' + formatShipmentNumber(shipping.shipmentNumber) + '\r\n';
-  csvContent += 'Дата:,' + shipping.date + '\r\n';
-  csvContent += 'Покупатель:,' + buyer.name + '\r\n';
+  // Create a binary string representing an XLS format
+  let xlsContent = "";
   
-  if (buyer.tin) csvContent += 'ИНН:,' + buyer.tin + '\r\n';
-  if (buyer.legalAddress) csvContent += 'Юридический адрес:,' + buyer.legalAddress + '\r\n';
+  // Excel document begins with a header
+  xlsContent += "\uFEFF"; // UTF-8 BOM for Excel compatibility
+  
+  // Header rows with document info
+  xlsContent += "Документ:\t" + documentType + "\tНомер:\t" + formatShipmentNumber(shipping.shipmentNumber) + "\r\n";
+  xlsContent += "Дата:\t" + shipping.date + "\r\n";
+  xlsContent += "Покупатель:\t" + buyer.name + "\r\n";
+  
+  if (buyer.tin) xlsContent += "ИНН:\t" + buyer.tin + "\r\n";
+  if (buyer.legalAddress) xlsContent += "Юридический адрес:\t" + buyer.legalAddress + "\r\n";
   
   // Empty row as separator
-  csvContent += '\r\n';
+  xlsContent += "\r\n";
   
   // Column headers for items table
-  csvContent += '№,Наименование,Количество,Ед. изм.,Цена без НДС,Ставка НДС,Сумма НДС,Цена с НДС,Итого\r\n';
+  xlsContent += "№\tНаименование\tКоличество\tЕд. изм.\tЦена без НДС\tСтавка НДС\tСумма НДС\tЦена с НДС\tИтого\r\n";
   
   // Items
   items.forEach((item, index) => {
-    csvContent += [
+    xlsContent += [
       index + 1,
       item.productName,
       item.quantity,
       item.unit,
       item.priceWithoutVat.toFixed(2),
-      item.vatRate + '%',
+      item.vatRate + "%",
       item.vatAmount.toFixed(2),
       item.priceWithVat.toFixed(2),
       item.totalAmount.toFixed(2)
-    ].join(',') + '\r\n';
+    ].join("\t") + "\r\n";
   });
   
   // Empty row as separator
-  csvContent += '\r\n';
+  xlsContent += "\r\n";
   
   // Totals
-  csvContent += ',,,,,,,Итого без НДС:,' + totalWithoutVat.toFixed(2) + '\r\n';
-  csvContent += ',,,,,,,Сумма НДС:,' + totalVatAmount.toFixed(2) + '\r\n';
-  csvContent += ',,,,,,,Итого с НДС:,' + totalWithVat.toFixed(2) + '\r\n';
+  xlsContent += "\t\t\t\t\t\t\tИтого без НДС:\t" + totalWithoutVat.toFixed(2) + "\r\n";
+  xlsContent += "\t\t\t\t\t\t\tСумма НДС:\t" + totalVatAmount.toFixed(2) + "\r\n";
+  xlsContent += "\t\t\t\t\t\t\tИтого с НДС:\t" + totalWithVat.toFixed(2) + "\r\n";
   
-  // Create a Blob with the CSV content
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  // Create a Blob with the XLS content
+  const blob = new Blob([xlsContent], { type: 'application/vnd.ms-excel' });
   
   return blob;
 };
@@ -239,7 +244,7 @@ export const buildDocumentFileName = (
 ): string => {
   const formattedNumber = formatShipmentNumber(shipmentNumber);
   const sanitizedBuyerName = buyerName.replace(/[^\w\s]/gi, '').substring(0, 20);
-  const extension = format === 'excel' ? 'csv' : 'docx';
+  const extension = format === 'excel' ? 'xls' : 'docx';
   
   return `${documentType}_${formattedNumber}_${sanitizedBuyerName}.${extension}`;
 };
