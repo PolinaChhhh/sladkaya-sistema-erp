@@ -12,23 +12,34 @@ export const useProductProfitability = () => {
     // Create a map to aggregate data by recipe ID
     const productMap = new Map<string, ProfitabilityData>();
     
+    // First, log all productions to see what should be in the report
+    console.log('All productions:');
+    productions.forEach(p => {
+      const recipe = recipes.find(r => r.id === p.recipeId);
+      if (recipe) {
+        console.log(`Production: ${recipe.name}, quantity: ${p.quantity}, cost: ${p.cost}, unitCost: ${p.quantity > 0 ? p.cost / p.quantity : 0}`);
+      }
+    });
+    
     // Process all shipped items
     shippings.forEach(shipping => {
       // Only include shipped or delivered items
       if (shipping.status === 'draft') return;
       
+      console.log(`Processing shipping ${shipping.id}, status: ${shipping.status}`);
+      
       shipping.items.forEach(item => {
         // Find the production batch for this shipment item
         const production = productions.find(p => p.id === item.productionBatchId);
         if (!production) {
-          console.log(`Production not found for item in shipping ${shipping.id}`);
+          console.log(`Production not found for item in shipping ${shipping.id}, productionBatchId: ${item.productionBatchId}`);
           return;
         }
         
         // Find the recipe for this production
         const recipe = recipes.find(r => r.id === production.recipeId);
         if (!recipe) {
-          console.log(`Recipe not found for production ${production.id}`);
+          console.log(`Recipe not found for production ${production.id}, recipeId: ${production.recipeId}`);
           return;
         }
         
@@ -41,7 +52,7 @@ export const useProductProfitability = () => {
         const unitCost = production.quantity > 0 ? production.cost / production.quantity : 0;
         const cost = unitCost * item.quantity;
         
-        console.log(`Shipped item: ${recipe.name}, quantity: ${item.quantity}, unitCost: ${unitCost}, totalCost: ${cost}, recipeId: ${recipe.id}`);
+        console.log(`Shipped item: ${recipe.name}, quantity: ${item.quantity}, unitCost: ${unitCost}, totalCost: ${cost}, recipeId: ${recipe.id}, productionId: ${production.id}`);
         
         // If we already have this recipe in our map, update the values
         if (productMap.has(recipe.id)) {
@@ -69,6 +80,27 @@ export const useProductProfitability = () => {
       });
     });
     
+    // Check if all productions are accounted for in the report
+    productions.forEach(p => {
+      const recipe = recipes.find(r => r.id === p.recipeId);
+      if (recipe && !productMap.has(recipe.id)) {
+        console.log(`Production for ${recipe.name} (${recipe.id}) exists but is not in the report - may not be shipped yet`);
+      }
+    });
+    
+    // Check if any shipped items don't match production IDs
+    console.log('Checking for shipping-production mismatches:');
+    const productionIds = new Set(productions.map(p => p.id));
+    shippings.forEach(shipping => {
+      if (shipping.status !== 'draft') {
+        shipping.items.forEach(item => {
+          if (!productionIds.has(item.productionBatchId)) {
+            console.log(`Shipping ${shipping.id} references non-existent production ID: ${item.productionBatchId}`);
+          }
+        });
+      }
+    });
+    
     // Log all products in the report
     console.log(`Products in profitability report: ${Array.from(productMap.keys()).length}`);
     console.log(`Recipe IDs in report: ${Array.from(productMap.keys()).join(', ')}`);
@@ -90,7 +122,7 @@ export const useProductProfitability = () => {
           const production = productions.find(p => p.id === item.productionBatchId);
           if (production) {
             const recipe = recipes.find(r => r.id === production.recipeId);
-            console.log(`Shipped: ${recipe?.name || 'Unknown'}, productionId: ${item.productionBatchId}, recipeId: ${production.recipeId}`);
+            console.log(`Shipped: ${recipe?.name || 'Unknown'}, productionId: ${item.productionBatchId}, recipeId: ${production.recipeId}, quantity: ${item.quantity}`);
           }
         });
       }
