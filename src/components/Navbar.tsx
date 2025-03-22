@@ -5,6 +5,7 @@ import { Menu, X, BarChart3, Building2 } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 import { Dialog } from '@/components/ui/dialog';
 import CompanyDialog from '@/features/company/CompanyDialog';
+import CompanyDetails from '@/features/company/CompanyDetails';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,11 +107,20 @@ const Navbar: React.FC = () => {
         )}
       </div>
       
-      {/* Company Dialog */}
-      <CompanyDialog 
-        isOpen={isCompanyDialogOpen} 
-        setIsOpen={setIsCompanyDialogOpen} 
-      />
+      {/* Display read-only company details if user is in navbar */}
+      {isCompanyDialogOpen && location.pathname !== '/' && (
+        <Dialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen}>
+          <CompanyDetails onClose={() => setIsCompanyDialogOpen(false)} />
+        </Dialog>
+      )}
+      
+      {/* Use company dialog with form only on home page */}
+      {isCompanyDialogOpen && location.pathname === '/' && (
+        <CompanyDialog 
+          isOpen={isCompanyDialogOpen} 
+          setIsOpen={setIsCompanyDialogOpen} 
+        />
+      )}
     </nav>
   );
 };
