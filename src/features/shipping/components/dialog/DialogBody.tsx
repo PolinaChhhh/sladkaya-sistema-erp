@@ -12,6 +12,7 @@ interface DialogBodyProps {
       quantity: number;
       price: number;
       vatRate: number;
+      productName?: string; // Make optional to match our type change
     }[];
   };
   setFormData: React.Dispatch<React.SetStateAction<{
@@ -22,6 +23,7 @@ interface DialogBodyProps {
       quantity: number;
       price: number;
       vatRate: number;
+      productName?: string; // Make optional to match our type change
     }[];
   }>>;
   buyers: any[];

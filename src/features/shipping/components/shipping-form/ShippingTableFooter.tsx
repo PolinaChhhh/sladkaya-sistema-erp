@@ -5,6 +5,7 @@ import { calculateTotalAmount, calculateVatAmount } from '../../hooks/useShipmen
 interface ShippingTableFooterProps {
   items: {
     productionBatchId: string;
+    productName?: string;
     quantity: number;
     price: number;
     vatRate: number;

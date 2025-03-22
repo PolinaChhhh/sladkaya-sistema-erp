@@ -59,11 +59,17 @@ export const useShippingOperations = ({
     // Find the selected buyer
     const selectedBuyer = buyers.find(b => b.id === formData.buyerId);
     
+    // Add the shipping with the optional productName field defaulting to undefined
     addShipping({
       buyerId: formData.buyerId,
       customer: selectedBuyer ? selectedBuyer.name : 'Неизвестный клиент', // For backward compatibility
+      buyerName: selectedBuyer ? selectedBuyer.name : 'Неизвестный клиент',
+      buyerTin: selectedBuyer?.tin,
+      buyerKpp: selectedBuyer?.kpp,
+      buyerLegalAddress: selectedBuyer?.legalAddress,
+      buyerPhysicalAddress: selectedBuyer?.physicalAddress,
       date: formData.date,
-      items: formData.items,
+      items: formData.items, // TypeScript now allows this because productName is optional
       status: 'draft',
     });
     
@@ -102,8 +108,13 @@ export const useShippingOperations = ({
       ...selectedShipping,
       buyerId: formData.buyerId,
       customer: selectedBuyer ? selectedBuyer.name : 'Неизвестный клиент',
+      buyerName: selectedBuyer ? selectedBuyer.name : 'Неизвестный клиент',
+      buyerTin: selectedBuyer?.tin,
+      buyerKpp: selectedBuyer?.kpp,
+      buyerLegalAddress: selectedBuyer?.legalAddress,
+      buyerPhysicalAddress: selectedBuyer?.physicalAddress,
       date: formData.date,
-      items: formData.items,
+      items: formData.items, // TypeScript now allows this because productName is optional
     };
     
     // Update shipping in store

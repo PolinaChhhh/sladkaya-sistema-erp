@@ -13,7 +13,7 @@ export type ShippingDocument = {
   date: string;
   items: {
     productionBatchId: string;
-    productName: string; // Product name for display
+    productName?: string; // Made optional since it can be derived from productions and recipes
     quantity: number;
     price: number;
     vatRate: number; // VAT rate as a percentage: 5, 7, 10, or 20
