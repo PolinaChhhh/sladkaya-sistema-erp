@@ -1,4 +1,6 @@
 
+export type RussianDocumentType = 'TORG12' | 'UTD' | 'TTN' | 'TN';
+
 export type ShippingDocument = {
   id: string;
   customer: string; // For backward compatibility
@@ -13,4 +15,6 @@ export type ShippingDocument = {
   status: 'draft' | 'shipped' | 'delivered';
   shipmentNumber: number; // Sequential number from 1 to 9999
   trackingId?: string; // Optional tracking ID for the shipment
+  documentType?: RussianDocumentType; // Type of official document
+  documentGenerated?: boolean; // Flag to track if document was generated
 };
