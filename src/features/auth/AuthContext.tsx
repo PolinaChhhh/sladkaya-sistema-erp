@@ -35,6 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile including role
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for ID:', userId);
+      
       // Get user profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -42,7 +44,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        
+        // If profile not found, we might want to create one
+        if (profileError.code === 'PGRST116') {
+          console.log('Profile not found, may need to be created');
+        }
+        
+        throw profileError;
+      }
+
+      console.log('Profile fetched:', profile);
 
       // Get user role
       const { data: roleData, error: roleError } = await supabase
@@ -51,33 +64,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('user_id', userId)
         .single();
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Role fetch error:', roleError);
+        
+        // If role not found, assign default readonly role
+        if (roleError.code === 'PGRST116') {
+          console.log('Role not found, using default readonly');
+          return {
+            ...profile,
+            role: 'readonly' as UserProfile['role'],
+          } as UserProfile;
+        }
+        
+        throw roleError;
+      }
+
+      console.log('Role fetched:', roleData);
 
       return {
         ...profile,
         role: roleData.role as UserProfile['role'],
       } as UserProfile;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
+      console.error('Error in fetchUserProfile:', error);
+      // Return a default profile with readonly role
+      return {
+        id: userId,
+        role: 'readonly',
+        full_name: null,
+        avatar_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email: state.user?.email || null,
+      } as UserProfile;
     }
   };
 
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
-      // First check for existing session
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Initializing auth...');
       
-      if (session) {
-        const profile = await fetchUserProfile(session.user.id);
-        setState({
-          user: session.user,
-          session,
-          profile,
-          isLoading: false,
-        });
-      } else {
+      try {
+        // First check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('Existing session found:', session.user.id);
+          const profile = await fetchUserProfile(session.user.id);
+          setState({
+            user: session.user,
+            session,
+            profile,
+            isLoading: false,
+          });
+        } else {
+          console.log('No session found');
+          setState({ ...initialState, isLoading: false });
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
         setState({ ...initialState, isLoading: false });
       }
     };
@@ -87,14 +133,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
+        
         if (session) {
-          const profile = await fetchUserProfile(session.user.id);
-          setState({
-            user: session.user,
-            session,
-            profile,
-            isLoading: false,
-          });
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            setState({
+              user: session.user,
+              session,
+              profile,
+              isLoading: false,
+            });
+          } catch (error) {
+            console.error('Error during auth state change:', error);
+            setState({
+              user: session.user,
+              session,
+              profile: null,
+              isLoading: false,
+            });
+          }
         } else {
           setState({ ...initialState, isLoading: false });
         }
@@ -108,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Signing in:', email);
       setState({ ...state, isLoading: true });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -124,24 +183,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           profile,
           isLoading: false,
         });
-        toast.success('Logged in successfully');
+        toast.success('Успешно вошли в систему');
         navigate('/');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to log in');
+      console.error('Sign in error:', error);
+      toast.error(error.message || 'Не удалось войти в систему');
       setState({ ...state, isLoading: false });
     }
   };
 
   const signOut = async () => {
     try {
+      console.log('Signing out');
       setState({ ...state, isLoading: true });
       await supabase.auth.signOut();
       setState({ ...initialState, isLoading: false });
-      toast.success('Logged out successfully');
+      toast.success('Вы успешно вышли из системы');
       navigate('/auth');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to log out');
+      console.error('Sign out error:', error);
+      toast.error(error.message || 'Не удалось выйти из системы');
       setState({ ...state, isLoading: false });
     }
   };

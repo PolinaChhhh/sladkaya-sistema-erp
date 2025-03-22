@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import Navbar from './Navbar';
 import { useAuth } from '@/features/auth/AuthContext';
 import AuthGuard from '@/features/auth/components/AuthGuard';
@@ -15,9 +15,20 @@ const Layout: React.FC<LayoutProps> = ({
   requireAuth = true,
   requiredRole 
 }) => {
-  const { isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
 
+  // Добавляем логирование для отладки
+  useEffect(() => {
+    console.log('Layout render - isLoading:', isLoading, 'user:', user);
+  }, [isLoading, user]);
+
+  // Проверяем, не застрял ли компонент в состоянии загрузки
   if (isLoading) {
+    // Добавляем таймаут, чтобы не зависать бесконечно в состоянии загрузки
+    setTimeout(() => {
+      console.log('Loading timeout reached');
+    }, 5000);
+
     return (
       <div className="min-h-screen flex justify-center items-center bg-gradient-to-b from-gray-50 to-gray-100">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-confection-500"></div>
