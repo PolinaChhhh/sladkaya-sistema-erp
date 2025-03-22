@@ -41,9 +41,17 @@ export const createShippingSlice: StateCreator<ShippingSlice> = (set, get) => ({
     )
   })),
   
-  deleteShipping: (id) => set((state) => ({
-    shippings: state.shippings.filter((shipping) => shipping.id !== id)
-  })),
+  deleteShipping: (id) => set((state) => {
+    // Find the shipping to be deleted first, so we can return it from the function
+    const shippingToDelete = state.shippings.find(shipping => shipping.id === id);
+    
+    return {
+      // Remove the shipping from the state
+      shippings: state.shippings.filter((shipping) => shipping.id !== id),
+      // Return the deleted shipping for potential further processing
+      _deletedShipping: shippingToDelete
+    };
+  }),
   
   updateShippingDocument: (id, documentType, generated) => set((state) => ({
     shippings: state.shippings.map((shipping) => 

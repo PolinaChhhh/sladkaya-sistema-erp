@@ -11,14 +11,18 @@ export const useShippingOperations = ({
   updateShipping,
   updateShippingStatus,
   deleteShipping,
-  buyers
+  buyers,
+  productions,
+  updateProduction
 }: {
   shippings: ShippingDocument[];
   addShipping: (shipping: Omit<ShippingDocument, 'id' | 'shipmentNumber'>) => void;
   updateShipping: (updatedShipping: ShippingDocument) => void;
   updateShippingStatus: (id: string, status: ShippingDocument['status']) => void;
-  deleteShipping: (id: string) => void;
+  deleteShipping: (id: string) => { _deletedShipping?: ShippingDocument };
   buyers: any[];
+  productions: any[];
+  updateProduction: (id: string, data: Partial<any>) => void;
 }) => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingDocument | null>(null);
@@ -30,7 +34,27 @@ export const useShippingOperations = ({
   
   const handleDeleteConfirm = () => {
     if (selectedShipping) {
-      deleteShipping(selectedShipping.id);
+      // Delete the shipping and get the deleted document
+      const { _deletedShipping } = deleteShipping(selectedShipping.id);
+      
+      // If we have the deleted shipping document, restore the items to inventory
+      if (_deletedShipping) {
+        // For each item in the deleted shipping, restore the quantity to the production batch
+        _deletedShipping.items.forEach(item => {
+          // Find the production batch
+          const production = productions.find(p => p.id === item.productionBatchId);
+          
+          if (production) {
+            // Increase the quantity of the production batch by the shipped quantity
+            const newQuantity = production.quantity + item.quantity;
+            console.log(`Restoring ${item.quantity} units to production ${item.productionBatchId}, new quantity: ${newQuantity}`);
+            
+            // Update the production batch
+            updateProduction(item.productionBatchId, { quantity: newQuantity });
+          }
+        });
+      }
+      
       toast.success('Отгрузка удалена');
       setIsDeleteConfirmOpen(false);
     }
