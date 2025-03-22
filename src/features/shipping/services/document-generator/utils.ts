@@ -78,7 +78,7 @@ export const prepareDocumentData = (
     totalWithoutVat,
     totalVatAmount,
     totalWithVat,
-    extendedData // Добавляем расширенные данные для шаблонов
+    extendedData // Теперь это поле будет соответствовать интерфейсу
   };
 };
 

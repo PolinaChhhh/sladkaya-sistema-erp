@@ -22,4 +22,5 @@ export interface DocumentGenerationData {
   totalWithoutVat: number;
   totalVatAmount: number;
   totalWithVat: number;
+  extendedData?: Record<string, any>; // Adding the missing extendedData field as optional
 }
