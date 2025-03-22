@@ -8,6 +8,9 @@ interface WordDocGeneratorProps {
   preparationTime?: number;
   bakingTemperature?: number;
   formatPrepTime: (minutes: number) => string;
+  ingredients?: Array<{name: string; amount: number; unit: string}>;
+  output?: number;
+  outputUnit?: string;
 }
 
 const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
@@ -15,10 +18,43 @@ const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
   recipeName,
   preparationTime,
   bakingTemperature,
-  formatPrepTime
+  formatPrepTime,
+  ingredients = [],
+  output,
+  outputUnit
 }) => {
   const handlePrintToWord = () => {
     try {
+      // Generate ingredients table HTML
+      const ingredientsTableHtml = ingredients.length > 0 
+        ? `
+        <h2>ИНГРЕДИЕНТЫ:</h2>
+        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th>Наименование</th>
+              <th>Количество</th>
+              <th>Единица измерения</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ingredients.map(ing => `
+              <tr>
+                <td>${ing.name}</td>
+                <td style="text-align: right;">${ing.amount}</td>
+                <td>${ing.unit}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ` 
+        : '';
+
+      // Add output information
+      const outputHtml = output 
+        ? `<p class="info" style="font-weight: bold;">Выход продукта: ${output} ${outputUnit || ''}</p>`
+        : '';
+      
       // Generate Word-compatible HTML content with proper styling
       const wordHtml = `
 <!DOCTYPE html>
@@ -33,14 +69,20 @@ const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
     .info { margin: 10pt 0; }
     ol { margin-left: 0; padding-left: 20pt; }
     li { margin-bottom: 10pt; }
+    table { width: 100%; margin: 15pt 0; border-collapse: collapse; }
+    th { background-color: #f2f2f2; text-align: left; padding: 5pt; }
+    td { padding: 5pt; }
   </style>
 </head>
 <body>
   <h1>ТЕХНОЛОГИЧЕСКАЯ КАРТА</h1>
   <h2>${recipeName || 'Рецепт'}</h2>
   
-  ${preparationTime ? `<p class="info">Время подготовки: ${formatPrepTime(preparationTime)}</p>` : ''}
+  ${outputHtml}
+  ${preparationTime ? `<p class="info">Время отпекания: ${formatPrepTime(preparationTime)}</p>` : ''}
   ${bakingTemperature ? `<p class="info">Температура: ${bakingTemperature}°C</p>` : ''}
+  
+  ${ingredientsTableHtml}
   
   <h2>ТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:</h2>
   <ol>
@@ -87,7 +129,20 @@ const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
     }
   };
 
-  return { handlePrintToWord };
+  // Return object with the handler that will be used by the parent component
+  return (
+    <div style={{ display: 'none' }}>
+      {/* This is a utility component that doesn't render UI */}
+    </div>
+  );
+};
+
+// Export a hook-like function to use this component
+export const useWordDocGenerator = (props: WordDocGeneratorProps) => {
+  return { handlePrintToWord: () => {
+    const component = WordDocGenerator(props);
+    return WordDocGenerator(props).props.children;
+  }};
 };
 
 export default WordDocGenerator;
