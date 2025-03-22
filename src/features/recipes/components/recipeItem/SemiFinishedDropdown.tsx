@@ -7,6 +7,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -97,29 +98,31 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
-          <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
-          <CommandGroup className="max-h-60 overflow-y-auto">
-            {filteredRecipes.map((recipe) => (
-              <CommandItem
-                key={recipe.id}
-                value={recipe.id}
-                onSelect={() => {
-                  setValue(recipe.id);
-                  setOpen(false);
-                  onSelectRecipe(recipe);
-                  setSearchQuery(""); // Clear search after selection
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === recipe.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {recipe.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
+            <CommandGroup className="max-h-60 overflow-y-auto">
+              {filteredRecipes.map((recipe) => (
+                <CommandItem
+                  key={recipe.id}
+                  value={recipe.id}
+                  onSelect={() => {
+                    setValue(recipe.id);
+                    setOpen(false);
+                    onSelectRecipe(recipe);
+                    setSearchQuery(""); // Clear search after selection
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === recipe.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {recipe.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
