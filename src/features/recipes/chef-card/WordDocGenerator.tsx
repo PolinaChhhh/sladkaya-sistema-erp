@@ -13,50 +13,52 @@ interface WordDocGeneratorProps {
   outputUnit?: string;
 }
 
-const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
-  processSteps,
-  recipeName,
-  preparationTime,
-  bakingTemperature,
-  formatPrepTime,
-  ingredients = [],
-  output,
-  outputUnit
-}) => {
-  const handlePrintToWord = () => {
-    try {
-      // Generate ingredients table HTML
-      const ingredientsTableHtml = ingredients.length > 0 
-        ? `
-        <h2>ИНГРЕДИЕНТЫ:</h2>
-        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-          <thead>
-            <tr style="background-color: #f2f2f2;">
-              <th>Наименование</th>
-              <th>Количество</th>
-              <th>Единица измерения</th>
+// Create a function that will handle the Word document generation
+const generateWordDocument = (props: WordDocGeneratorProps) => {
+  const {
+    processSteps,
+    recipeName,
+    preparationTime,
+    bakingTemperature,
+    formatPrepTime,
+    ingredients = [],
+    output,
+    outputUnit
+  } = props;
+  
+  try {
+    // Generate ingredients table HTML
+    const ingredientsTableHtml = ingredients.length > 0 
+      ? `
+      <h2>ИНГРЕДИЕНТЫ:</h2>
+      <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background-color: #f2f2f2;">
+            <th>Наименование</th>
+            <th>Количество</th>
+            <th>Единица измерения</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ingredients.map(ing => `
+            <tr>
+              <td>${ing.name}</td>
+              <td style="text-align: right;">${ing.amount}</td>
+              <td>${ing.unit}</td>
             </tr>
-          </thead>
-          <tbody>
-            ${ingredients.map(ing => `
-              <tr>
-                <td>${ing.name}</td>
-                <td style="text-align: right;">${ing.amount}</td>
-                <td>${ing.unit}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        ` 
-        : '';
+          `).join('')}
+        </tbody>
+      </table>
+      ` 
+      : '';
 
-      // Add output information
-      const outputHtml = output 
-        ? `<p class="info" style="font-weight: bold;">Выход продукта: ${output} ${outputUnit || ''}</p>`
-        : '';
-      
-      // Generate Word-compatible HTML content with proper styling
-      const wordHtml = `
+    // Add output information
+    const outputHtml = output 
+      ? `<p class="info" style="font-weight: bold;">Выход продукта: ${output} ${outputUnit || ''}</p>`
+      : '';
+    
+    // Generate Word-compatible HTML content with proper styling
+    const wordHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -90,59 +92,53 @@ const WordDocGenerator: React.FC<WordDocGeneratorProps> = ({
   </ol>
 </body>
 </html>
-      `;
+    `;
+    
+    // Convert to Blob with correct MIME type for Word
+    const blob = new Blob([wordHtml], { 
+      type: 'application/vnd.ms-word' 
+    });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Тех_карта_${recipeName || 'рецепт'}.doc`;
+    
+    // Show preparing toast
+    toast.success("Подготовка документа Word...", {
+      description: `Файл будет скачан через несколько секунд.`,
+    });
+    
+    // Trigger download after small delay for better UX
+    setTimeout(() => {
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
-      // Convert to Blob with correct MIME type for Word
-      const blob = new Blob([wordHtml], { 
-        type: 'application/vnd.ms-word' 
+      // Revoke object URL to free memory
+      URL.revokeObjectURL(url);
+      
+      toast.success("Документ успешно создан!", {
+        description: "Технологическая карта сохранена в формате Word.",
       });
-      
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Тех_карта_${recipeName || 'рецепт'}.doc`;
-      
-      // Show preparing toast
-      toast.success("Подготовка документа Word...", {
-        description: `Файл будет скачан через несколько секунд.`,
-      });
-      
-      // Trigger download after small delay for better UX
-      setTimeout(() => {
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Revoke object URL to free memory
-        URL.revokeObjectURL(url);
-        
-        toast.success("Документ успешно создан!", {
-          description: "Технологическая карта сохранена в формате Word.",
-        });
-      }, 800);
-    } catch (error) {
-      console.error("Ошибка при создании документа:", error);
-      toast.error("Ошибка при создании документа", {
-        description: "Попробуйте еще раз или обратитесь в поддержку.",
-      });
-    }
-  };
-
-  // Return object with the handler that will be used by the parent component
-  return (
-    <div style={{ display: 'none' }}>
-      {/* This is a utility component that doesn't render UI */}
-    </div>
-  );
+    }, 800);
+  } catch (error) {
+    console.error("Ошибка при создании документа:", error);
+    toast.error("Ошибка при создании документа", {
+      description: "Попробуйте еще раз или обратитесь в поддержку.",
+    });
+  }
 };
 
-// Export a hook-like function to use this component
+// Export a hook-like function to use this functionality
 export const useWordDocGenerator = (props: WordDocGeneratorProps) => {
-  return { handlePrintToWord: () => {
-    const component = WordDocGenerator(props);
-    return WordDocGenerator(props).props.children;
-  }};
+  return { 
+    handlePrintToWord: () => generateWordDocument(props)
+  };
 };
 
-export default WordDocGenerator;
+export default function WordDocGenerator() {
+  // This is a utility component that doesn't render UI
+  return null;
+}

@@ -5,11 +5,12 @@ import RecipeIngredients from './RecipeIngredients';
 import RecipeImage from './RecipeImage';
 import RecipeOutput from './RecipeOutput';
 import RecipeProcess from './RecipeProcess';
-import { Recipe, RecipeItem } from '@/store/types';
+import { Recipe } from '@/store/types';
 
 interface ChefCardProps {
   recipe: Recipe;
   onClose: () => void;
+  onEdit?: (recipe: Recipe) => void;
   getIngredientName: (id: string) => string;
   getIngredientUnit: (id: string) => string;
   getRecipeName: (id: string) => string;
@@ -19,6 +20,7 @@ interface ChefCardProps {
 const ChefCard: React.FC<ChefCardProps> = ({ 
   recipe, 
   onClose,
+  onEdit,
   getIngredientName,
   getIngredientUnit,
   getRecipeName,
@@ -36,9 +38,8 @@ const ChefCard: React.FC<ChefCardProps> = ({
   return (
     <div className="bg-cream-50 p-6 rounded-2xl h-full overflow-auto">
       <ChefCardHeader 
-        recipeName={recipe.name} 
-        recipeDescription={recipe.description} 
-        onClose={onClose} 
+        recipe={recipe} 
+        onEdit={onEdit} 
       />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
@@ -68,7 +69,10 @@ const ChefCard: React.FC<ChefCardProps> = ({
         
         {/* Right column */}
         <div className="space-y-6">
-          <RecipeImage imageUrl={recipe.imageUrl} />
+          <RecipeImage 
+            name={recipe.name}
+            imageUrl={recipe.imageUrl} 
+          />
           
           <RecipeIngredients 
             ingredients={mainIngredients} 

@@ -35,6 +35,7 @@ export type Recipe = {
   imageUrl?: string; // Add image URL field
   preparationTime?: number; // Add preparation time field (in minutes)
   bakingTemperature?: number; // Add baking temperature field (in Celsius)
+  process?: string[]; // Add process steps field
 };
 
 export type ProductionBatch = {

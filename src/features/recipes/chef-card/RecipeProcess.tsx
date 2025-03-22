@@ -27,7 +27,7 @@ interface RecipeProcessProps {
 }
 
 const RecipeProcess: React.FC<RecipeProcessProps> = ({ 
-  processSteps, 
+  processSteps = [], 
   preparationTime, 
   category,
   bakingTemperature,

@@ -43,6 +43,7 @@ const ChefCardDialog: React.FC<ChefCardDialogProps> = ({
         
         <ChefCard
           recipe={recipe}
+          onClose={onClose}
           onEdit={onEdit}
           getIngredientName={getIngredientName}
           getIngredientUnit={getIngredientUnit}
