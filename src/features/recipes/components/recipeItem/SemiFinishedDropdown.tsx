@@ -23,7 +23,7 @@ interface SemiFinishedDropdownProps {
 }
 
 const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({ 
-  semiFinishedRecipes, 
+  semiFinishedRecipes = [], // Default to empty array
   onSelectRecipe 
 }) => {
   const [open, setOpen] = useState(false);
@@ -47,15 +47,28 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
     }
   }, [open]);
 
-  // Filter recipes based on search query, ensuring we always have an array
-  const filteredRecipes = Array.isArray(semiFinishedRecipes) 
-    ? semiFinishedRecipes.filter(recipe => 
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : [];
+  // Make sure semiFinishedRecipes is always an array
+  const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
+  
+  // Filter recipes based on search query
+  const filteredRecipes = recipes.filter(recipe => 
+    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  // If no recipes are available, don't render the component
-  if (!semiFinishedRecipes || semiFinishedRecipes.length === 0) {
-    return null;
+  // If no recipes are available, just render an empty search box
+  if (recipes.length === 0) {
+    return (
+      <div className="relative w-[240px]">
+        <Input
+          ref={inputRef}
+          placeholder="Поиск полуфабрикатов..."
+          value={searchQuery}
+          className="h-9 pr-8"
+          disabled
+        />
+        <Search className="h-4 w-4 absolute right-3 top-1/2 transform -translate-y-1/2 opacity-50" />
+      </div>
+    );
   }
 
   return (

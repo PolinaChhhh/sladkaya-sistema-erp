@@ -24,7 +24,7 @@ interface RecipeItemsManagerProps {
 const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   items,
   ingredients,
-  recipes,
+  recipes = [], // Default to empty array
   currentRecipeId,
   getIngredientName,
   getIngredientUnit,
@@ -102,13 +102,16 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     );
   };
 
+  // Ensure recipes is always an array before filtering
+  const recipesArray = Array.isArray(recipes) ? recipes : [];
+  
   // Get all semi-finished recipes (excluding the current one if editing)
-  const semiFinishedRecipes = recipes.filter(
+  const semiFinishedRecipes = recipesArray.filter(
     recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
-  ) || [];
+  );
 
   const renderItems = () => {
-    if (items.length === 0) {
+    if (!items || items.length === 0) {
       return <EmptyItemsMessage category={category} />;
     }
 
