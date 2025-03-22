@@ -15,7 +15,7 @@ export const useShipmentsList = () => {
     addShipping,
     updateShipping,
     updateShippingStatus,
-    deleteShipping,
+    deleteShipping: storeDeleteShipping,
     updateProduction
   } = useStore(state => ({
     shippings: state.shippings,
@@ -67,7 +67,7 @@ export const useShipmentsList = () => {
     setIsEditDialogOpen(true);
   };
   
-  // Use the shipping operations hook
+  // Use the shipping operations hook with proper deleteShipping function that returns the expected type
   const {
     isDeleteConfirmOpen,
     setIsDeleteConfirmOpen,
@@ -84,7 +84,7 @@ export const useShipmentsList = () => {
     addShipping,
     updateShipping,
     updateShippingStatus,
-    deleteShipping,
+    deleteShipping: storeDeleteShipping, // This function returns { _deletedShipping?: ShippingDocument }
     buyers,
     productions,
     updateProduction
