@@ -42,20 +42,20 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
 
   const handlePrintToWord = () => {
     try {
-      // Generate recipe content as text
+      // Generate recipe content as plain text
       const recipeContent = generateRecipeContent();
       
-      // Convert to Blob
-      const blob = new Blob([recipeContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      // Create a simple text blob instead of trying to create a Word document
+      const blob = new Blob([recipeContent], { type: 'text/plain' });
       
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Тех_карта_${recipeName || 'рецепт'}.docx`;
+      link.download = `Тех_карта_${recipeName || 'рецепт'}.txt`;
       
       // Show preparing toast
-      toast.success("Подготовка документа Word...", {
+      toast.success("Подготовка документа...", {
         description: `Файл будет скачан через несколько секунд.`,
       });
       
@@ -69,7 +69,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
         URL.revokeObjectURL(url);
         
         toast.success("Документ успешно создан!", {
-          description: "Технологическая карта сохранена в формате Word.",
+          description: "Технологическая карта сохранена в текстовом формате.",
         });
       }, 800);
     } catch (error) {
@@ -82,27 +82,26 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
   
   const generateRecipeContent = (): string => {
     // Simple text format for the recipe content
-    // In production, use a library like docx to generate proper Word documents
     let content = '';
     
     // Add recipe name as title
-    content += `ТЕХНОЛОГИЧЕСКАЯ КАРТА\n\n`;
-    content += `${recipeName || 'Рецепт'}\n\n`;
+    content += `ТЕХНОЛОГИЧЕСКАЯ КАРТА\r\n\r\n`;
+    content += `${recipeName || 'Рецепт'}\r\n\r\n`;
     
     // Add preparation info if available
     if (preparationTime) {
-      content += `Время подготовки: ${formatPrepTime(preparationTime)}\n`;
+      content += `Время подготовки: ${formatPrepTime(preparationTime)}\r\n`;
     }
     
     if (bakingTemperature) {
-      content += `Температура: ${bakingTemperature}°C\n`;
+      content += `Температура: ${bakingTemperature}°C\r\n`;
     }
     
-    content += `\nТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:\n\n`;
+    content += `\r\nТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:\r\n\r\n`;
     
     // Add process steps
     processSteps.forEach((step, index) => {
-      content += `${index + 1}. ${step}\n`;
+      content += `${index + 1}. ${step}\r\n`;
     });
     
     return content;
@@ -130,7 +129,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Скачать технологическую карту в формате Word</p>
+              <p>Скачать технологическую карту в текстовом формате</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
