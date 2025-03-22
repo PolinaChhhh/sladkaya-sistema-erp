@@ -32,7 +32,7 @@ const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({
           />
         )}
         <Button type="button" variant="outline" size="sm" onClick={onAddItem}>
-          <Plus className="h-3 w-3 mr-1" /> Добавить
+          <Plus className="h-3 w-3 mr-1" /> Добавить ингредиент
         </Button>
       </div>
     </div>
