@@ -11,24 +11,27 @@ import {
 
 interface ShippingCardProps {
   shipping: ShippingDocument;
-  onEdit: () => void;
-  onDelete: () => void;
-  onUpdateStatus: (status: ShippingDocument['status']) => void;
-  onGenerateDocument: () => void;
+  onEditClick: (shipping: ShippingDocument) => void;
+  onDeleteClick: (shipping: ShippingDocument) => void;
+  onStatusUpdate: (shippingId: string, newStatus: ShippingDocument['status']) => void;
 }
 
 const ShippingCard: React.FC<ShippingCardProps> = ({
   shipping,
-  onEdit,
-  onDelete,
-  onUpdateStatus,
-  onGenerateDocument
+  onEditClick,
+  onDeleteClick,
+  onStatusUpdate
 }) => {
   const { productions, recipes, buyers } = useStore();
   
   const canShip = shipping.status === 'draft';
   const canDeliver = shipping.status === 'shipped';
   const canGenerate = true; // Allow document generation in any status
+  
+  const handleGenerateDocument = () => {
+    console.log('Generate document for shipment:', shipping.id);
+    // This will be implemented with the document generation feature
+  };
   
   return (
     <Card className="overflow-hidden glass border-blue-100">
@@ -49,12 +52,12 @@ const ShippingCard: React.FC<ShippingCardProps> = ({
         <div className="mt-4">
           <ShippingCardActions 
             shipping={shipping}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onUpdateStatus={onUpdateStatus}
-            onGenerateDocument={onGenerateDocument}
+            onStatusUpdate={onStatusUpdate}
+            onEditClick={() => onEditClick(shipping)}
+            onDeleteClick={() => onDeleteClick(shipping)}
+            handleGenerateDocument={handleGenerateDocument}
             canShip={canShip}
-            canDeliver={canDeliver}
+            canDeliver={canDeliver} 
             canGenerate={canGenerate}
           />
         </div>
