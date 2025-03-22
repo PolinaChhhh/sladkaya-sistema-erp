@@ -79,7 +79,7 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ shipping }) => {
             </tr>
             <tr>
               <td className="upd-label">Грузополучатель и его адрес:</td>
-              <td className="upd-value">{{ shipping.buyerName }}</td>
+              <td className="upd-value">{shipping.buyerName}</td>
               <td className="upd-reference">(4)</td>
             </tr>
             <tr>
@@ -89,7 +89,7 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ shipping }) => {
             </tr>
             <tr>
               <td className="upd-label">Покупатель:</td>
-              <td className="upd-value">{{ shipping.buyerName }}</td>
+              <td className="upd-value">{shipping.buyerName}</td>
               <td className="upd-reference">(6)</td>
             </tr>
             <tr>
