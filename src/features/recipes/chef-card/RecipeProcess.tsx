@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, Thermometer, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,23 +38,56 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
     if (remainingMinutes === 0) return `${hours} ч`;
     return `${hours} ч ${remainingMinutes} мин`;
   };
-
+  
   const handlePrintToWord = () => {
     try {
-      // Generate recipe content as plain text
+      // Generate recipe content as HTML for Word compatibility
       const recipeContent = generateRecipeContent();
       
-      // Create a simple text blob instead of trying to create a Word document
-      const blob = new Blob([recipeContent], { type: 'text/plain' });
+      // Create Word-compatible HTML content with proper styling
+      const wordHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Технологическая карта</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; margin: 2cm; }
+    h1 { text-align: center; font-size: 16pt; }
+    h2 { font-size: 14pt; margin-top: 20pt; }
+    .info { margin: 10pt 0; }
+    ol { margin-left: 0; padding-left: 20pt; }
+    li { margin-bottom: 10pt; }
+  </style>
+</head>
+<body>
+  <h1>ТЕХНОЛОГИЧЕСКАЯ КАРТА</h1>
+  <h2>${recipeName || 'Рецепт'}</h2>
+  
+  ${preparationTime ? `<p class="info">Время подготовки: ${formatPrepTime(preparationTime)}</p>` : ''}
+  ${bakingTemperature ? `<p class="info">Температура: ${bakingTemperature}°C</p>` : ''}
+  
+  <h2>ТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:</h2>
+  <ol>
+    ${processSteps.map(step => `<li>${step}</li>`).join('\n    ')}
+  </ol>
+</body>
+</html>
+      `;
+      
+      // Convert to Blob with correct MIME type for Word
+      const blob = new Blob([wordHtml], { 
+        type: 'application/vnd.ms-word' 
+      });
       
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Тех_карта_${recipeName || 'рецепт'}.txt`;
+      link.download = `Тех_карта_${recipeName || 'рецепт'}.doc`;
       
       // Show preparing toast
-      toast.success("Подготовка документа...", {
+      toast.success("Подготовка документа Word...", {
         description: `Файл будет скачан через несколько секунд.`,
       });
       
@@ -69,7 +101,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
         URL.revokeObjectURL(url);
         
         toast.success("Документ успешно создан!", {
-          description: "Технологическая карта сохранена в текстовом формате.",
+          description: "Технологическая карта сохранена в формате Word.",
         });
       }, 800);
     } catch (error) {
@@ -81,30 +113,7 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
   };
   
   const generateRecipeContent = (): string => {
-    // Simple text format for the recipe content
-    let content = '';
-    
-    // Add recipe name as title
-    content += `ТЕХНОЛОГИЧЕСКАЯ КАРТА\r\n\r\n`;
-    content += `${recipeName || 'Рецепт'}\r\n\r\n`;
-    
-    // Add preparation info if available
-    if (preparationTime) {
-      content += `Время подготовки: ${formatPrepTime(preparationTime)}\r\n`;
-    }
-    
-    if (bakingTemperature) {
-      content += `Температура: ${bakingTemperature}°C\r\n`;
-    }
-    
-    content += `\r\nТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:\r\n\r\n`;
-    
-    // Add process steps
-    processSteps.forEach((step, index) => {
-      content += `${index + 1}. ${step}\r\n`;
-    });
-    
-    return content;
+    return processSteps.join('\n');
   };
   
   return (
@@ -129,10 +138,9 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Скачать технологическую карту в текстовом формате</p>
+              <p>Скачать технологическую карту в формате Word</p>
             </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+          </TooltipProvider>
       </div>
       
       <div className="bg-white border border-cream-100 rounded-xl p-5 mb-6 shadow-sm">
