@@ -44,12 +44,12 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   }, [open]);
 
   // Filter recipes based on search query
-  const filteredRecipes = searchQuery 
+  const filteredRecipes = semiFinishedRecipes 
     ? semiFinishedRecipes.filter(recipe => 
         recipe.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : semiFinishedRecipes;
+    : [];
 
-  if (semiFinishedRecipes.length === 0) {
+  if (!semiFinishedRecipes || semiFinishedRecipes.length === 0) {
     return null;
   }
 
@@ -68,7 +68,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-72">
-        <Command shouldFilter={false}> {/* Disable built-in filtering as we do it ourselves */}
+        <Command>
           <CommandInput 
             placeholder="Поиск полуфабрикатов..." 
             className="h-9"
