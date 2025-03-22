@@ -17,25 +17,32 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
     {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
     {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
     {"placeholder": "{{company.name}}", "field": "company.name"},
+    {"placeholder": "{{company.legalAddress}}", "field": "company.legalAddress"},
     {"placeholder": "{{company.tin}}", "field": "company.tin"},
-    {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
     {"placeholder": "{{company.physical_address}}", "field": "company.physicalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
     {"placeholder": "{{buyer.kpp}}", "field": "buyer.kpp"},
-    {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"},
+    {"placeholder": "{{buyer.address}}", "field": "buyer.address"},
     {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
-    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"}
+    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"},
+    {"placeholder": "{{total_no_vat}}", "field": "totalWithoutVat"},
+    {"placeholder": "{{total_vat}}", "field": "totalVatAmount"},
+    {"placeholder": "{{total_with_vat}}", "field": "totalWithVat"}
   ]
 }`;
 
   const excelTableRulesTemplate = `{
   "rules": [
-    {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{shipping.shipmentNumber}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
     {"placeholder": "{{company.name}}", "field": "company.name"},
-    {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company.legalAddress}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company.tin}}", "field": "company.tin"},
     {"placeholder": "{{company.physical_address}}", "field": "company.physicalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
+    {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer.kpp}}", "field": "buyer.kpp"},
     {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
     {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"},
     {
@@ -44,18 +51,41 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
       "sheet": "Sheet1",
       "items": "items",
       "fields": [
-        {"column": "A", "field": "productName"},
-        {"column": "B", "field": "quantity"},
-        {"column": "C", "field": "unit"},
-        {"column": "D", "field": "priceWithoutVat"},
-        {"column": "E", "field": "vatRate"},
-        {"column": "F", "field": "vatAmount"},
-        {"column": "G", "field": "totalAmount"}
+        {"column": "A", "field": "number"},
+        {"column": "B", "field": "productName"},
+        {"column": "C", "field": "quantity"},
+        {"column": "D", "field": "unit"},
+        {"column": "E", "field": "priceWithoutVat"},
+        {"column": "F", "field": "vatRate"},
+        {"column": "G", "field": "vatAmount"},
+        {"column": "H", "field": "totalAmount"}
       ]
     },
-    {"placeholder": "{{total_no_vat}}", "field": "totalWithoutVat"},
-    {"placeholder": "{{total_vat}}", "field": "totalVatAmount"},
-    {"placeholder": "{{total_with_vat}}", "field": "totalWithVat"}
+    {"placeholder": "{{totalWithoutVat}}", "field": "totalWithoutVat"},
+    {"placeholder": "{{vatRate}}", "field": "vatRate"},
+    {"placeholder": "{{vatAmount}}", "field": "totalVatAmount"},
+    {"placeholder": "{{totalAmount}}", "field": "totalWithVat"}
+  ]
+}`;
+
+  const updRulesTemplate = `{
+  "rules": [
+    {"placeholder": "{{shipping.shipmentNumber}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
+    {"placeholder": "{{company.name}}", "field": "company.name"},
+    {"placeholder": "{{company.legalAddress}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company.tin}}", "field": "company.tin"},
+    {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
+    {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
+    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"},
+    {"placeholder": "{{productName}}", "field": "item.productName"},
+    {"placeholder": "{{quantity}}", "field": "item.quantity"},
+    {"placeholder": "{{priceWithoutVat}}", "field": "item.priceWithoutVat"},
+    {"placeholder": "{{totalWithoutVat}}", "field": "totalWithoutVat"},
+    {"placeholder": "{{vatRate}}", "field": "item.vatRate"},
+    {"placeholder": "{{vatAmount}}", "field": "totalVatAmount"},
+    {"placeholder": "{{totalAmount}}", "field": "totalWithVat"}
   ]
 }`;
 
@@ -80,7 +110,7 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
         className="font-mono text-xs"
       />
       
-      <div className="flex gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <div className="text-xs text-gray-500 flex items-center">
           <Info className="h-3 w-3 mr-1" />
           Шаблоны правил:
@@ -102,6 +132,15 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
           onClick={() => insertTemplate(excelTableRulesTemplate)}
         >
           Excel с таблицей
+        </Button>
+        <Button 
+          type="button" 
+          size="sm" 
+          variant="outline" 
+          className="text-xs h-7 px-2"
+          onClick={() => insertTemplate(updRulesTemplate)}
+        >
+          УПД
         </Button>
         <Button 
           type="button" 

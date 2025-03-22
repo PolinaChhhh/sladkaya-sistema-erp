@@ -1,0 +1,264 @@
+
+.upd-container {
+  width: 100%;
+  font-family: 'Times New Roman', serif;
+  font-size: 10pt;
+  color: #000;
+  background-color: #fff;
+}
+
+/* Header section */
+.upd-header {
+  margin-bottom: 15px;
+}
+
+.upd-title {
+  font-weight: bold;
+  font-size: 14pt;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.upd-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 5px;
+}
+
+.upd-info-table td {
+  padding: 3px;
+  vertical-align: top;
+}
+
+.upd-contract-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 5px;
+}
+
+.upd-contract-table td {
+  padding: 3px;
+  vertical-align: top;
+}
+
+.upd-label {
+  font-weight: bold;
+  width: 30%;
+  text-align: left;
+  vertical-align: top;
+}
+
+.upd-value {
+  border-bottom: 1px solid #000;
+  width: 60%;
+}
+
+.upd-reference {
+  width: 5%;
+  text-align: right;
+  vertical-align: top;
+}
+
+.upd-status-box {
+  border: 1px solid #000;
+  padding: 5px;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 300px;
+}
+
+.upd-status-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.upd-status-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.upd-checkbox {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000;
+  margin-right: 5px;
+}
+
+.upd-checkbox.checked::after {
+  content: "✓";
+  font-size: 10px;
+  display: block;
+  text-align: center;
+  line-height: 12px;
+}
+
+.upd-status-text {
+  font-size: 9pt;
+}
+
+/* Table section */
+.upd-table-section {
+  margin-bottom: 15px;
+}
+
+.upd-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8pt;
+}
+
+.upd-items-table th, 
+.upd-items-table td {
+  border: 1px solid #000;
+  padding: 3px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.upd-items-table th {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+
+.upd-wide-col {
+  width: 20%;
+}
+
+.upd-column-indices td {
+  font-size: 7pt;
+  font-style: italic;
+  background-color: #f5f5f5;
+}
+
+.upd-total-row td {
+  font-weight: bold;
+}
+
+/* Footer section */
+.upd-footer {
+  font-size: 9pt;
+}
+
+.upd-signatures-section {
+  margin-bottom: 15px;
+}
+
+.upd-signatures-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.upd-signature-cell {
+  width: 50%;
+  vertical-align: top;
+  padding: 5px;
+}
+
+.upd-signature-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.upd-signature-line {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  margin: 15px 0 2px;
+}
+
+.upd-signature-placeholder {
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+  margin-right: 5px;
+}
+
+.upd-signature-name {
+  width: 40%;
+  border-bottom: 1px solid #000;
+  text-align: center;
+}
+
+.upd-signature-caption {
+  display: flex;
+  font-size: 8pt;
+  color: #666;
+}
+
+.upd-signature-caption span {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.upd-signature-caption span:first-child {
+  flex-grow: 2;
+}
+
+.upd-ip-signature {
+  padding: 5px;
+}
+
+.upd-signature-registration {
+  width: 30%;
+  border-bottom: 1px solid #000;
+  margin-left: 5px;
+}
+
+.upd-foundation-section {
+  margin-bottom: 15px;
+}
+
+.upd-foundation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upd-foundation-table td {
+  padding: 3px;
+  vertical-align: top;
+}
+
+.upd-transfer-receive-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upd-section-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.upd-transfer-table,
+.upd-receive-table,
+.upd-responsible-table,
+.upd-entity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.upd-transfer-table td,
+.upd-receive-table td,
+.upd-responsible-table td,
+.upd-entity-table td {
+  padding: 3px;
+  vertical-align: top;
+}
+
+.upd-responsible-section,
+.upd-entity-section {
+  margin-top: 15px;
+}
+
+/* Print adjustments */
+@media print {
+  .upd-container {
+    page-break-after: always;
+  }
+  
+  .upd-items-table th,
+  .upd-items-table td {
+    font-size: 7pt;
+  }
+}

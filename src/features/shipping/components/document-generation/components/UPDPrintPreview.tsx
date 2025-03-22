@@ -5,7 +5,7 @@ import { Printer, FileText, FileSpreadsheet } from 'lucide-react';
 import { ShippingDocument } from '@/store/types/shipping';
 import { useStore } from '@/store/recipeStore';
 import { prepareDocumentData } from '@/features/shipping/services/document-generator/utils';
-import { UPDPrintTemplate } from '@/features/shipping/services/document-generator/print-templates';
+import UPDTemplate from './UPDTemplate';
 import { 
   generateUPDHtml,
   openPrintWindow,
@@ -168,7 +168,7 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
         
         <div className="bg-white p-2 overflow-auto max-h-[70vh]" style={{ zoom: '0.6' }}>
           <div ref={printContainerRef} className="print-friendly-content">
-            <UPDPrintTemplate data={documentData} />
+            <UPDTemplate data={documentData} />
           </div>
         </div>
       </div>
