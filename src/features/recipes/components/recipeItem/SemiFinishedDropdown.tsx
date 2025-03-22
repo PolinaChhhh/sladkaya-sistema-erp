@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Recipe } from '@/store/types';
 import {
@@ -28,6 +28,26 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the search input when the dropdown opens
+  useEffect(() => {
+    if (open && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    } else {
+      // Clear search when dropdown closes
+      setSearchQuery("");
+    }
+  }, [open]);
+
+  // Filter recipes based on search query
+  const filteredRecipes = searchQuery 
+    ? semiFinishedRecipes.filter(recipe => 
+        recipe.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : semiFinishedRecipes;
 
   if (semiFinishedRecipes.length === 0) {
     return null;
@@ -48,11 +68,17 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-72">
-        <Command>
-          <CommandInput placeholder="Поиск полуфабрикатов..." className="h-9" />
+        <Command shouldFilter={false}> {/* Disable built-in filtering as we do it ourselves */}
+          <CommandInput 
+            placeholder="Поиск полуфабрикатов..." 
+            className="h-9"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            ref={inputRef}
+          />
           <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-y-auto">
-            {semiFinishedRecipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
               <CommandItem
                 key={recipe.id}
                 value={recipe.id}
