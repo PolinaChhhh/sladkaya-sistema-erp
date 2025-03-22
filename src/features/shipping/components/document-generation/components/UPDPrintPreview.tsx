@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, Download, FilePlus, FileText } from 'lucide-react';
+import { Printer, FileText, FileSpreadsheet } from 'lucide-react';
 import { ShippingDocument } from '@/store/types/shipping';
 import { useStore } from '@/store/recipeStore';
 import { prepareDocumentData } from '@/features/shipping/services/document-generator/utils';
@@ -55,33 +55,6 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
     if (!printWindow) {
       toast.error('Пожалуйста, разрешите всплывающие окна для печати документа');
     }
-  };
-  
-  // Функция скачивания HTML в виде файла
-  const handleDownloadHTML = () => {
-    if (!buyer) {
-      toast.error('Ошибка: Покупатель не найден');
-      return;
-    }
-    
-    // Get all styles
-    const allStyles = Array.from(document.querySelectorAll('style'))
-      .map(style => style.innerHTML)
-      .join('\n');
-    
-    const htmlContent = generateUPDHtml(
-      printContainerRef.current?.innerHTML || '',
-      shipping,
-      allStyles
-    );
-    
-    downloadDataAsFile(
-      htmlContent,
-      `УПД_${shipping.shipmentNumber}_${buyer.name.replace(/[^\w\s]/gi, '')}.html`,
-      'text/html'
-    );
-    
-    toast.success('HTML-шаблон успешно скачан');
   };
   
   // Функция для экспорта в PDF
@@ -183,23 +156,14 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
           size="sm"
           className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
         >
-          <FileText className="h-4 w-4 mr-2" />
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
           Скачать Excel
-        </Button>
-        <Button 
-          onClick={handleDownloadHTML}
-          variant="outline"
-          size="sm"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Скачать HTML
         </Button>
       </div>
       
       <div className="border rounded-md overflow-hidden">
         <div className="bg-gray-50 p-2 border-b flex justify-between items-center">
           <span className="text-sm font-medium">Предварительный просмотр УПД</span>
-          <FilePlus className="h-4 w-4 text-gray-400" />
         </div>
         
         <div className="bg-white p-2 overflow-auto max-h-[70vh]" style={{ zoom: '0.6' }}>
@@ -207,13 +171,6 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
             <UPDPrintTemplate data={documentData} />
           </div>
         </div>
-      </div>
-      
-      <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-md">
-        <p>
-          <strong>Примечание:</strong> Это предварительный просмотр печатной формы УПД. 
-          Вы можете распечатать его напрямую, скачать в формате PDF для печати или Excel для редактирования.
-        </p>
       </div>
     </div>
   );

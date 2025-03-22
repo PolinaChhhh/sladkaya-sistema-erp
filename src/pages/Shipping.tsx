@@ -51,30 +51,33 @@ const Shipping = () => {
             
             <div className="grid gap-4 mb-8">
               <div className="p-4 border rounded-md">
-                <h3 className="font-medium mb-2">ТОРГ-12 (Товарная накладная)</h3>
-                <p className="text-sm text-gray-500">
-                  Официальная товарная накладная для оформления продажи товаров.
-                </p>
-              </div>
-              
-              <div className="p-4 border rounded-md">
                 <h3 className="font-medium mb-2">УПД (Универсальный передаточный документ)</h3>
                 <p className="text-sm text-gray-500">
                   Объединенный документ, заменяющий счет-фактуру и накладную.
                 </p>
               </div>
               
-              <div className="p-4 border rounded-md">
-                <h3 className="font-medium mb-2">ТТН (Товарно-транспортная накладная)</h3>
-                <p className="text-sm text-gray-500">
-                  Документ для оформления перевозки товаров через транспортную компанию.
+              <div className="p-4 border rounded-md bg-gray-50 text-gray-500">
+                <h3 className="font-medium mb-2">ТОРГ-12 (Товарная накладная)</h3>
+                <p className="text-sm">
+                  Официальная товарная накладная для оформления продажи товаров.
+                  <span className="block mt-1 text-blue-500">В разработке</span>
                 </p>
               </div>
               
-              <div className="p-4 border rounded-md">
+              <div className="p-4 border rounded-md bg-gray-50 text-gray-500">
+                <h3 className="font-medium mb-2">ТТН (Товарно-транспортная накладная)</h3>
+                <p className="text-sm">
+                  Документ для оформления перевозки товаров через транспортную компанию.
+                  <span className="block mt-1 text-blue-500">В разработке</span>
+                </p>
+              </div>
+              
+              <div className="p-4 border rounded-md bg-gray-50 text-gray-500">
                 <h3 className="font-medium mb-2">ТН (Товарная накладная)</h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm">
                   Упрощенная форма товарной накладной.
+                  <span className="block mt-1 text-blue-500">В разработке</span>
                 </p>
               </div>
             </div>
@@ -82,7 +85,7 @@ const Shipping = () => {
             <div className="mt-2 mb-8 p-4 bg-blue-50 rounded-md text-blue-800 text-sm">
               <p>
                 <strong>Примечание:</strong> Для создания документа перейдите на вкладку "Отгрузки", 
-                выберите отгрузку и нажмите кнопку "Создать документ".
+                выберите отгрузку и нажмите кнопку "Печатная форма УПД".
               </p>
             </div>
             

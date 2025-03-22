@@ -61,7 +61,7 @@ const ShippingCardActions: React.FC<ShippingCardActionsProps> = ({
           className="border-blue-300"
         >
           <FileText className="h-4 w-4 mr-2" />
-          Создать документ
+          Печатная форма УПД
         </Button>
       )}
       
