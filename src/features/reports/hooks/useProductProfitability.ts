@@ -4,9 +4,10 @@ import { useMemo, useState, useEffect } from 'react';
 import { ProfitabilityData } from '../types/reports';
 import { calculateProfitabilityData } from '../utils/profitabilityUtils';
 import { calculateDailyCosts } from '../utils/costAnalysisUtils';
+import { calculateCostBreakdown } from '../utils/costBreakdownUtils';
 
 export const useProductProfitability = () => {
-  const { shippings, productions, recipes } = useStore();
+  const { shippings, productions, recipes, ingredients } = useStore();
   
   // Current date for default filter
   const currentDate = new Date();
@@ -57,6 +58,22 @@ export const useProductProfitability = () => {
     );
   }, [selectedRecipeId, productions, selectedMonth, profitabilityData, recipes]);
   
+  // Calculate cost breakdown data for pie chart
+  const costBreakdownData = useMemo(() => {
+    if (!selectedRecipeId) return [];
+    
+    const recipe = recipes.find(r => r.id === selectedRecipeId);
+    if (!recipe) return [];
+    
+    return calculateCostBreakdown(
+      recipe,
+      recipes,
+      ingredients,
+      productions,
+      selectedMonth
+    );
+  }, [selectedRecipeId, productions, recipes, ingredients, selectedMonth]);
+  
   // Get the output unit for the selected recipe (for chart labels)
   const outputUnit = useMemo(() => {
     if (!selectedRecipeId) return '';
@@ -71,11 +88,12 @@ export const useProductProfitability = () => {
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [profitabilityData]);
+  }, [profitabilityData, costBreakdownData]);
   
   return {
     profitabilityData,
     costChartData,
+    costBreakdownData,
     isLoading,
     selectedMonth,
     setSelectedMonth,
