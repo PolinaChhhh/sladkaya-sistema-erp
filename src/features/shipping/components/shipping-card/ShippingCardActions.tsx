@@ -75,8 +75,8 @@ const ShippingCardActions: React.FC<ShippingCardActionsProps> = ({
         Редактировать
       </Button>
       
-      {/* Delete button */}
-      {shipping.status === 'draft' && (
+      {/* Delete button - Now visible for both 'draft' and 'delivered' status */}
+      {(shipping.status === 'draft' || shipping.status === 'delivered') && (
         <Button 
           onClick={onDeleteClick}
           variant="outline"
