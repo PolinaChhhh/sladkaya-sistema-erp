@@ -19,9 +19,13 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
     {"placeholder": "{{company.name}}", "field": "company.name"},
     {"placeholder": "{{company.tin}}", "field": "company.tin"},
     {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company.physical_address}}", "field": "company.physicalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
-    {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"}
+    {"placeholder": "{{buyer.kpp}}", "field": "buyer.kpp"},
+    {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"},
+    {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
+    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"}
   ]
 }`;
 
@@ -30,7 +34,10 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
     {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
     {"placeholder": "{{company.name}}", "field": "company.name"},
     {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company.physical_address}}", "field": "company.physicalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
+    {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
+    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"},
     {
       "type": "table",
       "startRow": 10,

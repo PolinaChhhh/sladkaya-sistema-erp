@@ -70,7 +70,8 @@ export const generateUPDXml = (data: DocumentGenerationData): string => {
 </ГрузОт>`;
 
   // Добавляем информацию о грузополучателе (покупателе)
-  const buyerAddress = parseBuyerAddress(buyer.legalAddress || '');
+  // Используем физический адрес, если он есть, иначе используем юридический адрес
+  const buyerAddress = parseBuyerAddress(buyer.physicalAddress || buyer.legalAddress || '');
   
   xml += `
 <ГрузПолуч>
@@ -86,14 +87,16 @@ export const generateUPDXml = (data: DocumentGenerationData): string => {
   xml += `
 <ДокПодтвОтгрНом РеквНаимДок="Счет-фактура и документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)" РеквНомерДок="${documentNumber}" РеквДатаДок="${formattedDocDate}"/>`;
 
-  // Добавляем информацию о покупателе
+  // Добавляем информацию о покупателе с юридическим адресом
+  const buyerLegalAddress = parseBuyerAddress(buyer.legalAddress || '');
+  
   xml += `
 <СвПокуп>
 <ИдСв>
 <СвЮЛУч НаимОрг="${escapeXml(buyer.name)}" ИННЮЛ="${buyer.tin || ''}" КПП="${buyer.kpp || ''}"/>
 </ИдСв>
 <Адрес>
-<АдрРФ КодРегион="${buyerAddress.region}" НаимРегион="${buyerAddress.regionName}" Индекс="${buyerAddress.index}" Город="${buyerAddress.city}" Улица="${buyerAddress.street}" Дом="${buyerAddress.house}" ${buyerAddress.apartment ? `Кварт="${buyerAddress.apartment}"` : ''}/>
+<АдрРФ КодРегион="${buyerLegalAddress.region}" НаимРегион="${buyerLegalAddress.regionName}" Индекс="${buyerLegalAddress.index}" Город="${buyerLegalAddress.city}" Улица="${buyerLegalAddress.street}" Дом="${buyerLegalAddress.house}" ${buyerLegalAddress.apartment ? `Кварт="${buyerLegalAddress.apartment}"` : ''}/>
 </Адрес>
 </СвПокуп>`;
 

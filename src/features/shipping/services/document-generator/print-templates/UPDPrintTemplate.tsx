@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DocumentGenerationData } from '../types';
 import './UPDPrintTemplate.css';
@@ -85,7 +84,7 @@ const UPDPrintTemplate: React.FC<UPDPrintTemplateProps> = ({ data }) => {
           
           <div className="upd-info-row">
             <div className="upd-label">Грузополучатель и его адрес:</div>
-            <div className="upd-value">{buyer.name}, {buyer.legalAddress || buyer.address || ""}</div>
+            <div className="upd-value">{buyer.name}, {buyer.physicalAddress || buyer.legalAddress || buyer.address || ""}</div>
             <div className="upd-reference">(4)</div>
           </div>
           
@@ -111,6 +110,18 @@ const UPDPrintTemplate: React.FC<UPDPrintTemplateProps> = ({ data }) => {
             <div className="upd-label">Адрес:</div>
             <div className="upd-value">{buyer.legalAddress || buyer.address || ""}</div>
             <div className="upd-reference">(6a)</div>
+          </div>
+          
+          <div className="upd-info-row">
+            <div className="upd-label">Юридический адрес:</div>
+            <div className="upd-value">{buyer.legalAddress || ""}</div>
+            <div className="upd-reference">(6a-1)</div>
+          </div>
+          
+          <div className="upd-info-row">
+            <div className="upd-label">Фактический адрес:</div>
+            <div className="upd-value">{buyer.physicalAddress || ""}</div>
+            <div className="upd-reference">(6a-2)</div>
           </div>
           
           <div className="upd-info-row">
