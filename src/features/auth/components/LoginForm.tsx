@@ -11,8 +11,8 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Пожалуйста, введите корректный email адрес'),
+  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -34,7 +34,7 @@ const LoginForm: React.FC = () => {
     try {
       await signIn(values.email, values.password);
     } catch (error: any) {
-      setError(error.message || 'Failed to log in');
+      setError(error.message || 'Не удалось войти в систему');
     }
   };
 
@@ -72,7 +72,7 @@ const LoginForm: React.FC = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Пароль</FormLabel>
               <FormControl>
                 <Input 
                   type="password" 
@@ -94,7 +94,7 @@ const LoginForm: React.FC = () => {
             className="px-0 text-confection-600"
             disabled={isLoading}
           >
-            Forgot Password?
+            Забыли пароль?
           </Button>
           
           <Button 
@@ -102,7 +102,7 @@ const LoginForm: React.FC = () => {
             disabled={isLoading}
             className="bg-confection-500 hover:bg-confection-600"
           >
-            {isLoading ? 'Logging in...' : 'Log In'}
+            {isLoading ? 'Вход...' : 'Войти'}
           </Button>
         </div>
       </form>

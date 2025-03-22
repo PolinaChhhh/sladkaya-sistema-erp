@@ -20,14 +20,14 @@ const Auth: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-semibold text-gray-800 mb-2">Welcome to Crumb</h2>
-            <p className="text-gray-600">Log in to your account</p>
+            <h2 className="text-3xl font-semibold text-gray-800 mb-2">Добро пожаловать в Crumb</h2>
+            <p className="text-gray-600">Войдите в вашу учетную запись</p>
           </div>
 
           <LoginForm />
           
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Don't have an account? Contact your administrator</p>
+            <p>Нет учетной записи? Свяжитесь с администратором</p>
           </div>
         </div>
       </div>
