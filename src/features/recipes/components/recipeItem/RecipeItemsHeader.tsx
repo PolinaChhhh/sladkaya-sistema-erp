@@ -10,7 +10,7 @@ interface RecipeItemsHeaderProps {
   category: RecipeCategory;
   semiFinishedRecipes: Recipe[];
   onAddItem: () => void;
-  onSelectSemiFinished: (recipe: Recipe) => void;
+  onSelectSemiFinished: (recipe: Recipe, amount: number) => void;
 }
 
 const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({

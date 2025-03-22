@@ -33,7 +33,6 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   onUpdateItems,
   category,
 }) => {
-  const [isPortionDialogOpen, setIsPortionDialogOpen] = useState(false);
   const [selectedSemiFinished, setSelectedSemiFinished] = useState<Recipe | null>(null);
 
   const addRecipeItem = () => {
@@ -77,20 +76,12 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   // For semi-finished products, also only ingredients are allowed now
   const allowRecipeItems = false;
 
-  // Open semi-finished portion dialog
-  const openSemiFinishedDialog = (recipe: Recipe) => {
-    setSelectedSemiFinished(recipe);
-    setIsPortionDialogOpen(true);
-  };
-
-  // Handle confirmation from portion dialog
-  const handleAddSemiFinishedIngredients = (portionSize: number) => {
-    if (!selectedSemiFinished) return;
-
+  // Handle semi-finished selection with amount
+  const handleAddSemiFinishedIngredients = (recipe: Recipe, amount: number) => {
     // Expand the semi-finished recipe into its ingredient components
     const expandedIngredients = expandSemiFinishedToIngredients(
-      selectedSemiFinished,
-      portionSize,
+      recipe,
+      amount,
       recipes
     );
 
@@ -98,7 +89,7 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     onUpdateItems([...items, ...expandedIngredients]);
     
     toast.success(
-      `Добавлены ингредиенты из "${selectedSemiFinished.name}" (${portionSize} ${selectedSemiFinished.outputUnit})`
+      `Добавлены ингредиенты из "${recipe.name}" (${amount} гр)`
     );
   };
 
@@ -145,20 +136,10 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
         category={category}
         semiFinishedRecipes={semiFinishedRecipes}
         onAddItem={addRecipeItem}
-        onSelectSemiFinished={openSemiFinishedDialog}
+        onSelectSemiFinished={handleAddSemiFinishedIngredients}
       />
       
       {renderItems()}
-
-      {/* Dialog for selecting semi-finished portion size */}
-      {selectedSemiFinished && (
-        <SemiFinishedPortionDialog
-          isOpen={isPortionDialogOpen}
-          onClose={() => setIsPortionDialogOpen(false)}
-          semiFinishedRecipe={selectedSemiFinished}
-          onConfirm={handleAddSemiFinishedIngredients}
-        />
-      )}
     </div>
   );
 };
