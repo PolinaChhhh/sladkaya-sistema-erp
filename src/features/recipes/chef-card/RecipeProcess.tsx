@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, Thermometer, Printer, FileText, Download } from 'lucide-react';
+import { Clock, Thermometer, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from "sonner";
@@ -41,23 +41,71 @@ const RecipeProcess: React.FC<RecipeProcessProps> = ({
   };
 
   const handlePrintToWord = () => {
-    // Generate Word document
-    const filename = `Тех_карта_${recipeName || 'рецепт'}.docx`;
+    try {
+      // Generate recipe content as text
+      const recipeContent = generateRecipeContent();
+      
+      // Convert to Blob
+      const blob = new Blob([recipeContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Тех_карта_${recipeName || 'рецепт'}.docx`;
+      
+      // Show preparing toast
+      toast.success("Подготовка документа Word...", {
+        description: `Файл будет скачан через несколько секунд.`,
+      });
+      
+      // Trigger download after small delay for better UX
+      setTimeout(() => {
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(url);
+        
+        toast.success("Документ успешно создан!", {
+          description: "Технологическая карта сохранена в формате Word.",
+        });
+      }, 800);
+    } catch (error) {
+      console.error("Ошибка при создании документа:", error);
+      toast.error("Ошибка при создании документа", {
+        description: "Попробуйте еще раз или обратитесь в поддержку.",
+      });
+    }
+  };
+  
+  const generateRecipeContent = (): string => {
+    // Simple text format for the recipe content
+    // In production, use a library like docx to generate proper Word documents
+    let content = '';
     
-    // In a real implementation, we would use a library like docx to generate
-    // the Word document from the recipe data
+    // Add recipe name as title
+    content += `ТЕХНОЛОГИЧЕСКАЯ КАРТА\n\n`;
+    content += `${recipeName || 'Рецепт'}\n\n`;
     
-    // For now, we'll just show a toast notification
-    toast.success("Подготовка документа Word...", {
-      description: `Файл ${filename} будет скачан через несколько секунд.`,
+    // Add preparation info if available
+    if (preparationTime) {
+      content += `Время подготовки: ${formatPrepTime(preparationTime)}\n`;
+    }
+    
+    if (bakingTemperature) {
+      content += `Температура: ${bakingTemperature}°C\n`;
+    }
+    
+    content += `\nТЕХНОЛОГИЧЕСКИЙ ПРОЦЕСС:\n\n`;
+    
+    // Add process steps
+    processSteps.forEach((step, index) => {
+      content += `${index + 1}. ${step}\n`;
     });
     
-    // Simulate download delay
-    setTimeout(() => {
-      toast.success("Документ успешно создан!", {
-        description: "Технологическая карта сохранена в формате Word.",
-      });
-    }, 1500);
+    return content;
   };
   
   return (
