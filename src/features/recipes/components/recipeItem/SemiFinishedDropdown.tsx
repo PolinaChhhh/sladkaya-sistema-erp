@@ -40,13 +40,21 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   // Create a safe reference to semiFinishedRecipes
   const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
   
-  // Filter recipes based on search query - исправим логику фильтрации
-  const filteredRecipes = recipes.filter(recipe => 
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Log the original recipes and search query for debugging
+  console.log("Available recipes:", recipes.map(r => r.name));
+  console.log("Current search query:", searchQuery);
+  
+  // Filter recipes based on search query - fixed filtering logic
+  const filteredRecipes = searchQuery.trim() === "" 
+    ? recipes 
+    : recipes.filter(recipe => 
+        recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  
+  console.log("Filtered recipes:", filteredRecipes.map(r => r.name));
 
   const handleRecipeSelect = (recipeId: string) => {
-    // Найдем рецепт по id из списка
+    // Find recipe by id from the list
     const recipe = recipes.find(r => r.id === recipeId);
     
     if (recipe) {
@@ -65,7 +73,14 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
       setAmountDialogOpen(false);
       setAmount(100); // Reset to default
       setSelectedRecipe(null);
-      setSearchQuery(""); // Очищаем запрос после завершения выбора
+      setSearchQuery(""); // Clear search query after selection is complete
+    }
+  };
+
+  // Handle keyboard events
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false);
     }
   };
 
@@ -79,12 +94,13 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0 w-[240px]" align="start">
-          <Command>
+          <Command onKeyDown={handleKeyDown}>
             <CommandInput 
               placeholder="Поиск полуфабрикатов..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
               className="h-9"
+              autoFocus
             />
             <CommandList>
               <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
