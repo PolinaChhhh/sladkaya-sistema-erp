@@ -46,14 +46,16 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   );
 
   const handleRecipeSelect = (recipe: Recipe) => {
+    console.log("Selected recipe:", recipe.name);
     setSelectedRecipe(recipe);
     setOpen(false);
     setSearchQuery("");
-    setAmountDialogOpen(true);
+    setAmountDialogOpen(true); // This opens the amount dialog
   };
 
   const handleAmountConfirm = () => {
     if (selectedRecipe) {
+      console.log(`Confirming amount: ${amount}g for ${selectedRecipe.name}`);
       onSelectRecipe(selectedRecipe, amount);
       setAmountDialogOpen(false);
       setAmount(100); // Reset to default

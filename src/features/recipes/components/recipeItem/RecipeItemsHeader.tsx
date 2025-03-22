@@ -21,6 +21,7 @@ const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({
 }) => {
   // Make sure semiFinishedRecipes is always an array
   const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
+  console.log("RecipeItemsHeader - Available semi-finished recipes:", recipes.length);
   
   return (
     <div className="flex flex-wrap justify-between items-center gap-2">
@@ -28,7 +29,8 @@ const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({
         {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
       </Label>
       <div className="flex flex-1 flex-wrap gap-2 justify-end">
-        {category === 'finished' && recipes.length > 0 && (
+        {/* Always show the semi-finished dropdown for finished products */}
+        {recipes.length > 0 && (
           <SemiFinishedDropdown 
             semiFinishedRecipes={recipes} 
             onSelectRecipe={onSelectSemiFinished} 

@@ -110,6 +110,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
     recipe => recipe.category === 'semi-finished' && recipe.id !== currentRecipeId
   );
 
+  console.log("Available semi-finished recipes:", semiFinishedRecipes.length);
+
   const renderItems = () => {
     if (!items || items.length === 0) {
       return <EmptyItemsMessage category={category} />;
