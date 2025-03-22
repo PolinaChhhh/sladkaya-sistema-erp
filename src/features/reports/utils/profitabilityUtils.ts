@@ -118,6 +118,8 @@ export function calculateRecipeProfitability(
     
     // Add to total quantity sold
     quantitySold += shipmentQuantity;
+
+    console.log(`FIFO Shipment calculation: Batch ${batchId}: ${shipmentQuantity} units sold at ${shipment.unitValue}₽, cost ${productionEvent.unitValue}₽/unit, total cost ${shipmentCost}₽, revenue ${shipmentRevenue}₽`);
   });
   
   // Skip if no quantity was sold
@@ -128,6 +130,8 @@ export function calculateRecipeProfitability(
   const profitabilityPercent = totalCost > 0 
     ? (grossProfit / totalCost) * 100 
     : 0;
+  
+  console.log(`Profitability summary for ${recipe.name}: ${quantitySold} units sold, total cost ${totalCost.toFixed(2)}₽, revenue ${totalRevenue.toFixed(2)}₽, profit ${grossProfit.toFixed(2)}₽, profitability ${profitabilityPercent.toFixed(2)}%`);
   
   return {
     recipeId: recipe.id,
@@ -149,11 +153,14 @@ export function calculateProfitabilityData(
   productions: any[],
   shippings: any[]
 ): ProfitabilityData[] {
+  console.log("Calculating profitability data with FIFO-based costing");
+  
   // Create a map to aggregate data by recipe ID
   const productMap = new Map<string, ProfitabilityData>();
   
   // Process all recipes
   recipes.forEach(recipe => {
+    console.log(`Processing recipe: ${recipe.name} (${recipe.id})`);
     const profitabilityData = calculateRecipeProfitability(recipe, productions, shippings);
     if (profitabilityData) {
       productMap.set(recipe.id, profitabilityData);
