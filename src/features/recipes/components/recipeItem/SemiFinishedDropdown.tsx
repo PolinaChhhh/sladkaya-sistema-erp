@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 interface SemiFinishedDropdownProps {
   semiFinishedRecipes: Recipe[];
@@ -57,6 +57,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
       onSelectRecipe(selectedRecipe, amount);
       setAmountDialogOpen(false);
       setAmount(100); // Reset to default
+      setSelectedRecipe(null);
     }
   };
 
@@ -64,16 +65,10 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
     <>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <div className="relative w-[240px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <Input 
-              placeholder="Поиск полуфабрикатов..." 
-              className="pl-10 pr-3"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onClick={() => setOpen(true)}
-            />
-          </div>
+          <Button variant="outline" size="sm" className="relative w-[240px] justify-start">
+            <Search className="mr-2 h-4 w-4" />
+            {searchQuery ? searchQuery : "Поиск полуфабрикатов..."}
+          </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0 w-[240px]" align="start">
           <Command>
@@ -113,6 +108,9 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
             <DialogTitle>
               {selectedRecipe ? `Укажите количество "${selectedRecipe.name}"` : 'Укажите количество'}
             </DialogTitle>
+            <DialogDescription>
+              Укажите нужное количество полуфабриката для добавления в рецепт.
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <div className="space-y-4">

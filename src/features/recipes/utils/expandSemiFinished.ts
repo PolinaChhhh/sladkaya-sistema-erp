@@ -10,8 +10,11 @@ export const expandSemiFinishedToIngredients = (
   desiredAmount: number,
   recipes: Recipe[]
 ): RecipeItem[] => {
+  console.log(`Expanding ${semiFinishedRecipe.name} for ${desiredAmount}g - output: ${semiFinishedRecipe.output}`);
+  
   // Calculate the scaling factor based on desired amount vs total output
   const scaleFactor = desiredAmount / semiFinishedRecipe.output;
+  console.log(`Scale factor: ${scaleFactor}`);
   
   // Get all ingredients from the semi-finished recipe
   const expandedItems: RecipeItem[] = [];
@@ -21,10 +24,13 @@ export const expandSemiFinishedToIngredients = (
     items.forEach(item => {
       if (item.type === 'ingredient' && item.ingredientId) {
         // For ingredients, just scale the amount and add to the result
+        const scaledAmount = item.amount * currentScaleFactor;
+        console.log(`Adding ingredient ${item.ingredientId} - amount: ${item.amount} × ${currentScaleFactor} = ${scaledAmount}`);
+        
         expandedItems.push({
           type: 'ingredient',
           ingredientId: item.ingredientId,
-          amount: item.amount * currentScaleFactor,
+          amount: scaledAmount,
           isPackaging: false,
           fromSemiFinished: {
             recipeId: fromRecipe.id,
@@ -37,7 +43,10 @@ export const expandSemiFinishedToIngredients = (
         if (nestedRecipe) {
           // Calculate new scale factor for the nested recipe
           const nestedScaleFactor = (item.amount * currentScaleFactor) / nestedRecipe.output;
+          console.log(`Recursively expanding ${nestedRecipe.name} with scale factor ${nestedScaleFactor}`);
           expandRecipeItems(nestedRecipe.items, nestedRecipe, nestedScaleFactor);
+        } else {
+          console.warn(`Recipe ${item.recipeId} not found - cannot expand further`);
         }
       }
     });
@@ -45,6 +54,7 @@ export const expandSemiFinishedToIngredients = (
   
   // Start the recursive expansion
   expandRecipeItems(semiFinishedRecipe.items, semiFinishedRecipe, scaleFactor);
+  console.log(`Expanded to ${expandedItems.length} ingredients`);
   
   return expandedItems;
 };

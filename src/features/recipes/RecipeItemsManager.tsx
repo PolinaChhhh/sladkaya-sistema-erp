@@ -85,6 +85,8 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
       return;
     }
     
+    console.log(`Adding semi-finished: ${recipe.name} - ${amount}g`);
+    
     // Expand the semi-finished recipe into its ingredient components
     const expandedIngredients = expandSemiFinishedToIngredients(
       recipe,
