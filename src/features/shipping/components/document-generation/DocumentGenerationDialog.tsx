@@ -3,9 +3,9 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ShippingDocument } from '@/store/types/shipping';
-import DocumentSelector from './DocumentSelector';
 import { useDocumentGeneration } from './hooks/useDocumentGeneration';
 import { 
+  DocumentSelector,
   DocumentUploader, 
   FormatSelector, 
   DocumentGenerationButton,

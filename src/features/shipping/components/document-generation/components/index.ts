@@ -1,4 +1,5 @@
 
+export { default as DocumentSelector } from './DocumentSelector';
 export { default as DocumentUploader } from './DocumentUploader';
 export { default as FormatSelector } from './FormatSelector';
 export { default as DocumentGenerationButton } from './DocumentGenerationButton';
