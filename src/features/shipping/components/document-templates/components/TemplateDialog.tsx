@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -14,88 +14,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RussianDocumentType } from '@/store/types/shipping';
 import { DocumentTemplate } from '../types';
 import { Upload } from 'lucide-react';
-import { useRef } from 'react';
 import { toast } from 'sonner';
 
 interface TemplateDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (template: Omit<DocumentTemplate, 'id' | 'dateCreated'> & { id?: string }) => void;
-  editingTemplate: DocumentTemplate | null;
+  formData: Partial<DocumentTemplate>;
+  setFormData: (data: Partial<DocumentTemplate>) => void;
+  templateFile: File | null;
+  setTemplateFile: (file: File | null) => void;
+  onSave: () => void;
+  isEdit: boolean;
 }
 
 const TemplateDialog: React.FC<TemplateDialogProps> = ({
   isOpen,
   onOpenChange,
+  formData,
+  setFormData,
+  templateFile,
+  setTemplateFile,
   onSave,
-  editingTemplate
+  isEdit
 }) => {
-  // Form state
-  const [name, setName] = useState(editingTemplate?.name || '');
-  const [type, setType] = useState<RussianDocumentType>(editingTemplate?.type || 'TORG12');
-  const [format, setFormat] = useState<'word' | 'excel'>(editingTemplate?.format || 'word');
-  const [description, setDescription] = useState(editingTemplate?.description || '');
-  const [file, setFile] = useState<File | null>(editingTemplate?.file || null);
-  const [substitutionRules, setSubstitutionRules] = useState(
-    editingTemplate?.substitutionRules || JSON.stringify({ rules: [] }, null, 2)
-  );
-  
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Reset form when dialog opens with a template or closes
-  React.useEffect(() => {
-    if (isOpen && editingTemplate) {
-      setName(editingTemplate.name);
-      setType(editingTemplate.type);
-      setFormat(editingTemplate.format);
-      setDescription(editingTemplate.description);
-      setFile(editingTemplate.file);
-      setSubstitutionRules(editingTemplate.substitutionRules);
-    } else if (!isOpen) {
-      // Reset form when dialog closes
-      setName('');
-      setType('TORG12');
-      setFormat('word');
-      setDescription('');
-      setFile(null);
-      setSubstitutionRules(JSON.stringify({ rules: [] }, null, 2));
-    }
-  }, [isOpen, editingTemplate]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      setTemplateFile(e.target.files[0]);
     }
   };
   
   const handleSave = () => {
     // Validate
-    if (!name.trim()) {
+    if (!formData.name?.trim()) {
       toast.error('Введите название шаблона');
       return;
     }
     
-    if (!file) {
+    if (!templateFile) {
       toast.error('Загрузите файл шаблона');
       return;
     }
     
     try {
       // Validate JSON rules
-      JSON.parse(substitutionRules);
+      if (formData.substitutionRules) {
+        JSON.parse(formData.substitutionRules);
+      }
       
       // Save template
-      onSave({
-        id: editingTemplate?.id,
-        name,
-        type,
-        format,
-        description,
-        file,
-        substitutionRules
-      });
-      
-      onOpenChange(false);
+      onSave();
     } catch (e) {
       toast.error('Ошибка в формате правил подстановки (JSON)');
     }
@@ -106,7 +75,7 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {editingTemplate ? 'Редактирование шаблона' : 'Создание шаблона документа'}
+            {isEdit ? 'Редактирование шаблона' : 'Создание шаблона документа'}
           </DialogTitle>
         </DialogHeader>
         
@@ -114,8 +83,8 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Название шаблона</label>
             <Input 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
+              value={formData.name || ''} 
+              onChange={(e) => setFormData({...formData, name: e.target.value})} 
               placeholder="Введите название шаблона"
             />
           </div>
@@ -124,8 +93,8 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium">Тип документа</label>
               <Select 
-                value={type} 
-                onValueChange={(value) => setType(value as RussianDocumentType)}
+                value={formData.type as string || 'TORG12'} 
+                onValueChange={(value) => setFormData({...formData, type: value as RussianDocumentType})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите тип" />
@@ -142,8 +111,8 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium">Формат документа</label>
               <Select 
-                value={format} 
-                onValueChange={(value) => setFormat(value as 'word' | 'excel')}
+                value={formData.format || 'word'} 
+                onValueChange={(value) => setFormData({...formData, format: value as 'word' | 'excel'})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите формат" />
@@ -159,8 +128,8 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Описание</label>
             <Textarea 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
+              value={formData.description || ''} 
+              onChange={(e) => setFormData({...formData, description: e.target.value})} 
               placeholder="Краткое описание шаблона"
               rows={2}
             />
@@ -175,7 +144,7 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {file ? 'Изменить файл' : 'Загрузить файл'}
+                {templateFile ? 'Изменить файл' : 'Загрузить файл'}
               </Button>
               <input 
                 type="file" 
@@ -185,9 +154,9 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
                 onChange={handleFileChange}
               />
             </div>
-            {file && (
+            {templateFile && (
               <p className="text-xs text-green-600">
-                Загружен файл: {file.name}
+                Загружен файл: {templateFile.name}
               </p>
             )}
           </div>
@@ -195,8 +164,8 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Правила подстановки (JSON)</label>
             <Textarea 
-              value={substitutionRules} 
-              onChange={(e) => setSubstitutionRules(e.target.value)} 
+              value={formData.substitutionRules || '{"rules": []}'}
+              onChange={(e) => setFormData({...formData, substitutionRules: e.target.value})} 
               placeholder='{"rules": []}'
               rows={4}
               className="font-mono text-xs"
@@ -212,7 +181,7 @@ const TemplateDialog: React.FC<TemplateDialogProps> = ({
             Отмена
           </Button>
           <Button onClick={handleSave}>
-            {editingTemplate ? 'Сохранить изменения' : 'Создать шаблон'}
+            {isEdit ? 'Сохранить изменения' : 'Создать шаблон'}
           </Button>
         </DialogFooter>
       </DialogContent>
