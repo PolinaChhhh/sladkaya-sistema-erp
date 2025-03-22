@@ -6,6 +6,7 @@ import { useStore } from '@/store/recipeStore';
 import { ShippingDocument } from '@/store/types/shipping';
 import { prepareDocumentData, downloadDocument } from '@/features/shipping/services/document-generator/utils';
 import { generateUPDDocument } from '@/features/shipping/services/document-generator/updGenerator';
+import { toast } from 'sonner';
 
 interface UPDGeneratorTestProps {
   shipping: ShippingDocument;
@@ -23,7 +24,7 @@ const UPDGeneratorTest: React.FC<UPDGeneratorTestProps> = ({ shipping }) => {
     const buyer = buyers.find(b => b.id === shipping.buyerId);
     
     if (!buyer) {
-      console.error('Ошибка: Покупатель не найден');
+      toast.error('Ошибка: Покупатель не найден');
       return;
     }
     
@@ -40,9 +41,10 @@ const UPDGeneratorTest: React.FC<UPDGeneratorTestProps> = ({ shipping }) => {
       // Скачивание файла
       downloadDocument(updBlob, fileName);
       
-      console.log('УПД успешно сгенерирован');
+      toast.success('УПД успешно сгенерирован');
     } catch (error) {
       console.error('Ошибка при генерации УПД:', error);
+      toast.error('Ошибка при генерации УПД');
     }
   };
   

@@ -7,6 +7,7 @@ export type Buyer = {
   email?: string;
   address?: string;
   tin?: string; // Tax Identification Number
+  kpp?: string; // Code of Reason for Registration
   legalAddress?: string;
   physicalAddress?: string;
   bankDetails?: string;
