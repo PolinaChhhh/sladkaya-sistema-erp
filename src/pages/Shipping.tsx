@@ -8,6 +8,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ShipmentsList from '@/features/shipping/ShipmentsList';
 import BuyersList from '@/features/shipping/BuyersList';
+import { DocumentTemplatesList } from '@/features/shipping/components/document-templates';
 
 const Shipping = () => {
   const [activeTab, setActiveTab] = useState<'shipments' | 'buyers' | 'documents'>('shipments');
@@ -48,7 +49,7 @@ const Shipping = () => {
               Система позволяет создавать следующие официальные документы для отгрузок:
             </p>
             
-            <div className="grid gap-4">
+            <div className="grid gap-4 mb-8">
               <div className="p-4 border rounded-md">
                 <h3 className="font-medium mb-2">ТОРГ-12 (Товарная накладная)</h3>
                 <p className="text-sm text-gray-500">
@@ -78,11 +79,15 @@ const Shipping = () => {
               </div>
             </div>
             
-            <div className="mt-6 p-4 bg-blue-50 rounded-md text-blue-800 text-sm">
+            <div className="mt-2 mb-8 p-4 bg-blue-50 rounded-md text-blue-800 text-sm">
               <p>
                 <strong>Примечание:</strong> Для создания документа перейдите на вкладку "Отгрузки", 
                 выберите отгрузку и нажмите кнопку "Создать документ".
               </p>
+            </div>
+            
+            <div className="mt-10">
+              <DocumentTemplatesList />
             </div>
           </div>
         </TabsContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -164,7 +163,7 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
           </div>
           
           {documentType === 'TORG12' && !templateFile && (
-            <Alert variant="warning" className="bg-amber-50 border-amber-200">
+            <Alert className="bg-amber-50 border-amber-200">
               <AlertDescription className="text-xs text-amber-800">
                 Для формы ТОРГ-12 рекомендуется загрузить шаблон документа для корректного формирования.
               </AlertDescription>
