@@ -27,7 +27,7 @@ const IngredientSelector: React.FC<IngredientSelectorProps> = ({
         value={ingredientId || ''}
         onValueChange={onIngredientChange}
       >
-        <SelectTrigger className={`w-full ${fromSemiFinished ? 'border-blue-200' : ''}`}>
+        <SelectTrigger className={`w-full ${fromSemiFinished ? 'border-blue-200 bg-blue-50' : ''}`}>
           <SelectValue placeholder="Выберите ингредиент" />
         </SelectTrigger>
         <SelectContent>

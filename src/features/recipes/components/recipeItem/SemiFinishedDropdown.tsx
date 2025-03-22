@@ -2,19 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Recipe } from '@/store/types';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, Search, Package } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -35,14 +27,24 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [amountDialogOpen, setAmountDialogOpen] = useState(false);
   const [amount, setAmount] = useState(100); // Default amount in grams
+  const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   
-  // Create a safe reference to semiFinishedRecipes
-  const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
-  
-  // Filter recipes based on search query
-  const filteredRecipes = recipes.filter(recipe => 
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter recipes based on search query whenever the query changes
+  useEffect(() => {
+    // Only filter if there's a search query, otherwise show empty results
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+    
+    // Filter recipes based on case-insensitive name match
+    const filteredRecipes = semiFinishedRecipes.filter(recipe => 
+      recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    console.log(`Search query "${searchQuery}" returned ${filteredRecipes.length} results`);
+    setSearchResults(filteredRecipes);
+  }, [searchQuery, semiFinishedRecipes]);
 
   const handleRecipeSelect = (recipe: Recipe) => {
     console.log("Selected recipe:", recipe.name);
@@ -64,7 +66,15 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
       setAmount(100); // Reset to default
       setSelectedRecipe(null);
       setSearchQuery(""); // Clear search query
+      setSearchResults([]); // Clear search results
     }
+  };
+
+  const handlePopoverClose = () => {
+    // Reset search when closing the popover
+    setSearchQuery("");
+    setSearchResults([]);
+    setOpen(false);
   };
 
   return (
@@ -76,36 +86,47 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
             <span>Добавить полуфабрикат</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-[300px]" align="start">
-          <Command>
-            <CommandInput 
-              placeholder="Поиск полуфабрикатов..." 
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              autoFocus
-            />
-            <CommandList className="max-h-[300px]">
-              <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
-              <CommandGroup>
-                {filteredRecipes.map((recipe) => (
-                  <CommandItem
-                    key={recipe.id}
-                    value={recipe.id}
-                    onSelect={() => handleRecipeSelect(recipe)}
-                    className="flex items-center justify-between cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-gray-500" />
-                      <span>{recipe.name}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {recipe.output} {recipe.outputUnit}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+        <PopoverContent className="p-3 w-[300px]" align="start">
+          <div className="flex flex-col gap-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Поиск полуфабрикатов..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+                autoFocus
+              />
+            </div>
+            
+            {searchQuery.trim() !== "" && (
+              <div className="max-h-[300px] overflow-y-auto mt-2">
+                {searchResults.length > 0 ? (
+                  <div className="space-y-1">
+                    {searchResults.map((recipe) => (
+                      <div
+                        key={recipe.id}
+                        onClick={() => handleRecipeSelect(recipe)}
+                        className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-gray-500" />
+                          <span>{recipe.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {recipe.output} {recipe.outputUnit}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-3 text-center text-sm text-gray-500">
+                    Полуфабрикат не найден
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </PopoverContent>
       </Popover>
 
