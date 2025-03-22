@@ -1,4 +1,3 @@
-
 import { Dispatch, SetStateAction } from 'react';
 import { ShippingDocument } from '@/store/recipeStore';
 import { getProductsInStock, getAvailableProductionBatches } from '../utils/shippingUtils';
@@ -50,15 +49,17 @@ export const useShippingForm = (
       return { error: 'Нет доступных партий продукта' };
     }
     
-    // Use the first (oldest) available batch
+    // Use the first (oldest) available batch for the initial reference
     const oldestBatch = availableBatches[0];
-    const maxQuantity = Math.min(oldestBatch.availableQuantity, 1); // Cap at 1 or available quantity if less
+    
+    // Instead of capping at 1, allow using the full quantity available for this recipe
+    const initialQuantity = Math.min(firstProduct.availableQuantity, 1); // Start with 1 but allow more
     
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
         productionBatchId: oldestBatch.productionBatchId,
-        quantity: maxQuantity, 
+        quantity: initialQuantity, 
         price: oldestBatch.unitCost * 1.3, // Default 30% markup based on actual unit cost
         vatRate: 20, // Default VAT rate 20%
       }],
@@ -80,32 +81,24 @@ export const useShippingForm = (
           ? selectedProduction.cost / selectedProduction.quantity 
           : 0;
         
-        // Find the available quantity for this production batch
-        const availableBatches = getAvailableProductionBatches(
-          productions,
-          shippings,
-          selectedProduction.recipeId
-        );
+        // Get the total available quantity for this recipe
+        const productsInStock = getProductsInStock(productions, shippings, recipes);
+        const recipeProduct = productsInStock.find(p => p.recipeId === selectedProduction.recipeId);
+        const totalAvailable = recipeProduct ? recipeProduct.availableQuantity : 0;
         
-        const matchingBatch = availableBatches.find(b => b.productionBatchId === value);
-        const availableQty = matchingBatch ? matchingBatch.availableQuantity : 0;
-        
-        // Cap the quantity at the available amount
-        const newQuantity = Math.min(1, availableQty);
+        // Set default quantity to 1 or keep existing if valid
+        const existingQuantity = newItems[index].quantity;
+        const newQuantity = Math.min(existingQuantity > 0 ? existingQuantity : 1, totalAvailable);
         
         newItems[index] = { 
           ...newItems[index], 
           [field]: value,
           price: unitCost * 1.3, // Default 30% markup on actual unit cost
-          quantity: newQuantity // Set to 1 or available quantity if less
+          quantity: newQuantity
         };
       } else {
         newItems[index] = { ...newItems[index], [field]: value };
       }
-    } else if (field === 'quantity') {
-      // For quantity, we need to verify that it doesn't exceed available quantity
-      // But this validation happens in the ShippingItemRow component
-      newItems[index] = { ...newItems[index], [field]: value };
     } else {
       newItems[index] = { ...newItems[index], [field]: value };
     }

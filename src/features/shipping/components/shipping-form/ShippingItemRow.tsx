@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,8 @@ interface ShippingItemRowProps {
     vatRate: number;
   };
   idx: number;
-  availableQuantity: number;
+  availableQuantity: number; // Total recipe quantity
+  preciseAvailableQuantity?: number; // Current batch quantity
   productName: string;
   productUnit: string;
   updateShippingItem: (index: number, field: string, value: any) => void;
@@ -32,6 +32,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   item,
   idx,
   availableQuantity,
+  preciseAvailableQuantity,
   productName,
   productUnit,
   updateShippingItem,
@@ -56,10 +57,10 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   // Get selected product recipe ID
   const selectedRecipeId = selectedProduction?.recipeId;
   
-  // Get precise available quantity for the selected production batch
-  const preciseAvailableQuantity = useMemo(() => {
-    return getAvailableQuantity(productions, shippings, item.productionBatchId);
-  }, [productions, shippings, item.productionBatchId]);
+  // Use passed preciseAvailableQuantity or calculate it
+  const batchAvailableQuantity = preciseAvailableQuantity !== undefined 
+    ? preciseAvailableQuantity 
+    : getAvailableQuantity(productions, shippings, item.productionBatchId);
   
   // Get all available production batches for the selected recipe
   const availableBatches = useMemo(() => {
@@ -73,7 +74,7 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
     const parsedQuantity = newQuantity < 0 ? 0 : newQuantity;
     
     // Make sure we don't exceed available stock
-    const validQuantity = Math.min(parsedQuantity, preciseAvailableQuantity);
+    const validQuantity = Math.min(parsedQuantity, availableQuantity);
     
     if (validQuantity !== parsedQuantity && parsedQuantity > 0) {
       console.log(`Limiting quantity to available stock: ${validQuantity} (requested: ${parsedQuantity})`);
@@ -87,19 +88,22 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
   const handleBatchChange = (newBatchId: string) => {
     if (newBatchId === item.productionBatchId) return;
     
-    // Get available quantity for the new batch
-    const newBatchAvailability = getAvailableQuantity(productions, shippings, newBatchId);
-    
     // Update the production batch ID
     updateShippingItem(idx, 'productionBatchId', newBatchId);
     
-    // Reset quantity to 1 or to the max available if less than 1
-    const newQuantity = Math.min(1, newBatchAvailability);
-    updateShippingItem(idx, 'quantity', newQuantity);
-    
-    // Update price based on the production's unit cost
+    // Get the new production details
     const newProduction = productions.find(p => p.id === newBatchId);
     if (newProduction) {
+      // Find the recipe for this production
+      const recipeId = newProduction.recipeId;
+      // Get all available quantity for this recipe
+      const productDetails = productsInStock.find(p => p.recipeId === recipeId);
+      const totalAvailable = productDetails?.availableQuantity || 0;
+      
+      // Set quantity to 1 by default (or keep current if valid)
+      const newQuantity = Math.min(item.quantity > 0 ? item.quantity : 1, totalAvailable);
+      updateShippingItem(idx, 'quantity', newQuantity);
+      
       // Calculate the unit cost from the production's total cost and quantity
       const unitCost = newProduction.quantity > 0 
         ? newProduction.cost / newProduction.quantity 
@@ -133,8 +137,8 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
       </div>
       
       <div className="col-span-1 text-center">
-        <span className={`font-medium whitespace-nowrap ${preciseAvailableQuantity === 0 ? "text-red-500" : ""}`}>
-          {preciseAvailableQuantity} {productUnit}
+        <span className={`font-medium whitespace-nowrap ${availableQuantity === 0 ? "text-red-500" : ""}`}>
+          {availableQuantity} {productUnit}
         </span>
       </div>
       
@@ -142,11 +146,11 @@ const ShippingItemRow: React.FC<ShippingItemRowProps> = ({
         <Input
           type="number"
           min="1"
-          max={preciseAvailableQuantity}
+          max={availableQuantity}
           value={item.quantity}
           onChange={(e) => handleQuantityChange(Number(e.target.value))}
           className="text-center"
-          disabled={preciseAvailableQuantity === 0}
+          disabled={availableQuantity === 0}
         />
       </div>
       

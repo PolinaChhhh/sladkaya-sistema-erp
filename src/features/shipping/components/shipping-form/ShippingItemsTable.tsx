@@ -57,7 +57,10 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
           ? productsInStock.find(p => p.recipeId === recipeId)
           : null;
         
-        // Calculate precise available quantity for this specific production batch
+        // Use total recipe quantity instead of just the batch quantity
+        const totalAvailableQuantity = productDetails?.availableQuantity || 0;
+        
+        // Also get precise batch quantity for validation
         const preciseAvailableQuantity = getAvailableQuantity(productions, shippings, item.productionBatchId);
         
         // Use the utility functions or fallback to values from grouped products
@@ -68,7 +71,8 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
           item, 
           productionId: item.productionBatchId,
           productName,
-          availableQuantity: preciseAvailableQuantity
+          batchAvailableQuantity: preciseAvailableQuantity,
+          totalAvailableQuantity
         });
         
         return (
@@ -76,7 +80,8 @@ const ShippingItemsTable: React.FC<ShippingItemsTableProps> = ({
             key={idx}
             item={item}
             idx={idx}
-            availableQuantity={preciseAvailableQuantity}
+            availableQuantity={totalAvailableQuantity} // Use total quantity for display
+            preciseAvailableQuantity={preciseAvailableQuantity} // Pass batch quantity for validation
             productName={productName}
             productUnit={productUnit}
             updateShippingItem={updateShippingItem}
