@@ -1,4 +1,3 @@
-
 import { ShippingDocument, RussianDocumentType } from '@/store/types/shipping';
 import { Buyer } from '@/store/types/buyer';
 import { Recipe, ProductionBatch } from '@/store/types/recipe';
@@ -61,6 +60,16 @@ export const prepareDocumentData = (
       currentDate
     },
     buyer,
+    company: {
+      name: "Ваша компания", // Это должно быть взято из настроек компании
+      tin: "1234567890", // Это должно быть взято из настроек компании
+      legalAddress: "г. Москва, ул. Примерная, д. 1", // Это должно быть взято из настроек компании
+      physicalAddress: "г. Москва, ул. Примерная, д. 1",
+      contactPerson: "Иванов И.И.",
+      phone: "+7 (495) 123-45-67",
+      email: "info@yourcompany.ru",
+      bankDetails: "Р/с 40702810000000000000, АО 'Банк', БИК 044525000, К/с 30101810000000000000"
+    },
     items,
     totals: {
       withoutVat: totalWithoutVat,
@@ -79,7 +88,7 @@ export const prepareDocumentData = (
     totalWithoutVat,
     totalVatAmount,
     totalWithVat,
-    extendedData // Теперь это поле будет соответствовать интерфейсу
+    extendedData
   };
 };
 
@@ -155,14 +164,15 @@ export const validateSubstitutionRules = (rulesJson: string): boolean => {
  * This function extracts additional data useful for TORG-12 documents
  */
 export const getTORG12TemplateData = (data: DocumentGenerationData): Record<string, any> => {
-  const { shipping, buyer, items, totalWithVat } = data;
+  const { shipping, buyer, items, totalWithVat, extendedData } = data;
   
   return {
     documentNumber: formatShipmentNumber(shipping.shipmentNumber),
     documentDate: shipping.date,
     currentDate: new Date().toLocaleDateString('ru-RU'),
-    supplierName: "Ваша компания", // Это должно быть взято из настроек компании
-    supplierTIN: "1234567890", // Это должно быть взято из настроек компании
+    supplierName: extendedData?.company?.name || "Ваша компания",
+    supplierTIN: extendedData?.company?.tin || "1234567890",
+    supplierAddress: extendedData?.company?.legalAddress || "г. Москва, ул. Примерная, д. 1",
     buyerName: buyer.name,
     buyerTIN: buyer.tin || "",
     buyerAddress: buyer.legalAddress || "",
@@ -178,8 +188,8 @@ export const getTORG12TemplateData = (data: DocumentGenerationData): Record<stri
     // Подписи для ТОРГ-12
     signatures: {
       supplier: {
-        position: "Генеральный директор",
-        name: "Иванов И.И."
+        position: extendedData?.company?.contactPerson ? "Генеральный директор" : "Генеральный директор",
+        name: extendedData?.company?.contactPerson || "Иванов И.И."
       },
       recipient: {
         position: "",

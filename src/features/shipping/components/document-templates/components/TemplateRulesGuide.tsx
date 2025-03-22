@@ -58,6 +58,20 @@ const TemplateRulesGuide: React.FC = () => {
               </div>
               
               <div className="bg-gray-50 p-3 rounded mb-3 text-sm">
+                <h5 className="font-medium">Данные компании-отправителя (company)</h5>
+                <ul className="list-disc pl-5 space-y-1 mt-1">
+                  <li><code>company.name</code> - название компании</li>
+                  <li><code>company.tin</code> - ИНН</li>
+                  <li><code>company.legalAddress</code> - юридический адрес</li>
+                  <li><code>company.physicalAddress</code> - фактический адрес</li>
+                  <li><code>company.contactPerson</code> - контактное лицо</li>
+                  <li><code>company.phone</code> - телефон</li>
+                  <li><code>company.email</code> - электронная почта</li>
+                  <li><code>company.bankDetails</code> - банковские реквизиты</li>
+                </ul>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded mb-3 text-sm">
                 <h5 className="font-medium">Данные покупателя (buyer)</h5>
                 <ul className="list-disc pl-5 space-y-1 mt-1">
                   <li><code>buyer.name</code> - название компании</li>
@@ -106,8 +120,17 @@ const TemplateRulesGuide: React.FC = () => {
   "rules": [
     // Простые замены
     {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
+    
+    // Данные компании-отправителя
+    {"placeholder": "{{company.name}}", "field": "company.name"},
+    {"placeholder": "{{company.tin}}", "field": "company.tin"},
+    {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
+    
+    // Данные покупателя
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"},
     
     // Таблица товаров
     {
@@ -143,7 +166,17 @@ const TemplateRulesGuide: React.FC = () => {
     // Простые замены для текстовых полей
     {"placeholder": "{{shipping_number}}", "field": "shipping.shipmentNumber"},
     {"placeholder": "{{shipping_date}}", "field": "shipping.date"},
+    
+    // Данные компании-отправителя
+    {"placeholder": "{{company_name}}", "field": "company.name"},
+    {"placeholder": "{{company_tin}}", "field": "company.tin"},
+    {"placeholder": "{{company_address}}", "field": "company.legalAddress"},
+    {"placeholder": "{{company_phone}}", "field": "company.phone"},
+    
+    // Данные покупателя
     {"placeholder": "{{buyer_name}}", "field": "buyer.name"},
+    {"placeholder": "{{buyer_tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer_address}}", "field": "buyer.legalAddress"},
     
     // Таблица товаров
     {

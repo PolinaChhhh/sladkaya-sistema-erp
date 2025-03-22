@@ -16,6 +16,9 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
   "rules": [
     {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
     {"placeholder": "{{shipping.date}}", "field": "shipping.date"},
+    {"placeholder": "{{company.name}}", "field": "company.name"},
+    {"placeholder": "{{company.tin}}", "field": "company.tin"},
+    {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
     {"placeholder": "{{buyer.address}}", "field": "buyer.legalAddress"}
@@ -25,6 +28,8 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
   const excelTableRulesTemplate = `{
   "rules": [
     {"placeholder": "{{shipping.number}}", "field": "shipping.shipmentNumber"},
+    {"placeholder": "{{company.name}}", "field": "company.name"},
+    {"placeholder": "{{company.address}}", "field": "company.legalAddress"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {
       "type": "table",

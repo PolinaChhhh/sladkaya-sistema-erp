@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ShippingDocument } from '@/store/types/shipping';
-import { UPDPrintPreview } from './components';
+import { UPDPrintPreview, CompanyDataProvider } from './components';
 
 interface DocumentGenerationDialogProps {
   isOpen: boolean;
@@ -22,7 +22,9 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
           <DialogTitle>Печатная форма УПД</DialogTitle>
         </DialogHeader>
         
-        <UPDPrintPreview shipping={shipping} />
+        <CompanyDataProvider>
+          <UPDPrintPreview shipping={shipping} />
+        </CompanyDataProvider>
       </DialogContent>
     </Dialog>
   );

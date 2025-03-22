@@ -5,3 +5,4 @@ export { default as FormatSelector } from './FormatSelector';
 export { default as UPDGeneratorTest } from './UPDGeneratorTest';
 export { default as UPDPrintPreview } from './UPDPrintPreview';
 export { default as DocumentGenerationButton } from './DocumentGenerationButton';
+export { default as CompanyDataProvider } from './CompanyDataProvider';
