@@ -39,7 +39,7 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
   // Track which recipe's movement history is being viewed
   const [historyRecipeId, setHistoryRecipeId] = useState<string | null>(null);
   
-  const inStockItems = useMemo(() => {
+  const stockItems = useMemo(() => {
     // Create a map to track produced and shipped quantities by recipe
     const stockMap: Record<string, StockItem> = {};
     
@@ -78,7 +78,6 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
     
     // Convert to array and sort by name
     return Object.values(stockMap)
-      .filter(item => item.quantity > 0) // Only show items with stock
       .sort((a, b) => a.recipeName.localeCompare(b.recipeName));
   }, [recipes, productions, shippings, getRecipeUnit]);
 
@@ -87,12 +86,12 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
     return recipes.find(r => r.id === historyRecipeId) || null;
   }, [historyRecipeId, recipes]);
 
-  // If no items in stock, show empty state
-  if (inStockItems.length === 0) {
+  // If no recipes at all, show empty state
+  if (recipes.length === 0) {
     return (
       <EmptyState 
         icon={Package}
-        title="Нет продукции на складе"
+        title="Нет продукции"
         description="Здесь будет отображаться готовая продукция"
       />
     );
@@ -119,29 +118,39 @@ const InStockRecipes: React.FC<InStockRecipesProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {inStockItems.map((item) => (
-                <TableRow key={item.recipeId}>
-                  <TableCell className="font-medium">{item.recipeName}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{item.unit}</TableCell>
-                  <TableCell>
-                    {item.lastProduced 
-                      ? new Date(item.lastProduced).toLocaleDateString('ru-RU') 
-                      : 'Никогда'}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1.5"
-                      onClick={() => setHistoryRecipeId(item.recipeId)}
-                    >
-                      <History className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:inline-block sm:whitespace-nowrap">История</span>
-                    </Button>
+              {stockItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                    Нет продукции
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                stockItems.map((item) => (
+                  <TableRow key={item.recipeId}>
+                    <TableCell className="font-medium">{item.recipeName}</TableCell>
+                    <TableCell className={item.quantity > 0 ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell>{item.unit}</TableCell>
+                    <TableCell>
+                      {item.lastProduced 
+                        ? new Date(item.lastProduced).toLocaleDateString('ru-RU') 
+                        : 'Никогда'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1.5"
+                        onClick={() => setHistoryRecipeId(item.recipeId)}
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:inline-block sm:whitespace-nowrap">История</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
