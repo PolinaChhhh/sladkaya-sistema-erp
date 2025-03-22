@@ -7,3 +7,6 @@ export { default as UPDPrintPreview } from './UPDPrintPreview';
 export { default as UPDTemplate } from './UPDTemplate';
 export { default as DocumentGenerationButton } from './DocumentGenerationButton';
 export { default as CompanyDataProvider } from './CompanyDataProvider';
+
+// Export UPD Sections
+export * from './upd-sections';
