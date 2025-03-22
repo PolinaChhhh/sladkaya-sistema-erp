@@ -6,6 +6,12 @@ import { ShippingDocument } from '@/store/types/shipping';
 import { useStore } from '@/store/recipeStore';
 import { prepareDocumentData } from '@/features/shipping/services/document-generator/utils';
 import { UPDPrintTemplate } from '@/features/shipping/services/document-generator/print-templates';
+import { 
+  generateUPDHtml,
+  openPrintWindow,
+  generateExcelData,
+  downloadDataAsFile
+} from '@/features/shipping/services/document-generator/print-templates/printUtils';
 import { toast } from 'sonner';
 
 interface UPDPrintPreviewProps {
@@ -33,33 +39,22 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
       return;
     }
     
-    const printWindow = window.open('', '_blank');
+    // Get all the print-related styles
+    const allStyles = Array.from(document.querySelectorAll('style'))
+      .map(style => style.innerHTML)
+      .join('\n');
+    
+    const htmlContent = generateUPDHtml(
+      printContainerRef.current?.innerHTML || '',
+      shipping,
+      allStyles
+    );
+    
+    const printWindow = openPrintWindow(htmlContent);
+    
     if (!printWindow) {
       toast.error('Пожалуйста, разрешите всплывающие окна для печати документа');
-      return;
     }
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>УПД №${shipping.shipmentNumber}</title>
-          <style>
-            ${document.querySelector('style')?.innerHTML || ''}
-          </style>
-        </head>
-        <body>
-          ${printContainerRef.current?.innerHTML || ''}
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
   };
   
   // Функция скачивания HTML в виде файла
@@ -69,29 +64,22 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
       return;
     }
     
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>УПД №${shipping.shipmentNumber}</title>
-          <style>
-            ${document.querySelector('style')?.innerHTML || ''}
-          </style>
-        </head>
-        <body>
-          ${printContainerRef.current?.innerHTML || ''}
-        </body>
-      </html>
-    `;
+    // Get all styles
+    const allStyles = Array.from(document.querySelectorAll('style'))
+      .map(style => style.innerHTML)
+      .join('\n');
     
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `УПД_${shipping.shipmentNumber}_${buyer.name.replace(/[^\w\s]/gi, '')}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const htmlContent = generateUPDHtml(
+      printContainerRef.current?.innerHTML || '',
+      shipping,
+      allStyles
+    );
+    
+    downloadDataAsFile(
+      htmlContent,
+      `УПД_${shipping.shipmentNumber}_${buyer.name.replace(/[^\w\s]/gi, '')}.html`,
+      'text/html'
+    );
     
     toast.success('HTML-шаблон успешно скачан');
   };
@@ -103,46 +91,32 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
       return;
     }
     
-    // Имитация экспорта в PDF (в реальном приложении здесь использовалась бы библиотека)
+    // Get all styles
+    const allStyles = Array.from(document.querySelectorAll('style'))
+      .map(style => style.innerHTML)
+      .join('\n');
+    
     toast.promise(
-      // Имитация асинхронного процесса
-      new Promise(resolve => setTimeout(resolve, 1500)), 
-      {
-        loading: 'Генерация PDF...',
-        success: () => {
-          // Вместо имитации здесь бы использовалась html2pdf или jsPDF
-          const printWindow = window.open('', '_blank');
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const htmlContent = generateUPDHtml(
+            printContainerRef.current?.innerHTML || '',
+            shipping,
+            allStyles
+          );
+          
+          const printWindow = openPrintWindow(htmlContent);
+          
           if (!printWindow) {
             throw new Error('Пожалуйста, разрешите всплывающие окна');
           }
           
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>УПД №${shipping.shipmentNumber}</title>
-                <style>
-                  ${document.querySelector('style')?.innerHTML || ''}
-                  @media print {
-                    body { margin: 0; padding: 0; }
-                    .upd-print-container { width: 100%; }
-                  }
-                </style>
-              </head>
-              <body>
-                ${printContainerRef.current?.innerHTML || ''}
-                <script>
-                  window.onload = function() {
-                    window.print();
-                    setTimeout(function() { window.close(); }, 500);
-                  };
-                </script>
-              </body>
-            </html>
-          `);
-          
-          printWindow.document.close();
-          return 'УПД успешно экспортирован для печати';
-        },
+          resolve();
+        }, 300);
+      }),
+      {
+        loading: 'Генерация PDF...',
+        success: 'УПД успешно экспортирован для печати',
         error: 'Ошибка при создании PDF'
       }
     );
@@ -156,37 +130,10 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
     }
     
     try {
-      // В реальном приложении здесь была бы генерация Excel файла с библиотекой xlsx
-      // Сейчас создаем простой CSV для имитации Excel
-      let csvContent = "data:text/csv;charset=utf-8,";
+      // Генерируем CSV данные
+      const csvContent = generateExcelData(documentData, shipping, buyer);
       
-      // Заголовки
-      csvContent += "УПД №" + shipping.shipmentNumber + "\r\n";
-      csvContent += "Дата: " + shipping.date + "\r\n";
-      csvContent += "Покупатель: " + buyer.name + "\r\n\r\n";
-      
-      // Таблица товаров
-      csvContent += "№,Наименование,Количество,Ед. изм.,Цена без НДС,Ставка НДС,Сумма НДС,Всего с НДС\r\n";
-      
-      documentData.items.forEach((item, index) => {
-        csvContent += [
-          index + 1,
-          item.productName,
-          item.quantity,
-          item.unit,
-          item.priceWithoutVat.toFixed(2),
-          item.vatRate + "%",
-          item.vatAmount.toFixed(2),
-          item.totalAmount.toFixed(2)
-        ].join(",") + "\r\n";
-      });
-      
-      // Итоги
-      csvContent += "\r\n";
-      csvContent += ",,,,,,Итого без НДС:," + documentData.totalWithoutVat.toFixed(2) + "\r\n";
-      csvContent += ",,,,,,Сумма НДС:," + documentData.totalVatAmount.toFixed(2) + "\r\n";
-      csvContent += ",,,,,,Итого с НДС:," + documentData.totalWithVat.toFixed(2) + "\r\n";
-      
+      // Скачиваем файл
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -256,7 +203,7 @@ const UPDPrintPreview: React.FC<UPDPrintPreviewProps> = ({ shipping }) => {
         </div>
         
         <div className="bg-white p-2 overflow-auto max-h-[70vh]" style={{ zoom: '0.6' }}>
-          <div ref={printContainerRef}>
+          <div ref={printContainerRef} className="print-friendly-content">
             <UPDPrintTemplate data={documentData} />
           </div>
         </div>

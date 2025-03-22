@@ -330,10 +330,53 @@
   .upd-print-container {
     padding: 0;
     width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Обеспечиваем видимость всех элементов при печати */
+  .upd-edo-section, .upd-footer, .upd-signatures, 
+  .upd-table-section, .upd-header, .upd-info-section,
+  .upd-transfer, .upd-receive, .upd-reference, 
+  .upd-signature-placeholder, .upd-transfer-signature-placeholder,
+  .upd-edo-info, .upd-foundation, .upd-transportation, 
+  .upd-entity, .upd-table {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+  
+  /* Обеспечиваем правильное отображение таблицы при печати */
+  .upd-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+  
+  .upd-table th, .upd-table td {
+    page-break-inside: avoid;
+  }
+  
+  /* Фиксируем цвета фона при печати */
+  .upd-table th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #f5f5f5 !important;
+  }
+  
+  .upd-column-indices td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: #f5f5f5 !important;
   }
   
   @page {
     margin: 10mm;
     size: A4 portrait;
   }
+}
+
+/* Класс для обеспечения печати */
+.print-friendly-content {
+  width: 100%;
 }

@@ -26,6 +26,16 @@ export const generateUPDHtml = (
           @media print {
             body { margin: 0; padding: 0; }
             .upd-print-container { width: 100%; }
+            /* Ensure all UI elements are visible in print mode */
+            .upd-edo-section, .upd-footer, .upd-signatures, 
+            .upd-table-section, .upd-header, .upd-info-section,
+            .upd-transfer, .upd-receive, .upd-reference, 
+            .upd-signature-placeholder, .upd-edo-info, .upd-transfer-signature-placeholder,
+            .upd-foundation, .upd-transportation, .upd-entity {
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+            }
           }
         </style>
       </head>
@@ -117,8 +127,11 @@ export const openPrintWindow = (
     printWindow.document.write(`
       <script>
         window.onload = function() {
-          window.print();
-          setTimeout(function() { window.close(); }, 500);
+          // Delay printing slightly to ensure all styles are applied
+          setTimeout(function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 1000);
+          }, 300);
         };
       </script>
     `);
@@ -126,4 +139,12 @@ export const openPrintWindow = (
   
   printWindow.document.close();
   return printWindow;
+};
+
+/**
+ * Преобразует HTML в PDF (эмуляция через печать)
+ */
+export const generatePdfFromHtml = (containerHtml: string, shipping: ShippingDocument): void => {
+  const htmlContent = generateUPDHtml(containerHtml, shipping);
+  openPrintWindow(htmlContent, true);
 };
