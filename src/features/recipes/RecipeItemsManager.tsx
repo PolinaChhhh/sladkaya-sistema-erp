@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Ingredient, RecipeItem, Recipe, RecipeCategory } from '@/store/types';
 import { toast } from 'sonner';
 import RecipeItemRow from './RecipeItemRow';
-import SemiFinishedPortionDialog from './SemiFinishedPortionDialog';
 import { expandSemiFinishedToIngredients } from './utils/expandSemiFinished';
 import RecipeItemsHeader from './components/recipeItem/RecipeItemsHeader';
 import EmptyItemsMessage from './components/recipeItem/EmptyItemsMessage';
@@ -33,8 +32,6 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
   onUpdateItems,
   category,
 }) => {
-  const [selectedSemiFinished, setSelectedSemiFinished] = useState<Recipe | null>(null);
-
   const addRecipeItem = () => {
     if (ingredients.length === 0) {
       toast.error('Сначала добавьте ингредиенты');
@@ -78,6 +75,16 @@ const RecipeItemsManager: React.FC<RecipeItemsManagerProps> = ({
 
   // Handle semi-finished selection with amount
   const handleAddSemiFinishedIngredients = (recipe: Recipe, amount: number) => {
+    if (!recipe) {
+      toast.error('Полуфабрикат не выбран');
+      return;
+    }
+    
+    if (amount <= 0) {
+      toast.error('Укажите количество больше нуля');
+      return;
+    }
+    
     // Expand the semi-finished recipe into its ingredient components
     const expandedIngredients = expandSemiFinishedToIngredients(
       recipe,

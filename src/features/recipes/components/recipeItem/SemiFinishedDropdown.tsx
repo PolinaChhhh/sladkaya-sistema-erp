@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Recipe } from '@/store/types';
 import {
   Command,
@@ -37,11 +37,13 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   const [amountDialogOpen, setAmountDialogOpen] = useState(false);
   const [amount, setAmount] = useState(100); // Default amount in grams
   
+  // Create a safe reference to semiFinishedRecipes
+  const recipes = Array.isArray(semiFinishedRecipes) ? semiFinishedRecipes : [];
+  
   // Filter recipes based on search query
-  const filteredRecipes = Array.isArray(semiFinishedRecipes) 
-    ? semiFinishedRecipes.filter(recipe => 
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : [];
+  const filteredRecipes = recipes.filter(recipe => 
+    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleRecipeSelect = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
@@ -60,57 +62,49 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
 
   return (
     <>
-      <div className="relative">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-          <Input 
-            placeholder="Поиск полуфабрикатов..." 
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-          />
-        </div>
-
-        {open && filteredRecipes.length > 0 && (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger className="hidden" />
-            <PopoverContent className="p-0 w-[240px]" align="start">
-              <Command>
-                <CommandInput 
-                  placeholder="Поиск полуфабрикатов..." 
-                  className="h-9"
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                />
-                <CommandList>
-                  <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
-                  <CommandGroup className="max-h-60 overflow-y-auto">
-                    {filteredRecipes.map((recipe) => (
-                      <CommandItem
-                        key={recipe.id}
-                        value={recipe.id}
-                        onSelect={() => handleRecipeSelect(recipe)}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            value === recipe.id ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {recipe.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        )}
-      </div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative w-[240px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input 
+              placeholder="Поиск полуфабрикатов..." 
+              className="pl-10 pr-3"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onClick={() => setOpen(true)}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="p-0 w-[240px]" align="start">
+          <Command>
+            <CommandInput 
+              placeholder="Поиск полуфабрикатов..." 
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
+            <CommandList>
+              <CommandEmpty>Полуфабрикаты не найдены</CommandEmpty>
+              <CommandGroup className="max-h-60 overflow-y-auto">
+                {filteredRecipes.map((recipe) => (
+                  <CommandItem
+                    key={recipe.id}
+                    value={recipe.id}
+                    onSelect={() => handleRecipeSelect(recipe)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === recipe.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {recipe.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
 
       {/* Amount Selection Dialog */}
       <Dialog open={amountDialogOpen} onOpenChange={setAmountDialogOpen}>

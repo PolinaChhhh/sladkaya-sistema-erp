@@ -28,7 +28,7 @@ const RecipeItemsHeader: React.FC<RecipeItemsHeaderProps> = ({
         {category === 'finished' ? 'Ингредиенты' : 'Состав полуфабриката'}
       </Label>
       <div className="flex flex-1 flex-wrap gap-2 justify-end">
-        {category === 'finished' && (
+        {category === 'finished' && recipes.length > 0 && (
           <SemiFinishedDropdown 
             semiFinishedRecipes={recipes} 
             onSelectRecipe={onSelectSemiFinished} 
