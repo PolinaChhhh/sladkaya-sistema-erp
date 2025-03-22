@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, FileText, FileSpreadsheet } from 'lucide-react';
+import { Loader2, FileText, FileSpreadsheet, Upload } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 import { ShippingDocument, RussianDocumentType } from '@/store/types/shipping';
 import DocumentSelector from './DocumentSelector';
@@ -11,9 +11,11 @@ import {
   prepareDocumentData, 
   generateDocument, 
   downloadDocument, 
-  buildDocumentFileName 
+  buildDocumentFileName,
+  setDocumentTemplate
 } from '../../services/documentGenerator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface DocumentGenerationDialogProps {
   isOpen: boolean;
@@ -30,9 +32,19 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
   const [documentType, setDocumentType] = useState<RussianDocumentType>('TORG12');
   const [isGenerating, setIsGenerating] = useState(false);
   const [documentFormat, setDocumentFormat] = useState<'word' | 'excel'>('excel');
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Find the buyer for this shipping
   const buyer = buyers.find(b => b.id === shipping.buyerId);
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setTemplateFile(file);
+      toast.success(`Шаблон "${file.name}" загружен`);
+    }
+  };
   
   const handleDocumentGeneration = async () => {
     if (!buyer) {
@@ -43,6 +55,11 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
     setIsGenerating(true);
     
     try {
+      // If template file is provided, set it first
+      if (templateFile) {
+        await setDocumentTemplate(documentType, templateFile);
+      }
+      
       // Prepare data for document generation
       const documentData = prepareDocumentData(shipping, buyer, productions, recipes);
       
@@ -89,6 +106,44 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
           />
           
           <div className="space-y-2">
+            <label className="text-sm font-medium">Загрузить шаблон (опционально)</label>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isGenerating}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {templateFile ? 'Изменить шаблон' : 'Загрузить шаблон'}
+              </Button>
+              {templateFile && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setTemplateFile(null)}
+                  disabled={isGenerating}
+                >
+                  Удалить
+                </Button>
+              )}
+              <input 
+                type="file" 
+                accept=".docx,.xls,.xlsx" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={handleFileChange}
+              />
+            </div>
+            
+            {templateFile && (
+              <p className="text-xs text-green-600 mt-1">
+                Загружен шаблон: {templateFile.name}
+              </p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
             <label className="text-sm font-medium">Формат документа</label>
             <Tabs 
               value={documentFormat} 
@@ -107,6 +162,14 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
               </TabsList>
             </Tabs>
           </div>
+          
+          {documentType === 'TORG12' && !templateFile && (
+            <Alert variant="warning" className="bg-amber-50 border-amber-200">
+              <AlertDescription className="text-xs text-amber-800">
+                Для формы ТОРГ-12 рекомендуется загрузить шаблон документа для корректного формирования.
+              </AlertDescription>
+            </Alert>
+          )}
           
           {!canGenerate && (
             <div className="text-sm p-3 bg-amber-50 text-amber-800 rounded-md">

@@ -1,4 +1,3 @@
-
 import { ShippingDocument, RussianDocumentType } from '@/store/types/shipping';
 import { Buyer } from '@/store/types/buyer';
 import { Recipe, ProductionBatch } from '@/store/types/recipe';
@@ -25,6 +24,25 @@ export interface DocumentGenerationData {
   totalVatAmount: number;
   totalWithVat: number;
 }
+
+// Store templates for document types
+const documentTemplates: Record<RussianDocumentType, File | null> = {
+  TORG12: null,
+  UTD: null,
+  TTN: null,
+  TN: null
+};
+
+/**
+ * Set a template file for a specific document type
+ */
+export const setDocumentTemplate = async (
+  documentType: RussianDocumentType,
+  file: File
+): Promise<void> => {
+  documentTemplates[documentType] = file;
+  console.log(`Template set for ${documentType}:`, file.name);
+};
 
 /**
  * Prepares data required for document generation
@@ -80,17 +98,70 @@ export const prepareDocumentData = (
 };
 
 /**
- * Generates a Word document for the specified document type
+ * Generates a document for the specified document type
  */
 export const generateDocument = async (
   documentType: RussianDocumentType,
   data: DocumentGenerationData,
   format: 'word' | 'excel' = 'word'
 ): Promise<Blob> => {
+  // Check if we have a template for this document type
+  const template = documentTemplates[documentType];
+  
+  if (template) {
+    // If we have a template, use it to generate the document
+    return generateFromTemplate(documentType, template, data, format);
+  }
+  
+  // If no template is available, fall back to the built-in generators
   if (format === 'excel') {
     return generateExcelDocument(documentType, data);
   }
   
+  // For Word documents
+  return generateWordDocument(documentType, data);
+};
+
+/**
+ * Generates a document from a template file
+ */
+const generateFromTemplate = async (
+  documentType: RussianDocumentType,
+  template: File,
+  data: DocumentGenerationData,
+  format: 'word' | 'excel'
+): Promise<Blob> => {
+  console.log(`Generating ${format} document from template for ${documentType}`);
+  
+  try {
+    // In a real implementation, we would use a library to fill the template
+    // For Excel templates, we might use SheetJS/xlsx
+    // For Word templates, we might use docxtemplater
+    
+    // For now, we'll read the template file and return it unchanged
+    // In a production environment, this would be replaced with actual template filling
+    const arrayBuffer = await template.arrayBuffer();
+    
+    // For demonstration purposes, we'll just return the template file
+    // In a real implementation, you would process the template here
+    return new Blob([arrayBuffer], { 
+      type: format === 'excel' 
+        ? 'application/vnd.ms-excel' 
+        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+    });
+  } catch (error) {
+    console.error('Error generating document from template:', error);
+    throw new Error('Failed to generate document from template');
+  }
+};
+
+/**
+ * Generates a Word document
+ */
+const generateWordDocument = async (
+  documentType: RussianDocumentType,
+  data: DocumentGenerationData
+): Promise<Blob> => {
   // In a real implementation, this would use a library like docxtemplater
   // For now, we'll simulate the document generation
   
