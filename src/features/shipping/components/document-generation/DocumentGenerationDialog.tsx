@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText, FileSpreadsheet } from 'lucide-react';
 import { useStore } from '@/store/recipeStore';
 import { ShippingDocument, RussianDocumentType } from '@/store/types/shipping';
 import DocumentSelector from './DocumentSelector';
@@ -13,6 +13,7 @@ import {
   downloadDocument, 
   buildDocumentFileName 
 } from '../../services/documentGenerator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface DocumentGenerationDialogProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
   const { buyers, productions, recipes, updateShippingDocument } = useStore();
   const [documentType, setDocumentType] = useState<RussianDocumentType>('TORG12');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [documentFormat, setDocumentFormat] = useState<'word' | 'excel'>('word');
   
   // Find the buyer for this shipping
   const buyer = buyers.find(b => b.id === shipping.buyerId);
@@ -44,11 +46,11 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
       // Prepare data for document generation
       const documentData = prepareDocumentData(shipping, buyer, productions, recipes);
       
-      // Generate the document
-      const documentBlob = await generateDocument(documentType, documentData);
+      // Generate the document in the selected format
+      const documentBlob = await generateDocument(documentType, documentData, documentFormat);
       
       // Build the filename
-      const fileName = buildDocumentFileName(documentType, shipping.shipmentNumber, buyer.name);
+      const fileName = buildDocumentFileName(documentType, shipping.shipmentNumber, buyer.name, documentFormat);
       
       // Download the document
       downloadDocument(documentBlob, fileName);
@@ -56,7 +58,7 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
       // Update the shipping record to mark document as generated
       updateShippingDocument(shipping.id, documentType, true);
       
-      toast.success('Документ успешно создан');
+      toast.success(`Документ успешно создан в формате ${documentFormat === 'word' ? 'Word' : 'Excel'}`);
       onOpenChange(false);
     } catch (error) {
       console.error('Error generating document:', error);
@@ -86,6 +88,26 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
             disabled={isGenerating}
           />
           
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Формат документа</label>
+            <Tabs 
+              value={documentFormat} 
+              onValueChange={(value) => setDocumentFormat(value as 'word' | 'excel')}
+              className="w-full"
+            >
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="word" disabled={isGenerating}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Word
+                </TabsTrigger>
+                <TabsTrigger value="excel" disabled={isGenerating}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Excel
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
           {!canGenerate && (
             <div className="text-sm p-3 bg-amber-50 text-amber-800 rounded-md">
               Для создания документа необходимы данные клиента и товары
@@ -112,7 +134,14 @@ const DocumentGenerationDialog: React.FC<DocumentGenerationDialogProps> = ({
                 Создание...
               </>
             ) : (
-              'Создать и скачать'
+              <>
+                {documentFormat === 'word' ? (
+                  <FileText className="h-4 w-4 mr-2" />
+                ) : (
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                )}
+                Создать и скачать
+              </>
             )}
           </Button>
         </DialogFooter>

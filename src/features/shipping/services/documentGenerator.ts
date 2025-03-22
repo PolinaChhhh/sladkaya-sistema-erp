@@ -84,8 +84,13 @@ export const prepareDocumentData = (
  */
 export const generateDocument = async (
   documentType: RussianDocumentType,
-  data: DocumentGenerationData
+  data: DocumentGenerationData,
+  format: 'word' | 'excel' = 'word'
 ): Promise<Blob> => {
+  if (format === 'excel') {
+    return generateExcelDocument(documentType, data);
+  }
+  
   // In a real implementation, this would use a library like docxtemplater
   // For now, we'll simulate the document generation
   
@@ -98,6 +103,60 @@ export const generateDocument = async (
   
   // Create a Blob containing the document content
   const blob = new Blob([documentContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  
+  return blob;
+};
+
+/**
+ * Generates an Excel document
+ */
+export const generateExcelDocument = async (
+  documentType: RussianDocumentType,
+  data: DocumentGenerationData
+): Promise<Blob> => {
+  // In a real implementation, we would use a library like xlsx or exceljs
+  // For demonstration purposes, we'll create a CSV file which can be opened in Excel
+  const { shipping, buyer, items, totalWithoutVat, totalVatAmount, totalWithVat } = data;
+  
+  // Header rows with document info
+  let csvContent = 'Документ:,' + documentType + ',Номер:,' + formatShipmentNumber(shipping.shipmentNumber) + '\r\n';
+  csvContent += 'Дата:,' + shipping.date + '\r\n';
+  csvContent += 'Покупатель:,' + buyer.name + '\r\n';
+  
+  if (buyer.tin) csvContent += 'ИНН:,' + buyer.tin + '\r\n';
+  if (buyer.legalAddress) csvContent += 'Юридический адрес:,' + buyer.legalAddress + '\r\n';
+  
+  // Empty row as separator
+  csvContent += '\r\n';
+  
+  // Column headers for items table
+  csvContent += '№,Наименование,Количество,Ед. изм.,Цена без НДС,Ставка НДС,Сумма НДС,Цена с НДС,Итого\r\n';
+  
+  // Items
+  items.forEach((item, index) => {
+    csvContent += [
+      index + 1,
+      item.productName,
+      item.quantity,
+      item.unit,
+      item.priceWithoutVat.toFixed(2),
+      item.vatRate + '%',
+      item.vatAmount.toFixed(2),
+      item.priceWithVat.toFixed(2),
+      item.totalAmount.toFixed(2)
+    ].join(',') + '\r\n';
+  });
+  
+  // Empty row as separator
+  csvContent += '\r\n';
+  
+  // Totals
+  csvContent += ',,,,,,,Итого без НДС:,' + totalWithoutVat.toFixed(2) + '\r\n';
+  csvContent += ',,,,,,,Сумма НДС:,' + totalVatAmount.toFixed(2) + '\r\n';
+  csvContent += ',,,,,,,Итого с НДС:,' + totalWithVat.toFixed(2) + '\r\n';
+  
+  // Create a Blob with the CSV content
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
   
   return blob;
 };
@@ -175,10 +234,12 @@ export const downloadDocument = (blob: Blob, fileName: string): void => {
 export const buildDocumentFileName = (
   documentType: RussianDocumentType,
   shipmentNumber: number,
-  buyerName: string
+  buyerName: string,
+  format: 'word' | 'excel' = 'word'
 ): string => {
   const formattedNumber = formatShipmentNumber(shipmentNumber);
   const sanitizedBuyerName = buyerName.replace(/[^\w\s]/gi, '').substring(0, 20);
+  const extension = format === 'excel' ? 'csv' : 'docx';
   
-  return `${documentType}_${formattedNumber}_${sanitizedBuyerName}.docx`;
+  return `${documentType}_${formattedNumber}_${sanitizedBuyerName}.${extension}`;
 };
