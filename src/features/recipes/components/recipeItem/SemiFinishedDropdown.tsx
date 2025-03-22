@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Recipe } from '@/store/types';
 import {
   Command,
@@ -14,7 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
@@ -31,16 +30,19 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   const [value, setValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Focus the search input when the dropdown opens
+  // Focus the search input when mounted
   useEffect(() => {
-    if (open && inputRef.current) {
+    if (inputRef.current) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
-    } else {
-      // Clear search when dropdown closes
+    }
+  }, []);
+
+  // Clear search when dropdown closes
+  useEffect(() => {
+    if (!open) {
       setSearchQuery("");
     }
   }, [open]);
@@ -58,35 +60,20 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {!open ? (
-          <Button 
-            variant="outline" 
-            role="combobox" 
-            aria-expanded={open}
-            size="sm"
-            className="justify-between gap-1"
-            ref={buttonRef}
-          >
-            <Search className="h-4 w-4" />
-            Добавить из полуфабриката
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        ) : (
-          <div className="min-w-[240px]">
-            <Input
-              ref={inputRef}
-              className="h-9 border-dashed"
-              placeholder="Поиск полуфабрикатов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setOpen(false);
-                }
-              }}
-            />
-          </div>
-        )}
+        <div className="relative w-[240px]">
+          <Input
+            ref={inputRef}
+            placeholder="Поиск полуфабрикатов..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setOpen(true); // Open popover when typing
+            }}
+            onFocus={() => setOpen(true)}
+            className="h-9 pr-8"
+          />
+          <Search className="h-4 w-4 absolute right-3 top-1/2 transform -translate-y-1/2 opacity-50" />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[240px]" align="start">
         <Command>
@@ -106,6 +93,7 @@ const SemiFinishedDropdown: React.FC<SemiFinishedDropdownProps> = ({
                   setValue(recipe.id);
                   setOpen(false);
                   onSelectRecipe(recipe);
+                  setSearchQuery(""); // Clear search after selection
                 }}
               >
                 <Check
