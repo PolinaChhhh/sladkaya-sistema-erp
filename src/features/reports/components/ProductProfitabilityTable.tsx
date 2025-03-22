@@ -46,13 +46,13 @@ const ProductProfitabilityTable: React.FC<ProductProfitabilityTableProps> = ({ d
               <TableCell className="text-right">{formatNumber(item.quantitySold)} {item.unit}</TableCell>
               <TableCell className="text-right">{formatNumber(item.totalCost)}</TableCell>
               <TableCell className="text-right">{formatNumber(item.totalRevenue)}</TableCell>
-              <TableCell className="text-right" className={cn(
+              <TableCell className={cn(
                 "text-right",
                 item.grossProfit < 0 ? "text-red-600 font-medium" : ""
               )}>
                 {formatNumber(item.grossProfit)}
               </TableCell>
-              <TableCell className="text-right" className={cn(
+              <TableCell className={cn(
                 "text-right",
                 item.profitabilityPercent < 0 ? "text-red-600 font-medium" : ""
               )}>
