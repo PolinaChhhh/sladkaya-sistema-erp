@@ -65,7 +65,8 @@ export const useProductProfitability = () => {
             items: recipeItems.map(item => ({
               productionBatchId: item.productionBatchId,
               quantity: item.quantity,
-              price: item.price
+              // Convert price to number if it's a string to ensure type safety
+              price: typeof item.price === 'string' ? parseFloat(item.price) : item.price
             }))
           });
         }
