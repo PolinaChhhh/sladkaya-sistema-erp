@@ -95,7 +95,7 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
               <td className="upd-reference">(5)</td>
             </tr>
             <tr>
-              <td className="upd-label">Документ об отгрузке: наименование,</td>
+              <td className="upd-label">Документ об отгрузке:</td>
               <td className="upd-value">№ {shipping.shipmentNumber} от {formatDate(shipping.date)}</td>
               <td className="upd-reference">(5a)</td>
             </tr>
@@ -106,7 +106,7 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
             </tr>
             <tr>
               <td className="upd-label">Адрес:</td>
-              <td className="upd-value">{buyer.physicalAddress || buyer.legalAddress || ""}</td>
+              <td className="upd-value">{buyer.legalAddress || ""}</td>
               <td className="upd-reference">(6a)</td>
             </tr>
             <tr>
@@ -137,8 +137,8 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
         <table className="upd-items-table">
           <thead>
             <tr>
+              <th rowSpan={2}>№</th>
               <th rowSpan={2}>Код товара/ работ, услуг</th>
-              <th rowSpan={2}>№ п/п</th>
               <th rowSpan={2} className="upd-wide-col">
                 Наименование товара (описание выполненных работ, оказанных услуг), имущественного права
               </th>
@@ -161,8 +161,8 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
               <th>краткое наименование</th>
             </tr>
             <tr className="upd-column-indices">
-              <td>A</td>
               <td>1</td>
+              <td>A</td>
               <td>1a</td>
               <td>1б</td>
               <td>2</td>
@@ -182,8 +182,8 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
           <tbody>
             {items.map((item, index) => (
               <tr key={index}>
-                <td>—</td>
                 <td>{index + 1}</td>
+                <td>—</td>
                 <td>{item.productName}</td>
                 <td>—</td>
                 <td>796</td>
@@ -201,10 +201,10 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
               </tr>
             ))}
             <tr className="upd-total-row">
-              <td colSpan={8}>Всего к оплате (9)</td>
+              <td colSpan={8}>Всего к оплате</td>
               <td>{formatNumber(totalWithoutVat)}</td>
               <td>X</td>
-              <td>{items[0]?.vatRate || "20"}%</td>
+              <td>20%</td>
               <td>{formatNumber(totalVatAmount)}</td>
               <td>{formatNumber(totalWithVat)}</td>
               <td colSpan={3}></td>
@@ -246,21 +246,6 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
                   <div className="upd-signature-caption">
                     <span>подпись</span>
                     <span>ФИО</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={2} className="upd-ip-signature">
-                  <div className="upd-signature-title">Индивидуальный предприниматель или иное уполномоченное лицо</div>
-                  <div className="upd-signature-line">
-                    <span className="upd-signature-placeholder"></span>
-                    <span className="upd-signature-name"></span>
-                    <span className="upd-signature-registration"></span>
-                  </div>
-                  <div className="upd-signature-caption">
-                    <span>подпись</span>
-                    <span>ФИО</span>
-                    <span>реквизиты свидетельства о государственной регистрации индивидуального предпринимателя</span>
                   </div>
                 </td>
               </tr>
@@ -308,47 +293,8 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
                   <td className="upd-value">{formatDate(shipping.date)}</td>
                   <td className="upd-reference">(13)</td>
                 </tr>
-                <tr>
-                  <td className="upd-label">Иные сведения об отгрузке, передаче</td>
-                  <td className="upd-value">—</td>
-                  <td className="upd-reference">(14)</td>
-                </tr>
               </tbody>
             </table>
-            
-            <div className="upd-responsible-section">
-              <div className="upd-section-title">Ответственный за правильность оформления факта хозяйственной жизни</div>
-              
-              <table className="upd-responsible-table">
-                <tbody>
-                  <tr>
-                    <td className="upd-label">Должность</td>
-                    <td className="upd-signature-line">
-                      <span className="upd-signature-placeholder"></span>
-                      <span className="upd-signature-name">{
-                        data.extendedData?.signer 
-                          ? `${data.extendedData.signer.lastName} ${data.extendedData.signer.firstName[0]}.${data.extendedData.signer.middleName[0]}.` 
-                          : "Иванов И.И."
-                      }</span>
-                    </td>
-                    <td className="upd-reference">(15)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="upd-entity-section">
-              <div className="upd-section-title">Наименование экономического субъекта – составителя документа (в т.ч. комиссионера / агента)</div>
-              
-              <table className="upd-entity-table">
-                <tbody>
-                  <tr>
-                    <td className="upd-value">{data.extendedData?.company?.name || "ООО \"Ваша компания\""}</td>
-                    <td className="upd-reference">(16)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </div>
           
           <div className="upd-receive-section">
@@ -362,50 +308,15 @@ const UPDTemplate: React.FC<UPDTemplateProps> = ({ data }) => {
                     <span className="upd-signature-placeholder"></span>
                     <span className="upd-signature-name"></span>
                   </td>
-                  <td className="upd-reference">(17)</td>
+                  <td className="upd-reference">(15)</td>
                 </tr>
                 <tr>
                   <td className="upd-label">Дата получения (приемки)</td>
                   <td className="upd-value">«_____» _______________ 20___ г.</td>
-                  <td className="upd-reference">(18)</td>
-                </tr>
-                <tr>
-                  <td className="upd-label">Иные сведения о получении, приемке</td>
-                  <td className="upd-value">—</td>
-                  <td className="upd-reference">(19)</td>
+                  <td className="upd-reference">(16)</td>
                 </tr>
               </tbody>
             </table>
-            
-            <div className="upd-responsible-section">
-              <div className="upd-section-title">Ответственный за правильность оформления факта хозяйственной жизни</div>
-              
-              <table className="upd-responsible-table">
-                <tbody>
-                  <tr>
-                    <td className="upd-label">Должность</td>
-                    <td className="upd-signature-line">
-                      <span className="upd-signature-placeholder"></span>
-                      <span className="upd-signature-name"></span>
-                    </td>
-                    <td className="upd-reference">(20)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="upd-entity-section">
-              <div className="upd-section-title">Наименование экономического субъекта – составителя документа</div>
-              
-              <table className="upd-entity-table">
-                <tbody>
-                  <tr>
-                    <td className="upd-value">{buyer.name}</td>
-                    <td className="upd-reference">(21)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
       </div>

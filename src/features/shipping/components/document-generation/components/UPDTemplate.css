@@ -195,16 +195,6 @@
   flex-grow: 2;
 }
 
-.upd-ip-signature {
-  padding: 5px;
-}
-
-.upd-signature-registration {
-  width: 30%;
-  border-bottom: 1px solid #000;
-  margin-left: 5px;
-}
-
 .upd-foundation-section {
   margin-bottom: 15px;
 }
@@ -227,28 +217,24 @@
 
 .upd-section-title {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .upd-transfer-table,
-.upd-receive-table,
-.upd-responsible-table,
-.upd-entity-table {
+.upd-receive-table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .upd-transfer-table td,
-.upd-receive-table td,
-.upd-responsible-table td,
-.upd-entity-table td {
+.upd-receive-table td {
   padding: 3px;
   vertical-align: top;
 }
 
-.upd-responsible-section,
-.upd-entity-section {
-  margin-top: 15px;
+.upd-transfer-section,
+.upd-receive-section {
+  margin-bottom: 15px;
 }
 
 /* Print adjustments */

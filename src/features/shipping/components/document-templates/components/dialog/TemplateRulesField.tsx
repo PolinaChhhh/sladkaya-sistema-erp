@@ -75,17 +75,15 @@ const TemplateRulesField: React.FC<TemplateRulesFieldProps> = ({ rules, onChange
     {"placeholder": "{{company.name}}", "field": "company.name"},
     {"placeholder": "{{company.legalAddress}}", "field": "company.legalAddress"},
     {"placeholder": "{{company.tin}}", "field": "company.tin"},
+    {"placeholder": "{{company.kpp}}", "field": "company.kpp"},
+    {"placeholder": "{{company.physical_address}}", "field": "company.physicalAddress"},
+    {"placeholder": "{{company.signer}}", "field": "company.signer.name"},
+    {"placeholder": "{{company.accountant}}", "field": "company.accountant.name"},
     {"placeholder": "{{buyer.name}}", "field": "buyer.name"},
     {"placeholder": "{{buyer.tin}}", "field": "buyer.tin"},
+    {"placeholder": "{{buyer.kpp}}", "field": "buyer.kpp"},
     {"placeholder": "{{buyer.legal_address}}", "field": "buyer.legalAddress"},
-    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"},
-    {"placeholder": "{{productName}}", "field": "item.productName"},
-    {"placeholder": "{{quantity}}", "field": "item.quantity"},
-    {"placeholder": "{{priceWithoutVat}}", "field": "item.priceWithoutVat"},
-    {"placeholder": "{{totalWithoutVat}}", "field": "totalWithoutVat"},
-    {"placeholder": "{{vatRate}}", "field": "item.vatRate"},
-    {"placeholder": "{{vatAmount}}", "field": "totalVatAmount"},
-    {"placeholder": "{{totalAmount}}", "field": "totalWithVat"}
+    {"placeholder": "{{buyer.physical_address}}", "field": "buyer.physicalAddress"}
   ]
 }`;
 
