@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useStore } from '@/store/recipeStore';
@@ -9,7 +8,7 @@ import {
   downloadDocument, 
   buildDocumentFileName,
   setDocumentTemplate
-} from '../../../services/documentGenerator';
+} from '../../../services/document-generator';
 
 export const useDocumentGeneration = (
   shipping: ShippingDocument,
